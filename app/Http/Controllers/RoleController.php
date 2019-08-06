@@ -14,8 +14,7 @@ class RoleController extends Controller
 
     public function index(Request $request)
    {
-       //$results = Role::where('id','!=','0')->paginate(10);
-        //return response()->json(['data' => $results], 200);
+
        $query = Role::query();
        return response()->json(self::paginate($query, $request), 200);
    }
