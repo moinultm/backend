@@ -28,6 +28,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Email or password not exists'], 401);
         }
 
+        
         return $this->respondWithToken($token);
     }
 
@@ -65,7 +66,8 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'user'=>auth()->user()->name
+            'name'=>auth()->user()->name,
+			'email'=>auth()->user()->email
         ]);
     }
 }
