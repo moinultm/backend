@@ -1,9 +1,7 @@
 <?php
 
 Route::group([
-
     'middleware' => 'api',
-
 ], function ($router) {
 
     //All Unprotected Roles
@@ -16,6 +14,8 @@ Route::group([
     Route::post('resetPassword', 'ChangePasswordController@process');
 
     Route::resource('roles', 'RoleController');
-    Route::resource('users', 'UsersController');
     Route::resource('profiles', 'ProfileController');
+    Route::resource('users', 'UsersController');
+    Route::post('users/{user}', 'UsersController@update');
+
 });

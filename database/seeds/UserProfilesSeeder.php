@@ -12,7 +12,6 @@ class UserProfilesSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->truncate();
 
         $user = DB::table('users')
             ->where('email', 'moinultm@gmail.com')
