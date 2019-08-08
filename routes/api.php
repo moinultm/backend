@@ -17,5 +17,5 @@ Route::group([
 
     Route::resource('roles', 'RoleController');
     Route::resource('users', 'UsersController');
-
+    Route::resource('profiles', 'ProfileController');
 });

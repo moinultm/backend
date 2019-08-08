@@ -18,9 +18,8 @@ class Profile extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->table = config('security-starter.tables.profiles');
+        $this->table = 'profiles';
     }
-
 
     public function roles(): BelongsToMany
     {
