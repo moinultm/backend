@@ -25,7 +25,7 @@ class RoleController extends Controller
             'code' => [
                 'required',
                 'max:255',
-                'unique:' . config('roles') . 'roles,code'
+                'unique: roles,code'
             ],
             'designation' => [
                 'required',

@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 trait Paginator
 {
 
-
     public static function paginate(Builder $builder, Request $request = null): array
     {
         if ($request != null && $request->has('size')) {
