@@ -13,9 +13,14 @@ Route::group([
     Route::post('sendPasswordResetLink', 'ResetPasswordController@sendEmail');
     Route::post('resetPassword', 'ChangePasswordController@process');
 
+    //security
     Route::resource('roles', 'RoleController');
     Route::resource('profiles', 'ProfileController');
     Route::resource('users', 'UsersController');
     Route::post('users/{user}', 'UsersController@update');
+
+    //category
+    Route::resource('category', 'CategoryController');
+
 
 });
