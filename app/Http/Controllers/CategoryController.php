@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Rules\CategoryExists;
+use App\Subcategory;
 use Illuminate\Http\Request;
 use App\category;
 use App\Traits\Paginator;
@@ -80,7 +81,6 @@ class CategoryController extends Controller
     {
         return response();
     }
-
 
 
     }

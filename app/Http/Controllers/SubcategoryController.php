@@ -49,6 +49,13 @@ class SubcategoryController extends Controller
         return response()->json($query->first(), $query->count() == 0 ? 404 : 200);
     }
 
+    public function parentReq(Request $request): JsonResponse
+    {
+        $category_id = $request->get('categoryId');
+        $query = Subcategory::where('category_id', $category_id);
+        return response()->json(self::paginate($query, $request), 200);
+
+    }
 
 
 }

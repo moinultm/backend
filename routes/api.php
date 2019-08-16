@@ -23,7 +23,7 @@ Route::group([
     Route::resource('category', 'CategoryController');
 
 //subcategory
-    Route::resource('subcategory', 'SubcategoryController');
+   Route::resource('subcategory', 'SubcategoryController');
 
     //customer
     Route::resource('customer', 'CustomerController');
@@ -32,5 +32,6 @@ Route::group([
 
     //Product
     Route::resource('product', 'ProductController');
+   Route::get('parent', 'SubcategoryController@parentReq');
 
 });
