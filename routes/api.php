@@ -22,5 +22,15 @@ Route::group([
     //category
     Route::resource('category', 'CategoryController');
 
+//subcategory
+    Route::resource('subcategory', 'SubcategoryController');
+
+    //customer
+    Route::resource('customer', 'CustomerController');
+
+    //supplier
+
+    //Product
+    Route::resource('product', 'ProductController');
 
 });

@@ -70,4 +70,22 @@ class RoleController extends Controller
         return response()->json(Role::where('id', $role->id)->first(), 200);
     }
 
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $rules = [
+            'id' => [
+                new RoleExists($id)
+            ]
+        ];
+        $request->request->add(['id' => $id]);
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+        DB::table('profile_roles')
+            ->where('refRole', $id)
+            ->delete();
+        return response()->json(Role::where('id', $id)->delete(), 200);
+    }
 }
