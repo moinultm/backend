@@ -13,10 +13,10 @@ class SellController extends Controller
 
 
 
-    public function postSell(Request $request)
+    public function store(Request $request)
     {
         $customer = $request->get('customer');
-        $enableProductTax = settings('product_tax');
+        $enableProductTax = 0;
 
         if (!$customer) {
             throw new ValidationException('Customer ID is required.');
@@ -87,7 +87,7 @@ class SellController extends Controller
             $total_payable = $total - $discountAmount;
             //discount ends
 
-            //invoice tax
+            /*invoice tax*
             if(settings('invoice_tax') == 1){
                 if(settings('invoice_tax_type') == 1){
                     $invoice_tax = (settings('invoice_tax_rate') * $total_payable) / 100;
@@ -97,7 +97,11 @@ class SellController extends Controller
             }else{
                 $invoice_tax = 0;
             }
-            //ends
+
+
+            */
+
+            $invoice_tax = 0;
 
             $transaction = new Transaction;
             $transaction->reference_no = $ref_no;
