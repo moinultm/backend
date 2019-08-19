@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePaymentsTable extends Migration
+class CreateWarehousesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,13 @@ class CreatePaymentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('warehouses', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('client_id');
-            $table->double('amount');
-            $table->string('method')->nullable();
-            $table->string('type');
-            $table->string('reference_no')->nullable();
-            $table->string('note')->nullable();
-            $table->timestamp('date')->nullable();
+            $table->string('name');
+            $table->string('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('in_charge_name')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -34,6 +32,6 @@ class CreatePaymentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('warehouses');
     }
 }
