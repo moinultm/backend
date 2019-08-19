@@ -2,19 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Payment;
+use DB;
 use App\Sell;
+use App\Traits\Helpers;
 use App\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Traits\Paginator;
+
 
 class SellController extends Controller
 {
+    use helpers;
+use paginator;
 
+
+    public function index(Request $request)
+    {
+        $query = Sell::query();
+        return response()->json(self::paginate($query, $request), 200);
+    }
 
 
     public function store(Request $request)
     {
+
+        //we have disabled the taxes and settings checkup
+
         $customer = $request->get('customer');
         $enableProductTax = 0;
 
@@ -25,13 +41,17 @@ class SellController extends Controller
         $ym = Carbon::now()->format('Y/m');
 
         $row = Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym.'/S-'.ref($row);
+        $ref_no = $ym.'/S-'.self::ref($row);
         $total = 0;
         $totalProductTax = 0;
         $productTax = 0;
         $total_cost_price = 0;
-        $sells = $request->get('sells');
+
         $paid = floatval($request->get('paid')) ?: 0;
+
+        $sells = $request->get('sells');
+        $sells = json_decode($sells, TRUE);
+       // print_r($sells);
 
         DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax){
             foreach ($sells as $sell_item) {
@@ -51,6 +71,7 @@ class SellController extends Controller
                 $sell->reference_no = $ref_no;
                 $sell->product_id = $sell_item['product_id'];
                 $sell->quantity = $sell_item['quantity'];
+                $sell->product_discount_percentage = $sell_item['product_discount_percentage'];
 
                 if($enableProductTax == 1){
                     //product tax calculation
@@ -70,7 +91,7 @@ class SellController extends Controller
                 $sell->client_id = $customer;
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
                 $sell->save();
-
+//this is product decrement from stock
                 $product = $sell->product;
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();
@@ -132,8 +153,10 @@ class SellController extends Controller
             }
         });
 
-        //round(520.34345,2)
+       // return response()->json(['message' => 'Successfully saved transaction.'], 200);
+        return response()->json( 'success', 200);
 
-        return response(['message' => 'Successfully saved transaction.']);
-    }
+     }
+
+
 }

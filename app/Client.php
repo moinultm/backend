@@ -11,9 +11,7 @@ class Client extends Model
     use SoftDeletes;
 
     protected $fillable = ['id'];
-    /**
-     * Get full name attribute
-     * */
+
 
     public function getNameAttribute(){
         return $this->first_name.' '.$this->last_name;
