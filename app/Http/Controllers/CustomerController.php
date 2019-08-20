@@ -15,7 +15,7 @@ class CustomerController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $query = Client::query();
+        $query = Client::where('client_type', 'purchaser');
         return response()->json(self::paginate($query, $request), 200);
     }
 }

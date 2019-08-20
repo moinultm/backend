@@ -29,6 +29,8 @@ Route::group([
     Route::resource('customer', 'CustomerController');
 
     //supplier
+    Route::resource('supplier', 'SupplierController');
+
 
     //Product
     Route::resource('product', 'ProductController');
