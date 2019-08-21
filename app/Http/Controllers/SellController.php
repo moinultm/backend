@@ -22,6 +22,15 @@ use paginator;
     public function index(Request $request)
     {
         $query = Sell::query();
+
+        if($request->get('filter')) {
+            $query= Sell::where(function($q) use($request) {
+                $q->where('reference_no', 'LIKE', '%' . $request->get('filter') . '%');
+            });
+        }
+
+
+
         return response()->json(self::paginate($query, $request), 200);
     }
 
