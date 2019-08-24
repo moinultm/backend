@@ -25,11 +25,13 @@ class ProductController extends Controller
     }
 
 
-    public function productDetails ($id): JsonResponse
+    public function productDetails ($id)
     {
-        $query = Product::query();
+        $query = Product::with('sells','purchases');
+       // $query = Product::with('purchases');
         $query->where('id', $id);
-        return response()->json($query->first(), $query->count() == 0 ? 404 : 200);
+      return response()->json($query->get(), $query->count() == 0 ? 404 : 200);
+
     }
 
 
