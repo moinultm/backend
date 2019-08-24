@@ -17,11 +17,20 @@ class ProductController extends Controller
         return response()->json(self::paginate($query, $request), 200);
     }
 
-    public function show($id): JsonResponse
+     public function show($id): JsonResponse
     {
         $query = Product::query();
         $query->where('id', $id);
         return response()->json($query->first(), $query->count() == 0 ? 404 : 200);
     }
+
+
+    public function productDetails ($id): JsonResponse
+    {
+        $query = Product::query();
+        $query->where('id', $id);
+        return response()->json($query->first(), $query->count() == 0 ? 404 : 200);
+    }
+
 
 }
