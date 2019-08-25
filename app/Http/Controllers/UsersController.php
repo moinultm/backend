@@ -97,6 +97,7 @@ class UsersController extends Controller
                 'string'
             ]
         ];
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);

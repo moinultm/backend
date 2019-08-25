@@ -34,9 +34,9 @@ Route::group([
 
     //Product
     Route::resource('product', 'ProductController');
-   Route::get('parent', 'SubcategoryController@parentReq');
+    Route::get('parent', 'SubcategoryController@parentReq');
     Route::get('product/{product}/details', 'ProductController@productDetails');
-
+    Route::post('product/{product}', 'ProductController@update');
    //sell
     Route::resource('sell', 'SellController');
 
