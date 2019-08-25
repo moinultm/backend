@@ -35,8 +35,10 @@ class ProductController extends Controller
 
         $query = Product::query();
         $query->where('id', $id);
-        $query->with(['sells']);
-       return response()->json($query->first(), $query->count() == 0 ? 404 : 200);
+        $query->with(['sells','sells.client']);
+        $query->with(['purchases','purchases.client']);
+
+       return response()->json(self::paginate($query), $query->count() == 0 ? 404 : 200);
 
 
     }
