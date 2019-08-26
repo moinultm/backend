@@ -58,5 +58,44 @@ class SubcategoryController extends Controller
     }
 
 
+
+    public function update(Request $request, $id): JsonResponse
+    {
+        $rules = [
+            'subcategory_name' => [
+                'required',
+                'max:255',
+                'unique:subcategories,subcategory_name,' . $id
+            ]
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+        $subcategory = Subcategory::where('id', $id)->first();
+        $subcategory->subcategory_name = $request->get('subcategory_name');
+
+        $subcategory->save();
+        return response()->json(Subcategory::where('id', $subcategory->id)->first(), 200);
+    }
+    public function destroy(Subcategory $subcategory): JsonResponse
+    {
+
+
+        if(count($subcategory->products) ===  0){
+            $subcategory->delete();
+            return response()->json(['message' => 'Successfully Deleted'],200 );
+        }else{
+
+            return response()->json(['error' => 'cannot  delete Product exists'], 403);
+
+        }
+
+    }
+
+
+
 }
 
