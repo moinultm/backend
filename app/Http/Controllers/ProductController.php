@@ -35,6 +35,8 @@ class ProductController extends Controller
 
         $query = Product::query();
         $query->where('id', $id);
+
+
         $query->with(['sells','sells.client']);
         $query->with(['purchases','purchases.client']);
 

@@ -9,6 +9,7 @@ class Sell extends Model
 {
     use SoftDeletes;
 
+    //protected $appends = array('total_sells');
     public function product(){
         return $this->belongsTo('App\Product');
     }
@@ -17,5 +18,6 @@ class Sell extends Model
     {
         return $this->belongsTo('App\Client');
     }
+
 
 }

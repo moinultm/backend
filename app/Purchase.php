@@ -9,6 +9,7 @@ class Purchase extends Model
 {
     use SoftDeletes;
 
+    //protected $appends = array('total_purchases');
     protected $dates = ['created_at','updated_at'];
 
     public function client()
@@ -20,6 +21,14 @@ class Purchase extends Model
     {
         return $this->belongsTo('App\Product');
     }
+
+
+    public function getTotalPurchasesAttribute()
+    {
+        $sum1=Purchase::all()->sum('quantity');
+        return $sum1;
+    }
+
 
     protected static function boot () {
         parent::boot();
