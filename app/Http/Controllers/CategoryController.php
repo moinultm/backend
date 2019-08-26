@@ -77,9 +77,19 @@ class CategoryController extends Controller
         return response()->json(Category::where('id', $category->id)->first(), 200);
     }
 
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Category $category): JsonResponse
     {
-        return response();
+
+
+        if(count($category->subcategories) ==  0 && count($category->product) == 0){
+            $category->delete();
+                        return response()->json(['message' => 'Successfully Deleted'],200 );
+        }else{
+
+            return response()->json(['error' => 'cannot  delete subcategory exists'], 403);
+
+        }
+
     }
 
 
