@@ -60,6 +60,7 @@ class Product extends Model
         $sum1=Purchase::where('product_id', $this->id)->sum('quantity');
         return $sum1;
     }
+    //testing
 
 
 }
