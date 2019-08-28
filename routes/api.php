@@ -23,7 +23,9 @@ Route::group([
     Route::resource('category', 'CategoryController');
 
 //subcategory
-   Route::resource('subcategory', 'SubcategoryController');
+    Route::resource('subcategory', 'SubcategoryController');
+    Route::get('subcategory/{subcategory}/product', 'SubcategoryController@productList');
+
 
     //customer
     Route::resource('customer', 'CustomerController');
