@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Product;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -97,18 +98,9 @@ class SubcategoryController extends Controller
 
 
     public function productList(Request $request,$id){
-        //$products = $subcategory->products();
-        //return view('subcategories.products')->withProducts($products->paginate(20));
-        //return response()->json(self::paginate($query, $request), 200);
 
-
-
-        $query = Subcategory::query();
-        $query->where('id', $id);
-
-        $query->with(['products']);
-
-        return response()->json(self::paginate($query), $query->count() == 0 ? 404 : 200);
+        $query=Product::query()->where('subcategory_id', $id);
+        return response()->json(self::paginate($query), $query->count() == 0 ? 403 : 200);
 
     }
 
