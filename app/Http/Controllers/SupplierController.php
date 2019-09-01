@@ -48,7 +48,7 @@ class SupplierController extends Controller
         $client->email = $request->get('email');
         $client->contact = $request->get('contact');
         $client->address = $request->get('address');
-        $client->client_type = 'purchaser';
+        $client->client_type = 'customer';
         $client->account_no = $request->get('account_no');
 
         if($request->get('previous_due') != null){
