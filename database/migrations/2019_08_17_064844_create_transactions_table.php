@@ -32,6 +32,7 @@ class CreateTransactionsTable extends Migration
             $table->boolean('pos')->default(0);
             $table->timestamp('date')->useCurrent();
             $table->timestamps();
+
         });
     }
 

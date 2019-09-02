@@ -29,6 +29,7 @@ Route::group([
 
     //customer
     Route::resource('customer', 'CustomerController');
+    Route::get('customer/{client}/details', 'CustomerController@details');
 
     //supplier
     Route::resource('supplier', 'SupplierController');

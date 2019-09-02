@@ -12,10 +12,8 @@ class Client extends Model
 
     protected $fillable = ['id'];
 
+   //protected $appends = array('net_total','total_return');
 
-    public function getNameAttribute(){
-        return $this->first_name.' '.$this->last_name;
-    }
 
     public function purchases(){
         return $this->hasMany('App\Purchase');
@@ -36,4 +34,18 @@ class Client extends Model
     public function returns(){
         return $this->hasMany('App\ReturnTransaction');
     }
+
+    //Attrebiutes
+    public function getNetTotalAttribute()
+    {
+        $net_total = $this->transactions()->sum('net_total') + $this->returns()->sum('return_amount') - $this->previous_due;
+        return $net_total;
+    }
+
+    public function getTotalReturnAttribute()
+    {
+          $total_return = $this->payments()->where('type', 'return')->sum('amount');
+         return $total_return;
+    }
+
 }

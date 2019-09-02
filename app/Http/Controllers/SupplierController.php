@@ -18,7 +18,7 @@ class SupplierController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Client::query();
-        //$query->where('client_type', 'purchaser');
+         $query->where('client_type', 'supplier');
         return response()->json(self::paginate($query, $request), 200);
     }
 
@@ -48,11 +48,11 @@ class SupplierController extends Controller
         $client->email = $request->get('email');
         $client->contact = $request->get('contact');
         $client->address = $request->get('address');
-        $client->client_type = 'customer';
+        $client->client_type = 'supplier';
         $client->account_no = $request->get('account_no');
 
         if($request->get('previous_due') != null){
-            $client->provious_due = $request->get('previous_due');
+            $client->previous_due = $request->get('previous_due');
         }
 
         $client->save();
@@ -105,11 +105,11 @@ class SupplierController extends Controller
         $client->email = $request->get('email');
         $client->contact = $request->get('contact');
         $client->address = $request->get('address');
-        $client->client_type = 'purchaser';
+        $client->client_type = 'supplier';
         $client->account_no = $request->get('account_no');
 
         if($request->get('previous_due') != null){
-            $client->provious_due = $request->get('previous_due');
+            $client->previous_due = $request->get('previous_due');
         }
 
         $client->save();

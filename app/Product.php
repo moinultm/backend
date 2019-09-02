@@ -33,11 +33,13 @@ class Product extends Model
     }
 
 
-    //Attributes
+
     public function sells() {
         return $this->hasMany('App\Sell');
     }
 
+
+    //Attributes
     public function getTotalQuantityTransactionAttribute()
     {
         $sum1=Product::where('id', $this->id)->sum('quantity');
