@@ -22,6 +22,29 @@ class SupplierController extends Controller
         return response()->json(self::paginate($query, $request), 200);
     }
 
+    public  function details(Client $client): JsonResponse
+    {
+
+        $net_total = $client->transactions->sum('net_total') + $client->returns->sum('return_amount') - $client->provious_due;
+        $total_return = $client->payments->where('type', 'return')->sum('amount');
+        $total_received = $client->payments->where('type', '!=','return')->sum('amount') - $total_return;
+        $total_due = $client->transactions->sum('net_total') - ($total_received);
+        $payment_lists = $client->payments()->orderBy('date','desc')->take(10)->get();
+        //$total_invoice = $client->transactions()->where('transaction_type', '!=','opening')->count();
+
+
+        $query = compact( 'total_due', 'total_received', 'total_return', 'net_total', 'payment_lists','client');
+
+        $AssociateArray = array(
+            'data' =>$query
+        );
+
+        //self::paginate()
+        return response()->json($AssociateArray  ,200);
+
+    }
+
+
 
     public function store(Request $request)
     {

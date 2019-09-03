@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Client;
 use App\Payment;
 use DB;
 use App\Sell;
@@ -21,17 +22,78 @@ use paginator;
 
     public function index(Request $request)
     {
-        $query = Sell::query();
 
-        if($request->get('filter')) {
-            $query= Sell::where(function($q) use($request) {
-                $q->where('reference_no', 'LIKE', '%' . $request->get('filter') . '%');
-            });
+
+        $customers =  Client::orderBy('full_name', 'asc')
+            ->where('client_type', "!=" ,'purchaser')
+            ->pluck('full_name', 'id');
+
+        $transactions = Transaction::where('transaction_type', 'sell')->orderBy('date', 'desc') ;
+
+        if($request->get('invoice_no')) {
+            $transactions->where('reference_no', 'LIKE', '%' . $request->get('invoice_no') . '%');
         }
 
+        if($request->get('customer')) {
+            $transactions->whereClientId($request->get('customer'));
+        }
+
+        if($request->get('type') == 'pos') {
+            $transactions->wherePos(1);
+        }
+
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to = self::filterTo($to);
+
+        if($request->get('from') || $request->get('to')) {
+            if(!is_null($from)){
+                $from = Carbon::createFromFormat('Y-m-d',$from);
+                $from = filterFrom($from);
+                $transactions->whereBetween('date',[$from,$to]);
+            }else{
+                $transactions->where('date','<=',$to);
+            }
+        }
+
+        $cloneTransactionForNetTotal = clone $transactions;
+        $cloneTransactionForTotalTax = clone $transactions;
+        $cloneTransactionForInvoiceTax = clone $transactions;
+        $cloneTransactionForTotalCostPrice = clone $transactions;
+
+        $invoice_tax = $cloneTransactionForInvoiceTax->sum('invoice_tax');
+        $total_tax = $cloneTransactionForTotalTax->sum('total_tax');
+        $product_tax = $total_tax - $invoice_tax;
+
+        $net_total = $cloneTransactionForNetTotal->sum('net_total');
+        $total = $net_total - $total_tax;
+
+        $total_cost_price = $cloneTransactionForTotalCostPrice->sum('total_cost_price');
+
+        $profit = $total - $total_cost_price;
 
 
-        return response()->json(self::paginate($query, $request), 200);
+     // $query = compact( 'transactions');
+        //'transactions' =>$transactions,
+         //   'customers'=>$customers,
+
+        $AssociateArray = array(
+            'data'=>$transactions,
+            'net_total'=>$net_total,
+            'invoice_tax'=>$invoice_tax,
+            'product_tax'=>$product_tax,
+            'total'=>$total,
+            'total_cost_price'=>$total_cost_price,
+            'profit'=>$profit,
+            'count'=>'5',
+            'size'=>'1',
+            'page'=>'1',
+        );
+
+
+      //return response()->json( $AssociateArray , 200);
+ return response()->json(self::paginate($transactions, $request), 200);
     }
 
 

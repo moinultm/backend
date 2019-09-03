@@ -33,6 +33,10 @@ Route::group([
 
     //supplier
     Route::resource('supplier', 'SupplierController');
+    Route::get('supplier/{client}/details', 'SupplierController@details');
+
+//Payment
+    Route::resource('payment', 'PaymentController');
 
 
     //Product

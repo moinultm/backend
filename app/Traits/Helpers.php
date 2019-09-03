@@ -19,8 +19,15 @@ trait Helpers
                 return "0".$num;
                 break;
             default:
-                return $num;;
+                return $num;
         }
     }
+
+
+    function filterTo($date){
+        return $date->endOfDay();
+    }
+
+
 
 }
