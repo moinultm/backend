@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+
 class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array('client_name');
+    protected $appends = array('client_name' );
 
     public function client(){
         return $this->belongsTo('App\Client');
@@ -41,6 +43,19 @@ class Transaction extends Model
         $ret=Client::select('full_name')->where('id', $this->client_id)->pluck('full_name')[0];
         return $ret;
     }
+
+
+
+    private function getDateValue() {
+        return date('m/d/Y', strtotime($this->attributes['date']));
+    }
+
+    private function setDateValue($value) {
+        $date_parts = explode('/', $value);
+        $this->attributes['date'] = $date_parts[2].'-'.$date_parts[0].'-'.$date_parts[1];
+    }
+
+
 
 /*
     protected static function boot () {

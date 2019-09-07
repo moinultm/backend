@@ -136,7 +136,7 @@ use paginator;
                     throw new ValidationException('Product ID is required');
                 }
 
-                $total = $total + $sell_item['subtotal'];
+                $total = $total + $sell_item['item_total'];
                 $total_cost_price = $total_cost_price + ($sell_item['cost_price'] * $sell_item['quantity']);
 
                 $sell = new Sell;
@@ -239,9 +239,11 @@ use paginator;
         $payments = $transaction->payments()->orderBy('date', 'desc')->get();
         $total_paid = $transaction->payments()->where('type', 'credit')->sum('amount');
         $total_return = $transaction->payments()->where('type', 'return')->sum('amount');
-        $total = $total_paid -  $total_return;
+        $total_pay = $total_paid -  $total_return;
 
-        $query = compact(  'total','payments','transaction','sells');
+        $clients = $transaction->client()->orderBy('id', 'desc')->get();
+
+        $query = compact(  'total_pay','payments','transaction','sells','clients');
 
         $AssociateArray = array(
             'data' =>$query
