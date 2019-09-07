@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Traits\Paginator;
+use Illuminate\Http\JsonResponse;
 
 
 class SellController extends Controller
@@ -143,6 +144,7 @@ use paginator;
                 $sell->product_id = $sell_item['product_id'];
                 $sell->quantity = $sell_item['quantity'];
                 $sell->product_discount_percentage = $sell_item['product_discount_percentage'];
+                $sell->product_discount_amount = $sell_item['product_discount_amount'];
 
                 if($enableProductTax == 1){
                     //product tax calculation
@@ -229,5 +231,24 @@ use paginator;
 
      }
 
+
+    public  function details(Transaction $transaction): JsonResponse
+    {
+
+        $sells = $transaction->sells()->orderBy('date', 'desc')->get();
+        $payments = $transaction->payments()->orderBy('date', 'desc')->get();
+        $total_paid = $transaction->payments()->where('type', 'credit')->sum('amount');
+        $total_return = $transaction->payments()->where('type', 'return')->sum('amount');
+        $total = $total_paid -  $total_return;
+
+        $query = compact(  'total','payments','transaction','sells');
+
+        $AssociateArray = array(
+            'data' =>$query
+        );
+
+        return response()->json($AssociateArray  ,200);
+
+    }
 
 }

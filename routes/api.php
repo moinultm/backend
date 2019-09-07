@@ -22,7 +22,7 @@ Route::group([
     //category
     Route::resource('category', 'CategoryController');
 
-//subcategory
+    //subcategory
     Route::resource('subcategory', 'SubcategoryController');
     Route::get('subcategory/{subcategory}/product', 'SubcategoryController@productList');
 
@@ -35,16 +35,17 @@ Route::group([
     Route::resource('supplier', 'SupplierController');
     Route::get('supplier/{client}/details', 'SupplierController@details');
 
-//Payment
+    //Payment
     Route::resource('payment', 'PaymentController');
-
 
     //Product
     Route::resource('product', 'ProductController');
     Route::get('parent', 'SubcategoryController@parentReq');
     Route::get('product/{product}/details', 'ProductController@productDetails');
     Route::post('product/{product}', 'ProductController@update');
-   //sell
+
+    //sell
     Route::resource('sell', 'SellController');
+    Route::get('sell/{transaction}/details', 'SellController@details');
 
 });
