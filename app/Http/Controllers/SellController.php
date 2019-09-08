@@ -232,25 +232,16 @@ use paginator;
      }
 
 
-    public  function details(Transaction $transaction): JsonResponse
+    public  function details($id): JsonResponse
     {
-
-        $sells = $transaction->sells()->orderBy('date', 'desc')->get();
-        $payments = $transaction->payments()->orderBy('date', 'desc')->get();
-        $total_paid = $transaction->payments()->where('type', 'credit')->sum('amount');
-        $total_return = $transaction->payments()->where('type', 'return')->sum('amount');
-        $total_pay = $total_paid -  $total_return;
-
-        $clients = $transaction->client()->orderBy('id', 'desc')->get();
-
-        $query = compact(  'total_pay','payments','transaction','sells','clients');
-
-        $AssociateArray = array(
-            'data' =>$query
-        );
+        $query = Transaction::query();
+        $query->where('id', $id);
+        $query->with(['sells','sells.product']);
+        $query->with(['payments']);
+        $query->with(['client']);
+        $AssociateArray = array('data' =>$query->get());
 
         return response()->json($AssociateArray  ,200);
-
     }
 
 }

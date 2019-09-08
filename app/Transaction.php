@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array('client_name' );
+    protected $appends = array( 'total_paid','total_return','total_pay'  );
 
     public function client(){
         return $this->belongsTo('App\Client');
@@ -38,33 +38,38 @@ class Transaction extends Model
 
 
 
-    public function getClientNameAttribute()
+
+
+    public function getTotalPaidAttribute()
     {
-        $ret=Client::select('full_name')->where('id', $this->client_id)->pluck('full_name')[0];
+       $ret= $this->payments()->where('type', 'credit')->sum('amount');
+        return $ret;
+    }
+
+    public function getTotalReturnAttribute()
+    {
+        $ret= $this->payments()->where('type', 'return')->sum('amount');
         return $ret;
     }
 
 
+    public function getTotalPayAttribute()
+    {
+        $return= $this->payments()->where('type', 'return')->sum('amount');
+        $paid= $this->payments()->where('type', 'credit')->sum('amount');
 
-    private function getDateValue() {
-        return date('m/d/Y', strtotime($this->attributes['date']));
+        return $paid-$return;
     }
 
-    private function setDateValue($value) {
-        $date_parts = explode('/', $value);
-        $this->attributes['date'] = $date_parts[2].'-'.$date_parts[0].'-'.$date_parts[1];
-    }
 
+    /*
+        protected static function boot () {
+            parent::boot();
+            self::saving(function ($model) {
+                $model->warehouse_id = auth()->user()->warehouse_id;
+            });
+        }
 
-
-/*
-    protected static function boot () {
-        parent::boot();
-        self::saving(function ($model) {
-            $model->warehouse_id = auth()->user()->warehouse_id;
-        });
-    }
-
-*/
+    */
 
 }
