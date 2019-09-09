@@ -9,7 +9,7 @@ class Sell extends Model
 {
     use SoftDeletes;
 
-
+    protected $appends = array( 'client_name' );
 
     public function product(){
         return $this->belongsTo('App\Product');
@@ -21,9 +21,11 @@ class Sell extends Model
     }
 
 
-
-
-
+    public function getClientNameAttribute()
+    {
+        $ret= $this->client()->select('full_name')->where('id', $this->id)->get();
+        return $ret;
+    }
 
 
 }

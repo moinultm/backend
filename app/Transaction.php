@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'total_paid','total_return','total_pay'  );
+    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name' );
 
     public function client(){
         return $this->belongsTo('App\Client');
@@ -38,8 +38,6 @@ class Transaction extends Model
 
 
 
-
-
     public function getTotalPaidAttribute()
     {
        $ret= $this->payments()->where('type', 'credit')->sum('amount');
@@ -59,6 +57,14 @@ class Transaction extends Model
         $paid= $this->payments()->where('type', 'credit')->sum('amount');
 
         return $paid-$return;
+    }
+
+
+    public function getClientNameAttribute()
+    {
+        $ret= $this->client()->select('full_name')
+            ->where('id', $this->client_id)->pluck('full_name')[0];
+        return $ret;
     }
 
 

@@ -48,4 +48,8 @@ Route::group([
     Route::resource('sell', 'SellController');
     Route::get('sell/{transaction}/details', 'SellController@details');
 
+    //return sells
+    Route::get('sell/return/{transaction}', 'SellController@returnSell');
+    Route::post('sell/return/{transaction}', 'SellController@returnSellPost');
+
 });
