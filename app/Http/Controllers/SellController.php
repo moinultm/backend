@@ -239,6 +239,7 @@ use paginator;
         $query->with(['sells','sells.product']);
         $query->with(['payments']);
         $query->with(['client']);
+
         $AssociateArray = array('data' =>$query->get());
 
         return response()->json($AssociateArray  ,200);
@@ -255,9 +256,16 @@ use paginator;
         }
         if($quantity <= 0){
             $message = "No product in this sell is left to return";
-            return redirect()->back()->withWarning($message);
+            return response()->json($message  ,403);
         }else{
-            return view('sells.return.return', compact('transaction', 'quantity'));
+
+
+            $data=   compact('transaction');
+            $AssociateArray = array(
+                'data' =>array_values($data)
+            );
+
+            return response()->json( $AssociateArray ,200);
         }
     }
 

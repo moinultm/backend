@@ -9,7 +9,7 @@ class Sell extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'client_name' );
+    protected $appends = array( 'client_name','product_name','unit_price' );
 
     public function product(){
         return $this->belongsTo('App\Product');
@@ -27,5 +27,15 @@ class Sell extends Model
         return $ret;
     }
 
+    public function getProductNameAttribute()
+    {
+        $ret= $this->product()->select('name')->where('id', $this->product_id)->pluck('name')[0];
+        return $ret;
+    }
+    public function getUnitPriceAttribute()
+    {
+        $ret= $this->product()->select('mrp')->where('id', $this->product_id)->pluck('mrp')[0];
+        return $ret;
+    }
 
 }
