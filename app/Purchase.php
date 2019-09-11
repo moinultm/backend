@@ -30,10 +30,10 @@ class Purchase extends Model
     }
 
 
-    protected static function boot () {
+  /*  protected static function boot () {
         parent::boot();
         self::saving(function ($model) {
             $model->warehouse_id = auth()->user()->warehouse_id;
         });
-    }
+    }*/
 }

@@ -51,15 +51,15 @@ class PurchaseController extends Controller
                 $transactions->where('date','<=',$to);
             }
         }
-       $transaction_paginated= self::paginate($transactions, $request);
-        $suppliers_paginated=self::paginate($suppliers , $request);
-        $data=   compact('tran_paginated','suppliers_paginated');
+       $transaction= self::paginate($transactions, $request);
+        $suppliers==self::paginate($suppliers , $request);
+         $data=   compact('transaction','suppliers');
 
         $AssociateArray = array(
             'data' =>  $data
         );
 
-        return response()->json($AssociateArray ,200);
+        return response()->json($transaction ,200);
 
 
      }
@@ -87,6 +87,8 @@ class PurchaseController extends Controller
         $totalProductTax = 0;
         $productTax = 0;
         $purchases = $request->get('purchases');
+        $purchases = json_decode($purchases, TRUE);
+
         $paid = floatval($request->get('paid')) ?: 0;
 
         DB::transaction(function() use ($request , $purchases, $ref_no, &$total, &$totalProductTax, $supplier, $paid, $enableProductTax, $productTax){
