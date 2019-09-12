@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Traits\Helpers;
+use Illuminate\Support\Facades\Validator;
 
 
 class ExpenseController extends Controller
@@ -47,20 +48,58 @@ class ExpenseController extends Controller
         return response()->json('', 200);
     }
 
-    public function store($id): JsonResponse
+    public function store(Request $request): JsonResponse
     {
 
-        return response()->json('', 200);
+
+
+        $rules = [
+            'purpose' => 'required',
+            'amount' => 'required|numeric',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+
+        $expense = new Expense;
+        $expense->purpose = $request->get('purpose');
+        $expense->amount = $request->get('amount');
+        $expense->save();
+
+        return response()->json('Saved', 200);
     }
 
     public function update(Request $request,$id): JsonResponse
     {
 
-        return response()->json('', 200);
+        $rules = [
+            'purpose' => 'required',
+            'amount' => 'required|numeric',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+
+        $expense = Expense::find($request->get('id'));
+            $expense->purpose = $request->get('purpose');
+            $expense->amount = $request->get('amount');
+        $expense->save();
+
+
+
+        return response()->json('Success', 200);
     }
 
-    public function destroy(Expense $warehouse): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
+        $expense = Expense::find($request->get('id'));
+        $expense->delete();
 
         return response()->json('', 200);
     }

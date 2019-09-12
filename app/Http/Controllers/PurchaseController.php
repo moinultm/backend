@@ -52,7 +52,7 @@ class PurchaseController extends Controller
             }
         }
        $transaction= self::paginate($transactions, $request);
-        $suppliers==self::paginate($suppliers , $request);
+        $suppliers=self::paginate($suppliers , $request);
          $data=   compact('transaction','suppliers');
 
         $AssociateArray = array(
