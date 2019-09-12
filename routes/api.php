@@ -54,5 +54,10 @@ Route::group([
     //purchase
     Route::resource('purchase', 'PurchaseController');
 
+//warehouse
+    Route::resource('warehouse', 'WarehouseController');
+//Expenses
+    Route::resource('expense', 'ExpenseController');
+
 
 });

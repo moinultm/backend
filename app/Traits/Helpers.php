@@ -29,5 +29,9 @@ trait Helpers
     }
 
 
+    function filterFrom($date){
+        return $date->startOfDay();
+    }
+
 
 }
