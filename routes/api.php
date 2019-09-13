@@ -59,5 +59,8 @@ Route::group([
 //Expenses
     Route::resource('expense', 'ExpenseController');
 
+//vatTax
+    Route::resource('vat', 'TaxController');
+
 
 });

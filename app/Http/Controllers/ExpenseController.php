@@ -96,12 +96,12 @@ class ExpenseController extends Controller
         return response()->json('Success', 200);
     }
 
-    public function destroy(Request $request): JsonResponse
+    public function destroy(Request $request,int $id): JsonResponse
     {
-        $expense = Expense::find($request->get('id'));
+        $expense = Expense::where('id', $id)->first();
         $expense->delete();
 
-        return response()->json('', 200);
+        return response()->json('Success', 200);
     }
 
 }
