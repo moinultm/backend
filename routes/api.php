@@ -62,5 +62,7 @@ Route::group([
 //vatTax
     Route::resource('vat', 'TaxController');
 
-
+//settings
+    Route::resource('settings', 'SettingsController');
+    Route::post('settings/{settings}', 'SettingsController@update');
 });

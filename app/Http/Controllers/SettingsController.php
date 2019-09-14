@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Setting;
 use App\Tax;
 use Illuminate\Http\Request;
+use App\Traits\Paginator;
+use Illuminate\Support\Facades\Validator;
 
 class SettingsController extends Controller
 {
+    use Paginator;
+
     public function index(Request $request )
     {
         $setting = Setting::whereId(1)->first();
@@ -23,22 +27,38 @@ class SettingsController extends Controller
             $setting = new Setting;
         }
 
+        $data=   compact('setting','taxes','tax_rate');
 
-        return view('settings.index')
-            ->with('setting',$setting)
-            ->with('taxes', $taxes)
-            ->with('tax_rate', $tax_rate);
+        $AssociateArray = array(
+            'data' =>  $setting
+        );
+
+        return response()->json($setting ,200);
+
+
     }
 
 
     public function update(Request $request,$id)
     {
-        $this->validate($request, [
+
+
+        $rules = [
             'site_name' => 'required|max:255',
             'email' => 'required|email',
             'address' => 'required|max:255',
             'phone' => 'required',
-        ]);
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+
+
+
+
 
         if($request->get('invoice_tax') == 1){
             $this->validate(
@@ -67,7 +87,7 @@ class SettingsController extends Controller
         $setting->enable_customer = $request->get('enable_customer');
         $setting->vat_no = $request->get('vat_no');
         $setting->pos_invoice_footer_text = $request->get('pos_invoice_footer_text');
-        $setting->dashboard = $request->get('dashboard_style');
+        $setting->dashboard = $request->get('dashboard');
 
         if($request->hasFile('image')){
             $file = $request->file('image');
@@ -90,7 +110,7 @@ class SettingsController extends Controller
         $message = trans('core.changes_saved');
         $setting->save();
 
-        return redirect()->back()->withSuccess($message);
+        return response()->json('Success', 200);
     }
 
 

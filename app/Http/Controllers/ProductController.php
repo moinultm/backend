@@ -40,8 +40,6 @@ class ProductController extends Controller
         $query->with(['purchases','purchases.client']);
 
        return response()->json(self::paginate($query), $query->count() == 0 ? 404 : 200);
-
-
     }
 
 
