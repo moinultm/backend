@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Client;
+use App\Product;
+use App\Sell;
 use App\Traits\Paginator;
 
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
@@ -18,6 +21,9 @@ class CustomerController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Client::where('client_type', 'customer');
+
+
+
         return response()->json(self::paginate($query, $request), 200);
     }
 
@@ -124,6 +130,25 @@ class CustomerController extends Controller
         }
 
         return response()->json('Cannot Delete Transaction or Sells found ', 403);
+    }
+
+
+    public function  saleDetails( $id){
+
+
+
+        $product= Sell::where('sells.client_id', $id)
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw('products.name,products.mrp,sum(sells.quantity) as quantity,
+                            sells.product_discount_percentage,
+                            sum(sells.product_discount_amount)as product_discount_amount,
+                            sum(sells.sub_total)as sub_total')
+            ->groupBy('products.name','products.mrp',
+                'sells.product_discount_percentage'
+                  );
+
+
+        return response()->json(self::paginate($product), 200);
     }
 
 }

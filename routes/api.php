@@ -30,6 +30,9 @@ Route::group([
     //customer
     Route::resource('customer', 'CustomerController');
     Route::get('customer/{client}/details', 'CustomerController@details');
+    Route::get('customer/{client}/report', 'CustomerController@saleDetails');
+
+
 
     //supplier
     Route::resource('supplier', 'SupplierController');
@@ -47,6 +50,9 @@ Route::group([
     //sell
     Route::resource('sell', 'SellController');
     Route::get('sell/{transaction}/details', 'SellController@details');
+
+
+
     //return sells
     Route::get('sell/return/{transaction}', 'SellController@returnSell');
     Route::post('sell/return/{transaction}', 'SellController@returnSellPost');
@@ -65,4 +71,6 @@ Route::group([
 //settings
     Route::resource('settings', 'SettingsController');
     Route::post('settings/{settings}', 'SettingsController@update');
+
+
 });

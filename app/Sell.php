@@ -9,7 +9,8 @@ class Sell extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'client_name','product_name','mrp' );
+    protected $appends = array( 'client_name','product_name','minimum_retail' );
+
 
     public function product(){
         return $this->belongsTo('App\Product');
@@ -29,13 +30,18 @@ class Sell extends Model
 
     public function getProductNameAttribute()
     {
-        $ret= $this->product()->select('name')->where('id', $this->product_id)->pluck('name')[0];
+        $ret= $this->product()->select('name')->where('id', $this->product_id)->pluck('name');
         return $ret;
     }
-    public function getMRPAttribute()
+    public function getMinimumRetailAttribute()
     {
-        $ret= $this->product()->select('mrp')->where('id', $this->product_id)->pluck('mrp')[0];
-        return $ret;
+
+            $ret= $this->product()->select('mrp')->where('id', $this->product_id)->pluck('mrp');
+            return $ret;
+
+
     }
+
+    // we have eleted the [0] from mrp and name duto  undifiend offset error
 
 }
