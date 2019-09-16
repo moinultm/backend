@@ -21,21 +21,22 @@ class ReportingController extends Controller
     public function  productSummary(Request $request)
     {
 
-        $products = Product::all();
+
 
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
-        if($request->has('from') || $request->has('to')) {
+        if($request->get('from') || $request->get('to')) {
             if(!is_null($from)){
 
                 $from = Carbon::createFromFormat('Y-m-d',$from);
                 $from = self::filterFrom($from);
-
-                $products->whereBetween('date',[$from,$to]);
+                $products = Sell::whereBetween('date',[$from,$to])->get();
+            //this wotks
 
             }else{
-                $products->where('date','<=',$to);
+                $products = Sell::query();
+                 $products->where('date','<=',$to);
 
             }
         }
