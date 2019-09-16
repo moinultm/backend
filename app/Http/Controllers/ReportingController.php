@@ -26,8 +26,9 @@ class ReportingController extends Controller
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
-        if($request->get('from') || $request->get('to')) {
+        if($request->has('from') || $request->has('to')) {
             if(!is_null($from)){
+
                 $from = Carbon::createFromFormat('Y-m-d',$from);
                 $from = self::filterFrom($from);
 
