@@ -73,4 +73,7 @@ Route::group([
     Route::post('settings/{settings}', 'SettingsController@update');
 
 
+    //Reporting
+    Route::get('report/product-summary', 'ReportingController@productSummary');
+
 });
