@@ -74,6 +74,18 @@ class ReportingController extends Controller
         });
 
 
+        $select = Product::query()
+                 ->select(array('name','created_at','mrp'));
+
+        $bindings = $select->getBindings();
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','INV_DATE','TRAN_QUANTITY'], $select);
+
+        $data2 = DB::table('TEMP_OPENING')
+            ->selectRaw('STOCK_ITEM_NAME')
+
+            ->get();
+
+
      Schema::drop('TEMP_OPENING');
 //////////////////////////////////////////////////////
         Schema::create('temp_transaction', function (Blueprint $table) {
@@ -107,7 +119,7 @@ class ReportingController extends Controller
 
         Schema::drop('TEMP_TRANSACTION');
 
-        return $data;
+        return $data2;
     }
 
 //https://stackoverflow.com/questions/47493155/creating-temporary-table-in-laravel-lumen-and-insert-data
