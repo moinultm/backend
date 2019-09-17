@@ -8,8 +8,11 @@ use App\Sell;
 use App\Traits\Paginator;
 use App\Warehouse;
 use Carbon\Carbon;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use App\Traits\Helpers;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ReportingController extends Controller
 {
@@ -21,33 +24,93 @@ class ReportingController extends Controller
     public function  productSummary(Request $request)
     {
 
-
-
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
-        if($request->get('from') || $request->get('to')) {
-            if(!is_null($from)){
+        //
 
+
+        $product= Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw('products.name')
+            ->groupBy('products.name','products.mrp',
+                               'sells.product_discount_percentage')->take(1);
+        
+
+
+        if($request->get('from') || $request->get('to')) {
+
+            if(!is_null($from)){
                 $from = Carbon::createFromFormat('Y-m-d',$from);
                 $from = self::filterFrom($from);
                 $products = Sell::whereBetween('date',[$from,$to])->get();
             //this wotks
-
             }else{
                 $products = Sell::query();
                  $products->where('date','<=',$to);
-
             }
         }
+        $products = Sell::query();
 
+        $temp=$this->temporary_check( $from,$to);
 
         $AssociateArray = array(
             'data' =>  $products
         );
 
-        return response()->json($AssociateArray ,200);
+        return response()->json( $temp ,200);
     }
+
+
+    public function temporary_check($from,$to )
+    {
+
+        Schema::create('TEMP_OPENING', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('STOCK_ITEM_NAME');
+            $table->date('INV_DATE');
+            $table->integer('TRAN_QUANTITY');
+            $table->temporary();
+        });
+
+
+     Schema::drop('TEMP_OPENING');
+//////////////////////////////////////////////////////
+        Schema::create('temp_transaction', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('STOCK_ITEM_NAME');
+            $table->date('INV_DATE');
+            $table->integer('OPENING_QUANTITY');
+            $table->integer('INWARD_QUANTITY');
+            $table->integer('OUTWARD_QUANTITY');
+
+            $table->temporary();
+        });
+/////////////////////////////////////////////////////
+        DB::table('TEMP_TRANSACTION')->insert([
+            'STOCK_ITEM_NAME'=>'A',
+            'INV_DATE'=>'2019-08-16',
+            'OPENING_QUANTITY'=>1,
+            'INWARD_QUANTITY'=>0,
+            'OUTWARD_QUANTITY'=>0
+        ]);
+ //////////////////////////////////////////////////////
+
+        $data = DB::table('TEMP_TRANSACTION')
+            ->selectRaw('STOCK_ITEM_NAME ,
+             sum(OPENING_QUANTITY) as OPENING_QUANTITY,
+             sum(INWARD_QUANTITY) as INWARD_QUANTITY,
+             sum(OUTWARD_QUANTITY) as OUTWARD_QUANTITY')
+            ->groupBy('STOCK_ITEM_NAME')
+            ->where('INV_DATE','<=', $from)
+            ->get();
+
+        Schema::drop('TEMP_TRANSACTION');
+
+        return $data;
+    }
+
+//https://stackoverflow.com/questions/47493155/creating-temporary-table-in-laravel-lumen-and-insert-data
 
 
     public function postProductReport(Request $request)

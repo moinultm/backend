@@ -9,7 +9,8 @@ class Sell extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'client_name','product_name','minimum_retail' );
+     //skipped for reporting
+   // protected $appends = array( 'client_name','product_name','minimum_retail' );
 
 
     public function product(){
