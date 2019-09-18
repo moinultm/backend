@@ -29,15 +29,11 @@ class ReportingController extends Controller
         $date=Carbon::now();
         $nowDate = date('Y-m-d', strtotime($date));
 
-        //$fromNow = Carbon::createFromFormat('Y-m-d',$date);
-        //$toNow = Carbon::createFromFormat('Y-m-d',$date);
 
-        /*
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
 
-        */
 
 /*
         $product= Sell::query()
@@ -63,21 +59,21 @@ class ReportingController extends Controller
      */
 
 
-      /*  dd($toNow);
+
 
         if(!is_null($from)) {
-        $temp = $this->temporary_check($from, $to);
-    }
-    else{
-        $temp = $this->temporary_check($fromNow, $toNow);
-    }
-*/
+            $temp = $this->temporary_check($from, $to);
+            }
+            else{
+                $temp = $this->temporary_check($nowDate, $nowDate);
+            }
+
         $AssociateArray = array(
-           // 'data' =>  $temp
+            'data' =>  $temp
         );
 
-        return      dd($nowDate);
-        //return response()->json( $AssociateArray ,200);
+
+       return response()->json( $AssociateArray ,200);
     }
 
 
