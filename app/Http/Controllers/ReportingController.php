@@ -24,12 +24,22 @@ class ReportingController extends Controller
     public function  productSummary(Request $request)
     {
 
+//need to fix dates query
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+
+        //$fromNow = Carbon::createFromFormat('Y-m-d',$date);
+        //$toNow = Carbon::createFromFormat('Y-m-d',$date);
+
+        /*
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
-        //
 
+        */
 
+/*
         $product= Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw('products.name')
@@ -50,76 +60,118 @@ class ReportingController extends Controller
                  $products->where('date','<=',$to);
             }
         }
-        $products = Sell::query();
+     */
 
-        $temp=$this->temporary_check( $from,$to);
 
+      /*  dd($toNow);
+
+        if(!is_null($from)) {
+        $temp = $this->temporary_check($from, $to);
+    }
+    else{
+        $temp = $this->temporary_check($fromNow, $toNow);
+    }
+*/
         $AssociateArray = array(
-            'data' =>  $products
+           // 'data' =>  $temp
         );
 
-        return response()->json( $temp ,200);
+        return      dd($nowDate);
+        //return response()->json( $AssociateArray ,200);
     }
 
 
     public function temporary_check($from,$to )
     {
 
+
+////////////////OPENING-PROCESS///////////////////////////
+
         Schema::create('TEMP_OPENING', function (Blueprint $table) {
             $table->increments('id');
             $table->string('STOCK_ITEM_NAME');
-            $table->date('INV_DATE');
             $table->integer('TRAN_QUANTITY');
+            $table->integer('TRAN_AMOUNT');
             $table->temporary();
         });
 
 
-        $select = Product::query()
-                 ->select(array('name','created_at','mrp'));
+        $select1= Product::query()->select(array('name','opening_stock','opening_stock_value'));
 
-        $bindings = $select->getBindings();
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','INV_DATE','TRAN_QUANTITY'], $select);
+        $select2 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'products.name  , sum(sells.quantity*-1)as Quantity,sum(sells.sub_total*-1)as Amount')
+            ->where('date','<=',$from)
+            ->groupBy('products.name' );
 
-        $data2 = DB::table('TEMP_OPENING')
-            ->selectRaw('STOCK_ITEM_NAME')
+        $select3 = Purchase::query()
+            ->join('products', 'purchases.product_id', '=', 'products.id')
+            ->selectRaw( 'products.name  , sum(purchases.quantity)as Quantity,sum(purchases.sub_total)as Amount')
+            ->where('date','<=',$from)
+            ->groupBy('products.name' );
 
-            ->get();
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
 
+//////////////////TRANSACTION-PROCESS//////////////////////////////
 
-     Schema::drop('TEMP_OPENING');
-//////////////////////////////////////////////////////
-        Schema::create('temp_transaction', function (Blueprint $table) {
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
             $table->increments('id');
             $table->string('STOCK_ITEM_NAME');
-            $table->date('INV_DATE');
-            $table->integer('OPENING_QUANTITY');
-            $table->integer('INWARD_QUANTITY');
+            $table->integer('TRAN_QUANTITY');
+            $table->integer('TRAN_AMOUNT');
             $table->integer('OUTWARD_QUANTITY');
-
+            $table->integer('OUTWARD_AMOUNT');
+            $table->integer('INWARD_QUANTITY');
+            $table->integer('INWARD_AMOUNT');
             $table->temporary();
         });
-/////////////////////////////////////////////////////
-        DB::table('TEMP_TRANSACTION')->insert([
-            'STOCK_ITEM_NAME'=>'A',
-            'INV_DATE'=>'2019-08-16',
-            'OPENING_QUANTITY'=>1,
-            'INWARD_QUANTITY'=>0,
-            'OUTWARD_QUANTITY'=>0
-        ]);
- //////////////////////////////////////////////////////
 
-        $data = DB::table('TEMP_TRANSACTION')
-            ->selectRaw('STOCK_ITEM_NAME ,
-             sum(OPENING_QUANTITY) as OPENING_QUANTITY,
-             sum(INWARD_QUANTITY) as INWARD_QUANTITY,
-             sum(OUTWARD_QUANTITY) as OUTWARD_QUANTITY')
-            ->groupBy('STOCK_ITEM_NAME')
-            ->where('INV_DATE','<=', $from)
+
+        $select4= DB::table('TEMP_OPENING')
+            ->selectRaw('STOCK_ITEM_NAME , sum(TRAN_QUANTITY) as TRAN_QUANTITY , sum(TRAN_AMOUNT) as TRAN_AMOUNT,0,0,0,0')
+            ->groupBy('STOCK_ITEM_NAME' );
+
+
+        $select5 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'products.name,0,0,sum(sells.quantity*-1)as OUTWARD_QUANTITY,sum(sells.sub_total*-1)as AMOUNT,0,0')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.name' );
+
+        $select6 = Purchase::query()
+            ->join('products', 'purchases.product_id', '=', 'products.id')
+            ->selectRaw( 'products.name,0,0,0,0,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as AMOUNT')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.name' );
+
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT'], $select4);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT'], $select5);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT'], $select6);
+
+
+////////////////FINAL SELECTION//////////////////////////////
+
+        $dataProduct = DB::table('TEMP_TRANSACTION')
+            ->selectRaw('STOCK_ITEM_NAME , 
+            sum(TRAN_QUANTITY) as TRAN_QUANTITY , 
+            sum(TRAN_AMOUNT) as  TRAN_AMOUNT,
+            sum(INWARD_QUANTITY) as INWARD_QUANTITY,
+            sum(INWARD_AMOUNT) as  INWARD_AMOUNT,
+            sum(OUTWARD_QUANTITY) as OUTWARD_QUANTITY,
+              sum(OUTWARD_AMOUNT) as  OUTWARD_AMOUNT')
+            ->groupBy('STOCK_ITEM_NAME' )
             ->get();
 
+
+        Schema::drop('TEMP_OPENING');
         Schema::drop('TEMP_TRANSACTION');
 
-        return $data2;
+
+
+        return $dataProduct;
     }
 
 //https://stackoverflow.com/questions/47493155/creating-temporary-table-in-laravel-lumen-and-insert-data
