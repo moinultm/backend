@@ -26,7 +26,6 @@ Route::group([
     Route::resource('subcategory', 'SubcategoryController');
     Route::get('subcategory/{subcategory}/product', 'SubcategoryController@productList');
 
-
     //customer
     Route::resource('customer', 'CustomerController');
     Route::get('customer/{client}/details', 'CustomerController@details');
@@ -70,7 +69,6 @@ Route::group([
 //settings
     Route::resource('settings', 'SettingsController');
     Route::post('settings/{settings}', 'SettingsController@update');
-
 
     //Reporting
     Route::get('report/product-summary', 'ReportingController@productSummary');
