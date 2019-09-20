@@ -19,6 +19,7 @@ Route::group([
     Route::resource('users', 'UsersController');
     Route::post('users/{user}', 'UsersController@update');
 
+
     //category
     Route::resource('category', 'CategoryController');
 
@@ -72,5 +73,6 @@ Route::group([
 
     //Reporting
     Route::get('report/product-summary', 'ReportingController@productSummary');
-
+//representttive
+    Route::get('users/{user}/representative', 'RepresentativeController@getUser');
 });
