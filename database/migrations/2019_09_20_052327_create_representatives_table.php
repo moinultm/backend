@@ -13,7 +13,7 @@ class CreateRepresentativesTable extends Migration
      */
     public function up()
     {
-        Schema::create('representatives', function (Blueprint $table) {
+        Schema::create('representatives_stock', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('user_id');
             $table->integer('product_id');

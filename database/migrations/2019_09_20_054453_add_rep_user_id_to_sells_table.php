@@ -14,7 +14,7 @@ class AddRepUserIdToSellsTable extends Migration
     public function up()
     {
         Schema::table('sells', function (Blueprint $table) {
-            $table->integer('rep_user_id')->after('date')->default(0);
+            $table->integer('user_id')->after('date')->default(0);
 
         });
     }
@@ -27,7 +27,7 @@ class AddRepUserIdToSellsTable extends Migration
     public function down()
     {
         Schema::table('sells', function (Blueprint $table) {
-            $table->dropColumn('rep_user_id');
+            $table->dropColumn('user_id');
 
         });
     }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddRepUserIdToTransactionsTable extends Migration
+class AddDateToReturnTransactions extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddRepUserIdToTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->integer('user_id')->after('date')->default(0);
+        Schema::table('return_transactions', function (Blueprint $table) {
+            $table->timestamp('date')->after('returned_by')->nullable();
 
         });
     }
@@ -26,8 +26,9 @@ class AddRepUserIdToTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn('user_id');
+        Schema::table('return_transactions', function (Blueprint $table) {
+            $table->dropColumn('date');
+
         });
     }
 }

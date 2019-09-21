@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddRepUserIdToReturnTransactionsTable extends Migration
+class AddRepUserIdToReturnTransactions extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddRepUserIdToReturnTransactionsTable extends Migration
     public function up()
     {
         Schema::table('return_transactions', function (Blueprint $table) {
-            $table->integer('rep_user_id')->after('date')->default(0);
+            $table->integer('user_id')->after('date')->default(0);
 
         });
     }
@@ -27,7 +27,7 @@ class AddRepUserIdToReturnTransactionsTable extends Migration
     public function down()
     {
         Schema::table('return_transactions', function (Blueprint $table) {
-            $table->dropColumn('rep_user_id');
+            $table->dropColumn('user_id');
 
         });
     }

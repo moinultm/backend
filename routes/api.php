@@ -73,6 +73,10 @@ Route::group([
 
     //Reporting
     Route::get('report/product-summary', 'ReportingController@productSummary');
-//representttive
+//representetive
+    Route::resource('represent', 'RepresentativeController');
     Route::get('users/{user}/representative', 'RepresentativeController@getUser');
+
+
+
 });

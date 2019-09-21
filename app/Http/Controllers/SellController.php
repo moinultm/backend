@@ -123,7 +123,7 @@ use paginator;
 
         $sells = $request->get('sells');
         $sells = json_decode($sells, TRUE);
-       // print_r($sells);
+         print_r($sells);
 
         DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax){
             foreach ($sells as $sell_item) {
