@@ -41,13 +41,13 @@ class UsersController extends Controller
                 'confirmed'
             ],
             'profiles' => [
-                'array'
+                'string'
             ]
         ];
 
-        $profiles =$request->has('profiles');
-        //$profiles= json_decode($profiles, TRUE);
-        dd($request);
+     // $profiles =$request->get('profiles');
+      // $profiles= json_decode($profiles, TRUE);
+       // dd($profiles);
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -56,13 +56,18 @@ class UsersController extends Controller
         $user = new User();
         $user->email = $request->get('email');
         $user->name = $request->get('name');
+        $user->name = $request->get('name');
         $user->password = bcrypt($request->get('password'));
+
         if ($request->has('picture')) {
             $user->picture = $this->upload($request->picture, storage_path('uploads/users/avatars'));
         }
         $user->save();
-        if ($profiles) {
-            foreach ($request->get('profiles') as $profile) {
+        if ($request->has('profiles')) {
+            $profiles = explode(',', $request->get('profiles'));
+
+
+            foreach ($profiles as $profile) {
                 DB::table('user_profiles')
                     ->insert([
                         'refUser' => $user->id,
@@ -103,10 +108,10 @@ class UsersController extends Controller
             ]
         ];
 
-        $profiles =$request->has('profiles');
-        //$profiles = json_decode($profiles, TRUE);
 
-        dd($profiles);
+        // $profiles = json_decode($request->get('profiles'), TRUE);
+
+       // dd($profiles);
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -128,7 +133,7 @@ class UsersController extends Controller
         DB::table('user_profiles')
             ->where('refUser', $id)
             ->delete();
-        if ($profiles) {
+        if ($request->has('profiles')) {
             $profiles = explode(',', $request->get('profiles'));
             foreach ($profiles as $profile) {
                 DB::table('user_profiles')
