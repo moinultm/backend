@@ -17,9 +17,9 @@ class Representative extends Model
     public function product(){
         return $this->belongsTo('App\Product');
     }
-    public function client()
+    public function user()
     {
-        return $this->belongsTo('App\Client');
+        return $this->belongsTo('App\User');
     }
 
 

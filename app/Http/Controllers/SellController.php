@@ -123,7 +123,7 @@ use paginator;
 
         $sells = $request->get('sells');
         $sells = json_decode($sells, TRUE);
-         print_r($sells);
+         //print_r($sells);
 
         DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax){
             foreach ($sells as $sell_item) {
@@ -163,6 +163,8 @@ use paginator;
                 $sell->sub_total = $sell_item['subtotal']- $productTax;
                 $sell->client_id = $customer;
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+                $sell->user_id = $request->get('user_id');
+
                 $sell->save();
 //this is product decrement from stock
                 $product = $sell->product;
@@ -211,6 +213,7 @@ use paginator;
             $transaction->net_total = round(($total_payable + $request->get('shipping_cost') + $invoice_tax), 2);
             $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
             $transaction->paid = $paid;
+            $transaction->user_id = $request->get('user_id');
             $transaction->save();
 
             if($paid > 0){
@@ -222,12 +225,14 @@ use paginator;
                 $payment->reference_no = $ref_no;
                 $payment->note = "Paid for Invoice ".$ref_no;
                 $payment->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+                $payment->user_id = $request->get('user_id');
                 $payment->save();
             }
+          $ref_no=  $transaction->reference_no;
         });
 
        // return response()->json(['message' => 'Successfully saved transaction.'], 200);
-        return response()->json( 'success', 200);
+        return response()->json( Transaction::where('reference_no', $ref_no), 200);
 
      }
 

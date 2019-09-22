@@ -76,6 +76,7 @@ Route::group([
 //representetive
     Route::resource('represent', 'RepresentativeController');
     Route::get('users/{user}/representative', 'RepresentativeController@getUser');
+    Route::get('represent/{user}/sells', 'RepresentativeController@getSells');
 
 
 

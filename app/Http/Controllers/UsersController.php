@@ -44,6 +44,11 @@ class UsersController extends Controller
                 'array'
             ]
         ];
+
+        $profiles =$request->has('profiles');
+        //$profiles= json_decode($profiles, TRUE);
+        dd($request);
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
@@ -56,7 +61,7 @@ class UsersController extends Controller
             $user->picture = $this->upload($request->picture, storage_path('uploads/users/avatars'));
         }
         $user->save();
-        if ($request->has('profiles')) {
+        if ($profiles) {
             foreach ($request->get('profiles') as $profile) {
                 DB::table('user_profiles')
                     ->insert([
@@ -98,6 +103,11 @@ class UsersController extends Controller
             ]
         ];
 
+        $profiles =$request->has('profiles');
+        //$profiles = json_decode($profiles, TRUE);
+
+        dd($profiles);
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
@@ -118,7 +128,7 @@ class UsersController extends Controller
         DB::table('user_profiles')
             ->where('refUser', $id)
             ->delete();
-        if ($request->has('profiles')) {
+        if ($profiles) {
             $profiles = explode(',', $request->get('profiles'));
             foreach ($profiles as $profile) {
                 DB::table('user_profiles')
