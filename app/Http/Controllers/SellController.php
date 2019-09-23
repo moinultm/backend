@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Client;
 use App\Payment;
+use App\Representative;
 use DB;
 use App\Sell;
 use App\Traits\Helpers;
@@ -123,7 +124,7 @@ use paginator;
 
         $sells = $request->get('sells');
         $sells = json_decode($sells, TRUE);
-        print_r($sells);
+       // print_r($sells);
 
         DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax){
             foreach ($sells as $sell_item) {
@@ -162,11 +163,21 @@ use paginator;
                 $sell->unit_cost_price = $sell_item['cost_price'];
                 $sell->sub_total = $sell_item['subtotal']- $productTax;
                 $sell->client_id = $customer;
-                $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+                $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                 $sell->user_id = $request->get('user_id');
 
                 $sell->save();
-//this is product decrement from stock
+
+                //Representative Decrements
+                $stock = new Representative();
+                $stock->user_id = $request->get('user_id');
+                $stock->date = Carbon::parse($request->get('date'))->format('Y-m-d');
+                $stock->product_id = $sell_item['product_id'];
+                $stock->quantity =  $sell_item['quantity']*-1;
+
+                $stock->save();
+
+                //this is product decrement from stock
                 $product = $sell->product;
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();

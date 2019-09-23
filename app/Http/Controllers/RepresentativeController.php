@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Representative;
 use App\Sell;
+use App\Transaction;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -21,10 +22,13 @@ class RepresentativeController extends Controller
     public function index(Request $request): JsonResponse {
 
         $query = Representative::query();
+        $query ->where('quantity' , '>','0');
         $query->with(['product']);
         $query->with(['user']);
         return response()->json(self::paginate($query, $request), 200);
     }
+
+
 
     public function getUser(): JsonResponse {
 
@@ -72,18 +76,69 @@ public function store(Request $request){
 }
 
 
-    public function getSells(Request $request): JsonResponse {
-
-        $query = Sell::query();
-        //$query->where('user_type', '2');
-        $AssociateArray = array(
-            'data' =>  $query->get()
-        );
+    public function getSells(Request $request,$id): JsonResponse {
 
 
-        return response()->json( self::paginate($query, $request), 200);
+        $user_id = $request->get('id');
+
+        if($user_id != '0'){
+            $product= Sell::where('sells.user_id', $id)
+                ->join('products', 'sells.product_id', '=', 'products.id')
+                ->selectRaw('products.name,products.mrp,sum(sells.quantity) as quantity,
+                            sells.product_discount_percentage,
+                            sum(sells.product_discount_amount)as product_discount_amount,
+                            sum(sells.sub_total)as sub_total')
+                ->groupBy('products.name','products.mrp',
+                    'sells.product_discount_percentage'
+                );
+
+        }else{
+            $product= Sell::query()
+                ->join('products', 'sells.product_id', '=', 'products.id')
+                ->selectRaw('products.name,products.mrp,sum(sells.quantity) as quantity,
+                            sells.product_discount_percentage,
+                            sum(sells.product_discount_amount)as product_discount_amount,
+                            sum(sells.sub_total)as sub_total')
+                ->groupBy('products.name','products.mrp',
+                    'sells.product_discount_percentage'
+                );
+
+        }
+
+
+
+       /* $query = Sell::query();
+        $query->with(['product']);
+        $query->with(['client']);
+     */
+
+        return response()->json( self::paginate($product, $request), 200);
     }
 
 
+
+    public function getInvoices(Request $request,$id): JsonResponse {
+
+
+         $user_id = $request->get('id');
+
+        $sells= Transaction:: where('transaction_type', 'sell')->orderBy('date', 'desc');
+
+
+
+
+
+
+        /* $query = Sell::query();
+         $query->with(['product']);
+         $query->with(['client']);
+
+        //for groupping
+            ->select('reference_no', DB::raw('SUM(quantity) as total_quantity'))
+            ->groupBy('reference_no');
+      */
+
+        return response()->json( self::paginate($sells, $request), 200);
+    }
 
 }
