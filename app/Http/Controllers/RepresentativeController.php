@@ -119,6 +119,7 @@ public function store(Request $request){
 
     public function getInvoices(Request $request,$id): JsonResponse {
 
+//mus assign user id to all
 
          $user_id = $request->get('id');
 
