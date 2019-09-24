@@ -29,6 +29,6 @@ class CreateRepresentativesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('representatives');
+        Schema::dropIfExists('representatives_stock');
     }
 }

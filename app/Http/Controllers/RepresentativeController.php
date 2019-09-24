@@ -11,20 +11,27 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
 
+use App\Traits\Helpers;
+
 use Illuminate\Validation\ValidationException;
 use App\Traits\Paginator;
 
 class RepresentativeController extends Controller
 {
     use Paginator;
-
+    use helpers;
 
     public function index(Request $request): JsonResponse {
 
-        $query = Representative::query();
-        $query ->where('quantity' , '>','0');
-        $query->with(['product']);
-        $query->with(['user']);
+
+
+        $query = Representative::where('quantity' , '>','0')
+             ->selectRaw('ref_no, sum(quantity)as total_quantity ,date')
+                   ->groupBy('ref_no')
+            ->orderBy('ref_no', 'DESC');
+
+
+
         return response()->json(self::paginate($query, $request), 200);
     }
 
@@ -45,13 +52,16 @@ class RepresentativeController extends Controller
 
 public function store(Request $request){
 
-
     $customer = $request->get('user_id');
 
     if (!$customer) {
         throw new ValidationException('user ID is required.');
     }
 
+    $ym = Carbon::now()->format('Y/m');
+
+    $row = Representative::where('quantity' , '>','0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
+    $ref_no = $ym.'/R-'.self::ref($row);
 
 
     $items = $request->get('items');
@@ -59,9 +69,10 @@ public function store(Request $request){
   //print_r($items);
     $user =0;
 
-    DB::transaction(function() use ($request , $items){
+    DB::transaction(function() use ($request,$items,$ref_no){
         foreach ($items as $sell_item) {
             $stock = new Representative();
+            $stock->ref_no =$ref_no;
             $stock->user_id = $request->get('user_id');
             $stock->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
             $stock->product_id = $sell_item['product_id'];
