@@ -58,6 +58,7 @@ Route::group([
 
     //purchase
     Route::resource('purchase', 'PurchaseController');
+    Route::get('purchase/{transaction}/details', 'PurchaseController@details');
 
 //warehouse
     Route::resource('warehouse', 'WarehouseController');

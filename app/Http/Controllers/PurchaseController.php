@@ -188,6 +188,19 @@ class PurchaseController extends Controller
         return response()->json( 'success', 200);
     }
 
+    public  function details($id): JsonResponse
+    {
+        $query = Transaction::query();
+        $query->where('id', $id);
+        $query->with(['purchases','purchases.product']);
+        $query->with(['payments']);
+        $query->with(['client']);
+
+        $AssociateArray = array('data' =>$query->get());
+
+        return response()->json($AssociateArray  ,200);
+    }
+
 
     public function update(Request $request, $id): JsonResponse
     {

@@ -138,7 +138,7 @@ class SupplierController extends Controller
         $client->save();
 
         if($request->get('previous_due') != null){
-            $transaction = Client::where('client_id', $id)->first();
+            $transaction = Transaction::where('id', $id)->first();
             $row = Transaction::where('transaction_type', 'opening')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'opening')->withTrashed()->get()->count() + 1 : 1;
             $ref_no = "OPENING-".self::ref($row);
             $transaction->reference_no = $ref_no;
@@ -152,8 +152,8 @@ class SupplierController extends Controller
             $transaction->net_total = $request->get('previous_due');
             $transaction->paid = 0;
             $transaction->save();
-
         }
+
         return response()->json( 'update success', 200);
 
     }
