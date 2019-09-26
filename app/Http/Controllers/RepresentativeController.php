@@ -27,7 +27,7 @@ class RepresentativeController extends Controller
 
         $query = Representative::where('quantity' , '>','0')
              ->selectRaw('ref_no, sum(quantity)as total_quantity ,date')
-                   ->groupBy('ref_no')
+                   ->groupBy('ref_no','date')
             ->orderBy('ref_no', 'DESC');
 
 

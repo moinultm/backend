@@ -10,7 +10,7 @@ class Sell extends Model
     use SoftDeletes;
 
      //skipped for reporting
-  protected $appends = array( 'client_name','product_name','minimum_retail' );
+  protected $appends = array( 'client_name','product_name','minimum_retail', 'user_name' );
 
 
     public function product(){
@@ -22,6 +22,17 @@ class Sell extends Model
         return $this->belongsTo('App\Client');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
+
+
+    public function getUserNameAttribute()
+    {
+        $ret= $this->user()->select('name')->where('id', $this->id)->get();
+        return $ret;
+    }
 
     public function getClientNameAttribute()
     {

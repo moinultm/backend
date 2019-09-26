@@ -81,6 +81,8 @@ Route::group([
     Route::get('represent/{user}/invoices', 'RepresentativeController@getInvoices');
 
 
+//Dashboard
+    Route::get('dashboard', 'DashboardController@index');
 
 
 });

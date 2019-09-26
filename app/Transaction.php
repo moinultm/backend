@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name' );
+    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name' );
 
     public function client(){
         return $this->belongsTo('App\Client');
@@ -34,6 +34,19 @@ class Transaction extends Model
 
     public function warehouse () {
         return $this->belongsTo('App\Warehouse');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
+
+
+
+    public function getUserNameAttribute()
+    {
+        $ret= $this->user()->select('name')->where('id', $this->user_id)->pluck('name');
+        return $ret;
     }
 
 
@@ -63,7 +76,7 @@ class Transaction extends Model
     public function getClientNameAttribute()
     {
         $ret= $this->client()->select('full_name')
-            ->where('id', $this->client_id)->pluck('full_name')[0];
+            ->where('id', $this->client_id)->pluck('full_name');
         return $ret;
     }
 
