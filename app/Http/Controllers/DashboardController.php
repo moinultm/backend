@@ -156,11 +156,11 @@ class DashboardController extends Controller
 //dd($today);
 
         $todaySellList= Transaction::where('transaction_type', 'sell')
-            ->whereDate('date', Carbon::today())
+            ->whereDate('date','>', Carbon::now()->subDays(30))
             ->orderBy('date', 'desc')->get();
 
         $todayPurchaseList= Transaction::where('transaction_type', 'purchase')
-            ->whereDate('date', Carbon::today())
+            ->whereDate('date', '>', Carbon::now()->subDays(30))
             ->orderBy('date', 'desc')->get();
 
         $AssociateArray = array(

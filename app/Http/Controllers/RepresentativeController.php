@@ -24,12 +24,10 @@ class RepresentativeController extends Controller
     public function index(Request $request): JsonResponse {
 
 
-
-        $query = Representative::where('quantity' , '>','0')
-             ->selectRaw('ref_no, sum(quantity)as total_quantity ,date')
-                   ->groupBy('ref_no','date')
+        $query = Representative::where('quantity' , '>=','0')
+             ->selectRaw('id,ref_no, sum(quantity)as total_quantity ,date')
+                   ->groupBy('id','ref_no','date')
             ->orderBy('ref_no', 'DESC');
-
 
 
         return response()->json(self::paginate($query, $request), 200);
@@ -138,9 +136,6 @@ public function store(Request $request){
 
 
 
-
-
-
         /* $query = Sell::query();
          $query->with(['product']);
          $query->with(['client']);
@@ -151,6 +146,22 @@ public function store(Request $request){
       */
 
         return response()->json( self::paginate($sells, $request), 200);
+    }
+
+    public function getDetails(Request $request,$id): JsonResponse
+
+    {
+
+
+        $query = Representative::query();
+        $query->where('id', $id);
+        $query->with(['product']);
+        $query->with(['user']);
+
+        $AssociateArray = array('data' =>$query->get());
+
+            return response()->json( $AssociateArray, 200);
+
     }
 
 }

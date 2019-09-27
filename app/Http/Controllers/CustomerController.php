@@ -22,8 +22,6 @@ class CustomerController extends Controller
     {
         $query = Client::where('client_type', 'customer');
 
-
-
         return response()->json(self::paginate($query, $request), 200);
     }
 
