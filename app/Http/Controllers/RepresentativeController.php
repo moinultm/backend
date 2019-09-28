@@ -59,7 +59,7 @@ public function store(Request $request){
     $ym = Carbon::now()->format('Y/m');
 
     $row = Representative::where('quantity' , '>','0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
-    $ref_no = $ym.'/R-'.self::ref($row);
+    $ref_no = $ym.'/RI-'.self::ref($row);
 
 
     $items = $request->get('items');

@@ -37,6 +37,7 @@ Route::group([
     //supplier
     Route::resource('supplier', 'SupplierController');
     Route::get('supplier/{client}/details', 'SupplierController@details');
+    Route::get('supplier/{client}/summary-trans', 'SupplierController@tranSummary');
 
     //Payment
     Route::resource('payment', 'PaymentController');
@@ -72,9 +73,8 @@ Route::group([
     Route::resource('settings', 'SettingsController');
     Route::post('settings/{settings}', 'SettingsController@update');
 
-    //Reporting
-    Route::get('report/product-summary', 'ReportingController@productSummary');
-//representetive
+
+    //representetive
     Route::resource('represent', 'RepresentativeController');
     Route::get('users/{user}/representative', 'RepresentativeController@getUser');
     Route::get('represent/{user}/sells', 'RepresentativeController@getSells');
@@ -82,8 +82,15 @@ Route::group([
     Route::get('represent/{user}/details', 'RepresentativeController@getDetails');
 
 
-//Dashboard
+    //Dashboard
     Route::get('dashboard', 'DashboardController@index');
+
+
+    //Reporting
+    Route::get('report/product-summary', 'ReportingController@productSummary');
+    Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
+
+    Route::get('report/product-sells-report', 'ReportingController@productSellReport');
 
 
 });

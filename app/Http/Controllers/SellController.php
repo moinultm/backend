@@ -120,13 +120,18 @@ use paginator;
         $productTax = 0;
         $total_cost_price = 0;
 
+        $row = Representative::where('quantity' , '<','0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
+        $ref_no_rep_sell = $ym.'/RS-'.self::ref($row);
+
+
+
         $paid = floatval($request->get('paid')) ?: 0;
 
         $sells = $request->get('sells');
         $sells = json_decode($sells, TRUE);
        // print_r($sells);
 
-        DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax){
+        DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax,$ref_no_rep_sell){
             foreach ($sells as $sell_item) {
 
                 if (intval($sell_item['quantity']) === 0) {
@@ -174,6 +179,8 @@ use paginator;
                 $stock->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                 $stock->product_id = $sell_item['product_id'];
                 $stock->quantity =  $sell_item['quantity']*-1;
+                $stock->ref_no= $ref_no_rep_sell;
+
 
                 $stock->save();
 
