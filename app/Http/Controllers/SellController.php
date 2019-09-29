@@ -22,6 +22,8 @@ class SellController extends Controller
 use paginator;
 
 
+
+
     public function index(Request $request)
     {
 
@@ -32,8 +34,8 @@ use paginator;
 
         $transactions = Transaction::where('transaction_type', 'sell')->orderBy('date', 'desc') ;
 
-        if($request->get('invoice_no')) {
-            $transactions->where('reference_no', 'LIKE', '%' . $request->get('invoice_no') . '%');
+        if($request->get('invoice')) {
+            $transactions->where('reference_no', 'LIKE', '%' . $request->get('invoice') . '%');
         }
 
         if($request->get('customer')) {
@@ -44,20 +46,28 @@ use paginator;
             $transactions->wherePos(1);
         }
 
-        $from = $request->get('from');
-        $to = $request->get('to')?:date('Y-m-d');
-        $to = Carbon::createFromFormat('Y-m-d',$to);
-        $to = self::filterTo($to);
-
-        if($request->get('from') || $request->get('to')) {
-            if(!is_null($from)){
-                $from = Carbon::createFromFormat('Y-m-d',$from);
-                $from = filterFrom($from);
-                $transactions->whereBetween('date',[$from,$to]);
-            }else{
-                $transactions->where('date','<=',$to);
-            }
+        if( $request->get('from') !='null' &&  $request->get('to')!='null' ) {
+            $from = $request->get('from');
+            $to = $request->get('to')?:date('Y-m-d');
+            $to = Carbon::createFromFormat('Y-m-d',$to);
+            $to = self::filterTo($to);
         }
+
+
+        if( $request->get('from') !='null' &&   $request->get('to')!='null' ) {
+
+            if($request->get('from') || $request->get('to')) {
+                if(!is_null($from)){
+                    $from = Carbon::createFromFormat('Y-m-d',$from);
+                    $from = self::filterFrom($from);
+                    $transactions->whereBetween('date',[$from,$to]);
+                }else{
+                    $transactions->where('date','<=',$to);
+                }
+            }
+
+        }
+
 
         $cloneTransactionForNetTotal = clone $transactions;
         $cloneTransactionForTotalTax = clone $transactions;
@@ -79,20 +89,20 @@ use paginator;
      // $query = compact( 'transactions');
         //'transactions' =>$transactions,
          //   'customers'=>$customers,
-
-        $AssociateArray = array(
-            'data'=>$transactions,
-            'net_total'=>$net_total,
-            'invoice_tax'=>$invoice_tax,
-            'product_tax'=>$product_tax,
-            'total'=>$total,
-            'total_cost_price'=>$total_cost_price,
-            'profit'=>$profit,
-            'count'=>'5',
-            'size'=>'1',
-            'page'=>'1',
-        );
-
+    /*
+     * $AssociateArray = array(
+                'data'=>$transactions,
+                'net_total'=>$net_total,
+                'invoice_tax'=>$invoice_tax,
+                'product_tax'=>$product_tax,
+                'total'=>$total,
+                'total_cost_price'=>$total_cost_price,
+                'profit'=>$profit,
+                'count'=>'5',
+                'size'=>'1',
+                'page'=>'1',
+            );
+    */
 
       //return response()->json( $AssociateArray , 200);
  return response()->json(self::paginate($transactions, $request), 200);
