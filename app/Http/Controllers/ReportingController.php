@@ -7,6 +7,7 @@ use App\Purchase;
 use App\Representative;
 use App\Sell;
 use App\Traits\Paginator;
+use App\Transaction;
 use App\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
@@ -455,5 +456,40 @@ class ReportingController extends Controller
     }
 
 
+
+    public  function sellsStatusReport(Request $request){
+
+        $warehouse_id = 'all';
+        $warehouse_name = ($warehouse_id == 'all') ? 'All Branch' : Warehouse::where('id', $warehouse_id);
+
+        $query = Transaction::where('transaction_type', 'sell');
+        $query->with(['sells','sells.product']);
+        $transactions = ($warehouse_id == 'all') ? $query : $query->where('warehouse_id', $warehouse_id );
+
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to = self::filterTo($to);
+
+        if($request->get('from') || $request->get('to')) {
+            if(!is_null($from)){
+                $from = Carbon::createFromFormat('Y-m-d',$from);
+                $from =self::filterFrom($from);
+                $transactions->whereBetween('date',[$from,$to]);
+            }else{
+                $transactions->where('date','<=',$to);
+
+            }
+        }
+
+
+
+        $AssociateArray = array(
+            'data' => $transactions->get()
+        );
+        return response()->json($AssociateArray ,200);
+
+
+    }
 
 }

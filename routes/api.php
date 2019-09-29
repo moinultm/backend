@@ -90,6 +90,6 @@ Route::group([
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
     Route::get('report/product-sells-report', 'ReportingController@productSellReport');
-
+    Route::get('report/sells-status-report', 'ReportingController@sellsStatusReport');
 
 });
