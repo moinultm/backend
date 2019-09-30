@@ -76,7 +76,7 @@ class CustomerController extends Controller
         $client->client_type = 'customer';
         $client->account_no = $request->get('account_no');
               $client->previous_due = $request->get('previous_due');
-
+        $client->client_code = $request->get('client_code');
         $client->save();
         return response()->json( 'success', 200);
 
@@ -110,7 +110,7 @@ class CustomerController extends Controller
         $client->client_type = 'customer';
         $client->account_no = $request->get('account_no');
         $client->previous_due = $request->get('previous_due');
-
+        $client->client_code = $request->get('client_code');
         $client->save();
         return response()->json( 'success', 200);
 

@@ -53,6 +53,7 @@ class SupplierController extends Controller
                 'required',
                 'max:255'
             ],
+
             'contact' => [
                 'required',
                 'min:9',
@@ -73,6 +74,7 @@ class SupplierController extends Controller
         $client->address = $request->get('address');
         $client->client_type = 'supplier';
         $client->account_no = $request->get('account_no');
+        $client->client_code = $request->get('client_code');
 
         if($request->get('previous_due') != null){
             $client->previous_due = $request->get('previous_due');
@@ -130,7 +132,7 @@ class SupplierController extends Controller
         $client->address = $request->get('address');
         $client->client_type = 'supplier';
         $client->account_no = $request->get('account_no');
-
+        $client->client_code = $request->get('client_code');
         if($request->get('previous_due') != null){
             $client->previous_due = $request->get('previous_due');
         }
