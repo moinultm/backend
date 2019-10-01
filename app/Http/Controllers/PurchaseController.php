@@ -67,7 +67,23 @@ class PurchaseController extends Controller
     public function show($id): JsonResponse
     {
 
+        return response()->json('',200);
+
+
     }
+
+    public function getLists(): JsonResponse
+
+    {
+        Transaction::$preventAttrSet=true;
+
+        $transactions = Transaction::select('id','reference_no')->where('transaction_type', 'purchase')->orderBy('date', 'desc')->get();
+        $AssociateArray = array(
+            'data' =>  $transactions
+        );
+        return response()->json($AssociateArray ,200);
+    }
+
 
     public function store(Request $request): JsonResponse
     {

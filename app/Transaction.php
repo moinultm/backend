@@ -12,6 +12,9 @@ class Transaction extends Model
 
     protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name' );
 
+    public static  $preventAttrSet = false;
+
+
     public function client(){
         return $this->belongsTo('App\Client');
     }
@@ -53,12 +56,16 @@ class Transaction extends Model
 
     public function getTotalPaidAttribute()
     {
-       $ret= $this->payments()->where('type', 'credit')->sum('amount');
+        $ret= $this->payments()->where('type', 'credit')->sum('amount');
+
+        if (self::$preventAttrSet) {return []; }
+
         return $ret;
     }
 
     public function getTotalReturnAttribute()
     {
+        if (self::$preventAttrSet) {return []; }
         $ret= $this->payments()->where('type', 'return')->sum('amount');
         return $ret;
     }
@@ -66,6 +73,7 @@ class Transaction extends Model
 
     public function getTotalPayAttribute()
     {
+        if (self::$preventAttrSet) {return []; }
         $return= $this->payments()->where('type', 'return')->sum('amount');
         $paid= $this->payments()->where('type', 'credit')->sum('amount');
 
@@ -75,10 +83,18 @@ class Transaction extends Model
 
     public function getClientNameAttribute()
     {
+
+
+
+        if (self::$preventAttrSet) {return []; }
+
         $ret= $this->client()->select('full_name')
             ->where('id', $this->client_id)->pluck('full_name');
         return $ret;
     }
+
+
+
 
 
     /*

@@ -109,6 +109,19 @@ use paginator;
     }
 
 
+    public function getLists(): JsonResponse
+
+    {
+        Transaction::$preventAttrSet=true;
+
+        $transactions = Transaction::select('id','reference_no')->where('transaction_type', 'sell')->orderBy('date', 'desc')->get();
+        $AssociateArray = array(
+            'data' =>  $transactions
+        );
+        return response()->json($AssociateArray ,200);
+    }
+
+
     public function store(Request $request)
     {
 

@@ -59,6 +59,9 @@ Route::group([
     //purchase
     Route::resource('purchase', 'PurchaseController');
     Route::get('purchase/{transaction}/details', 'PurchaseController@details');
+    Route::get('purchase/list/pi', 'PurchaseController@getLists');
+    Route::get('sell/list/si', 'SellController@getLists');
+
 
 //warehouse
     Route::resource('warehouse', 'WarehouseController');
