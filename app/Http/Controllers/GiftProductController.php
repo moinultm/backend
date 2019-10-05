@@ -23,6 +23,12 @@ class GiftProductController extends Controller
     use paginator;
 
 
+    public function index(Request $request): JsonResponse
+    {
+
+        $transactions = Transaction::where('transaction_type', 'gift')->orderBy('date', 'desc') ;
+        return response()->json(self::paginate($transactions, $request), 200);
+    }
 
     public function store(Request $request): JsonResponse
     {

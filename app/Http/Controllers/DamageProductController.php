@@ -19,7 +19,12 @@ class DamageProductController extends Controller
     use helpers;
     use paginator;
 
+    public function index(Request $request): JsonResponse
+    {
 
+        $transactions = Transaction::where('transaction_type', 'damage')->orderBy('date', 'desc') ;
+        return response()->json(self::paginate($transactions, $request), 200);
+    }
 
     public function store(Request $request): JsonResponse
     {
@@ -89,7 +94,7 @@ class DamageProductController extends Controller
 
                 $transaction = new Transaction;
                 $transaction->reference_no = $ref_no;
-                $transaction->client_id = $customer;
+                $transaction->client_id = 0;
                 $transaction->transaction_type = 'damage';
                 $transaction->total_cost_price = $total_cost_price;
                 $transaction->discount = 0;
