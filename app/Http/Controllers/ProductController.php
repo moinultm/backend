@@ -43,7 +43,8 @@ class ProductController extends Controller
     }
 
 
-    //Saving Function
+
+        //Saving Function
     public function store(Request $request): JsonResponse
     {
         $rules = [
@@ -173,5 +174,10 @@ class ProductController extends Controller
         //return view('products.form')->withProduct($product)->withSubcategories($subcategories)->withCategories($categories)->withTaxes($taxes)->with('secondary_lang', $secondary_lang);
 
     }
+
+
+
+
+
 
 }

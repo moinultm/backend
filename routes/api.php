@@ -84,6 +84,10 @@ Route::group([
     Route::get('represent/{user}/details', 'RepresentativeController@getDetails');
 
 
+    //gifts
+    Route::resource('gifts', 'GiftProductController');
+
+
     //Dashboard
     Route::get('dashboard', 'DashboardController@index');
 

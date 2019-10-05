@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Client;
 use App\Payment;
+use App\Product;
 use App\Representative;
 use DB;
 use App\Sell;
@@ -11,7 +12,7 @@ use App\Traits\Helpers;
 use App\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use App\Exceptions\ValidationException;
 use App\Traits\Paginator;
 use Illuminate\Http\JsonResponse;
 
@@ -124,6 +125,11 @@ use paginator;
 
     public function store(Request $request)
     {
+
+
+        $rules = [
+            'user_id' => ['required']
+        ];
 
         //we have disabled the taxes and settings checkup
 
