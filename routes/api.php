@@ -87,6 +87,7 @@ Route::group([
     //gifts
     Route::resource('gifts', 'GiftProductController');
 
+    Route::resource('damages', 'DamageProductController');
 
     //Dashboard
     Route::get('dashboard', 'DashboardController@index');
