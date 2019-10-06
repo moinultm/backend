@@ -28,7 +28,7 @@ class DamageProductController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $customer = $request->get('customer');
+        $customer = 0;
         $enableProductTax = 0;
 
 
@@ -83,7 +83,7 @@ class DamageProductController extends Controller
                 $sell->product_id = $sell_item['product_id'];
                 $sell->quantity = $sell_item['quantity'];
                 $sell->unit_cost_price = $sell_item['cost_price'];
-                $sell->client_id = $customer;
+                $sell->client_id = 0;
                 $sell->user_id = $request->get('user_id');
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d');
 

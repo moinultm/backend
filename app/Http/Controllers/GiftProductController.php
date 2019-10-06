@@ -49,9 +49,6 @@ class GiftProductController extends Controller
         }
 
 
-
-
-
         $ym = Carbon::now()->format('Y/m');
 
         $rowT = Transaction::where('transaction_type', 'gift')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'gift')->withTrashed()->get()->count() + 1 : 1;
