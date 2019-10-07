@@ -18,10 +18,12 @@ class CreateOrdersTable extends Migration
             $table->string('reference_no');
             $table->integer('client_id');
             $table->integer('product_id');
+            $table->integer('user_id');
             $table->integer('warehouse_id')->default(1);
             $table->double('quantity');
             $table->double('unit_cost_price')->nullable();
             $table->double('product_discount_percentage')->default(0);
+            $table->double('product_discount_amount')->default(0);
             $table->double('sub_total');
             $table->double('product_tax')->nullable();
             $table->timestamp('date')->nullable();
@@ -37,6 +39,6 @@ class CreateOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('sells_orders');
     }
 }

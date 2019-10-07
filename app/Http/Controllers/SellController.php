@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Client;
+use App\Order;
 use App\Payment;
 use App\Product;
 use App\Representative;
@@ -15,6 +16,8 @@ use Illuminate\Http\Request;
 use App\Exceptions\ValidationException;
 use App\Traits\Paginator;
 use Illuminate\Http\JsonResponse;
+
+
 
 
 class SellController extends Controller
@@ -127,12 +130,8 @@ use paginator;
     {
 
 
-        $rules = [
-            'user_id' => ['required']
-        ];
 
         //we have disabled the taxes and settings checkup
-
         $customer = $request->get('customer');
         $enableProductTax = 0;
 
@@ -143,15 +142,14 @@ use paginator;
         $ym = Carbon::now()->format('Y/m');
 
         $row = Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym.'/S-'.self::ref($row);
+        $ref_no = $ym.'/SI-'.self::ref($row);
         $total = 0;
         $totalProductTax = 0;
         $productTax = 0;
         $total_cost_price = 0;
 
         $row = Representative::where('quantity' , '<','0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no_rep_sell = $ym.'/RS-'.self::ref($row);
-
+        $ref_no_rep_sell = $ym.'/RP-'.self::ref($row);
 
 
         $paid = floatval($request->get('paid')) ?: 0;
@@ -209,9 +207,9 @@ use paginator;
                 $stock->product_id = $sell_item['product_id'];
                 $stock->quantity =  $sell_item['quantity']*-1;
                 $stock->ref_no= $ref_no_rep_sell;
-
-
                 $stock->save();
+
+
 
                 //this is product decrement from stock
                 $product = $sell->product;

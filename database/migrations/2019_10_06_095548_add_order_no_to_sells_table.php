@@ -26,8 +26,7 @@ class AddOrderNoToSellsTable extends Migration
     public function down()
     {
         Schema::table('sells', function (Blueprint $table) {
-            $table->dropColumn('client_code');
-
+            $table->dropColumn('order_no');
         });
     }
 }

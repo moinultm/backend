@@ -98,7 +98,7 @@ class PurchaseController extends Controller
         $ym = Carbon::now()->format('Y/m');
 
         $row = Transaction::where('transaction_type', 'purchase')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'purchase')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym.'/P-'.self::ref($row);
+        $ref_no = $ym.'/PI-'.self::ref($row);
         $total = 0;
         $totalProductTax = 0;
         $productTax = 0;
