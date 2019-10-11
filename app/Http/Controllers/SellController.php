@@ -50,6 +50,8 @@ use paginator;
             $transactions->wherePos(1);
         }
 
+        $from = $request->get('from');
+        $to=$request->get('to');
         if( $request->get('from') !='null' &&  $request->get('to')!='null' ) {
             $from = $request->get('from');
             $to = $request->get('to')?:date('Y-m-d');
@@ -129,7 +131,7 @@ use paginator;
     public function store(Request $request)
     {
 
-
+//11-10-2019 update then sells order table after insertion
 
         //we have disabled the taxes and settings checkup
         $customer = $request->get('customer');

@@ -27,6 +27,38 @@ class SellsOrderController extends Controller
     public function index(Request $request)
     {
 
+        $transactions = Order::query()->orderBy('date', 'desc') ;
+
+        $from = $request->get('from');
+        $to=$request->get('to');
+
+        if( $request->get('from') !='null' &&  $request->get('to')!='null' ) {
+            $from = $request->get('from');
+            $to = $request->get('to')?:date('Y-m-d');
+            $to = Carbon::createFromFormat('Y-m-d',$to);
+            $to = self::filterTo($to);
+        }
+
+
+        if( $request->get('from') !='null' &&   $request->get('to')!='null' ) {
+
+            if($request->get('from') || $request->get('to')) {
+                if(!is_null($from)){
+                    $from = Carbon::createFromFormat('Y-m-d',$from);
+                    $from = self::filterFrom($from);
+                    $transactions->whereBetween('date',[$from,$to]);
+                }else{
+                    $transactions->where('date','<=',$to);
+                }
+            }
+
+        }
+
+
+        $transactions->with(['user']);
+        $transactions->with(['client']);
+
+        return response()->json(self::paginate($transactions, $request), 200);
     }
 
     public function show(Request $request)
