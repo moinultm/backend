@@ -102,9 +102,12 @@ Route::group([
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
     Route::get('report/product-sells-report', 'ReportingController@productSellReport');
-    Route::get('report/sells-status-report', 'ReportingController@sellsStatusReport');
 
     Route::get('report/stock-general-report', 'ReportingController@stockGeneralReport');
+
+
+    Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
+    Route::get('report/sells-report', 'ReportingController@postSellsReport');
 
 
 });

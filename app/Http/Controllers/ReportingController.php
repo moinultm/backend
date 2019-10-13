@@ -111,13 +111,13 @@ class ReportingController extends Controller
 
         $select4 = DamageProduct::query()
             ->join('products', 'damage_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.name  , sum(damage_products.quantity)as Quantity,sum(damage_products.unit_cost_price)as Amount')
+            ->selectRaw( 'products.name  , sum(damage_products.quantity*-1)as Quantity,sum(damage_products.unit_cost_price)as Amount')
             ->where('date','<=',$from)
             ->groupBy('products.name' );
 
         $select5 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.name  , sum(gift_products.quantity)as Quantity,sum(gift_products.unit_cost_price)as Amount')
+            ->selectRaw( 'products.name  , sum(gift_products.quantity*-1)as Quantity,sum(gift_products.unit_cost_price)as Amount')
             ->where('date','<=',$from)
             ->groupBy('products.name' );
 
@@ -166,14 +166,14 @@ class ReportingController extends Controller
 
         $select7 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.name,0,0,0,0,0,0,sum(gift_products.quantity)as GIFT_QUANTITY,0')
+            ->selectRaw( 'products.name,0,0,0,0,0,0,sum(gift_products.quantity*-1)as GIFT_QUANTITY,0')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.name' );
 
 
         $select8 = DamageProduct::query()
             ->join('products', 'damage_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.name,0,0,0,0,0,0,0,sum(damage_products.quantity)as GIFT_QUANTITY')
+            ->selectRaw( 'products.name,0,0,0,0,0,0,0,sum(damage_products.quantity*-1)as DAMAGE_QUANTITY')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.name' );
 
@@ -495,40 +495,7 @@ class ReportingController extends Controller
 
 
 
-    public  function sellsStatusReport(Request $request){
 
-        $warehouse_id = 'all';
-        $warehouse_name = ($warehouse_id == 'all') ? 'All Branch' : Warehouse::where('id', $warehouse_id);
-
-        $query = Transaction::where('transaction_type', 'sell');
-        $query->with(['sells','sells.product']);
-        $transactions = ($warehouse_id == 'all') ? $query : $query->where('warehouse_id', $warehouse_id );
-
-        $from = $request->get('from');
-        $to = $request->get('to')?:date('Y-m-d');
-        $to = Carbon::createFromFormat('Y-m-d',$to);
-        $to = self::filterTo($to);
-
-        if($request->get('from') || $request->get('to')) {
-            if(!is_null($from)){
-                $from = Carbon::createFromFormat('Y-m-d',$from);
-                $from =self::filterFrom($from);
-                $transactions->whereBetween('date',[$from,$to]);
-            }else{
-                $transactions->where('date','<=',$to);
-
-            }
-        }
-
-
-
-        $AssociateArray = array(
-            'data' => $transactions->get()
-        );
-        return response()->json($AssociateArray ,200);
-
-
-    }
 
 
 
@@ -552,12 +519,10 @@ class ReportingController extends Controller
 
         $characteristics= Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
-            ->selectRaw('products.id,products.name,products.mrp,sum(sells.quantity) as quantity,
-                            sells.product_discount_percentage,
-                            sum(sells.product_discount_amount)as product_discount_amount,
-                            sum(sells.sub_total)as sub_total')
+            ->selectRaw('sum(sells.quantity) as quantity,
+                            sells.product_discount_percentage,sum(sells.product_discount_amount)as product_discount_amount')
             ->whereBetween('date',[$from,$to])
-            ->groupBy('products.id','products.name','products.mrp',
+            ->groupBy(
                 'sells.product_discount_percentage'
             );
 
@@ -574,7 +539,7 @@ class ReportingController extends Controller
 
 
         $AssociateArray = array(
-            'data' =>  $temp,
+            'product' =>  $temp,
             'characteristics'=>$characteristics->get(),
             'crossData'=>$crossData->get()
         );
@@ -593,7 +558,7 @@ class ReportingController extends Controller
 
         Schema::create('TEMP_OPENING', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('STOCK_ITEM_ID');
+            $table->integer('STOCK_ITEM_ID');
             $table->string('STOCK_ITEM_NAME');
             $table->integer('TRAN_QUANTITY');
             $table->integer('TRAN_AMOUNT');
@@ -618,14 +583,14 @@ class ReportingController extends Controller
 
         $select4 = DamageProduct::query()
             ->join('products', 'damage_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id, products.name  , sum(damage_products.quantity)as Quantity,sum(damage_products.unit_cost_price)as Amount')
+            ->selectRaw( 'products.id, products.name  , sum(damage_products.quantity*-1)as Quantity,sum(damage_products.unit_cost_price)as Amount')
             ->where('date','<=',$from)
             ->groupBy('products.id','products.name' );
 
 
         $select5 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id, products.name  , sum(gift_products.quantity)as Quantity,sum(gift_products.unit_cost_price)as Amount')
+            ->selectRaw( 'products.id, products.name  , sum(gift_products.quantity*-1)as Quantity,sum(gift_products.unit_cost_price)as Amount')
             ->where('date','<=',$from)
             ->groupBy('products.id','products.name' );
 
@@ -642,7 +607,7 @@ class ReportingController extends Controller
 
         Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('STOCK_ITEM_ID');
+            $table->integer('STOCK_ITEM_ID');
             $table->string('STOCK_ITEM_NAME');
             $table->integer('TRAN_QUANTITY');
             $table->integer('TRAN_AMOUNT');
@@ -678,7 +643,7 @@ class ReportingController extends Controller
 
         $select7 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,sum(gift_products.quantity)as GIFT_QUANTITY,0')
+            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,sum(gift_products.quantity*-1)as GIFT_QUANTITY,0')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','products.name' );
 
@@ -686,7 +651,7 @@ class ReportingController extends Controller
 
         $select8 = DamageProduct::query()
             ->join('products', 'damage_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,0,sum(damage_products.quantity)as GIFT_QUANTITY')
+            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,0,sum(damage_products.quantity*-1)as GIFT_QUANTITY')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','products.name' );
 
@@ -726,4 +691,83 @@ class ReportingController extends Controller
 
         return $dataProduct;
     }
+
+
+
+
+
+    // purchase Status Report
+    public function postPurchaseReport(Request $request)
+    {
+
+        $warehouse_id = 'all';
+        $query = Transaction::where('transaction_type', 'purchase');
+        $transactions = ($warehouse_id == 'all') ? $query : $query->where('warehouse_id', $warehouse_id );
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to = self:: filterTo($to);
+
+        if($request->get('from') || $request->get('to')) {
+            if(!is_null($from)){
+                $from = Carbon::createFromFormat('Y-m-d',$from);
+                $from =  self::filterFrom($from);
+                $transactions->whereBetween('date',[$from,$to]);
+            }else{
+                $transactions->where('date','<=',$to);
+            }
+        }
+
+
+        $transactions->with(['purchases.product']);
+
+        $AssociateArray = array(
+            'data' => $transactions->get()
+
+
+        );
+
+
+
+        return response()->json($AssociateArray ,200);
+
+
+    }
+
+    public  function postSellsReport(Request $request){
+
+        $warehouse_id = 'all';
+        $warehouse_name = ($warehouse_id == 'all') ? 'All Branch' : Warehouse::where('id', $warehouse_id);
+
+        $query = Transaction::where('transaction_type', 'sell');
+        $query->with(['sells','sells.product']);
+        $transactions = ($warehouse_id == 'all') ? $query : $query->where('warehouse_id', $warehouse_id );
+
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to = self::filterTo($to);
+
+        if($request->get('from') || $request->get('to')) {
+            if(!is_null($from)){
+                $from = Carbon::createFromFormat('Y-m-d',$from);
+                $from =self::filterFrom($from);
+                $transactions->whereBetween('date',[$from,$to]);
+            }else{
+                $transactions->where('date','<=',$to);
+
+            }
+        }
+
+        $transactions->with(['sells.product']);
+
+
+        $AssociateArray = array(
+            'data' => $transactions->get()
+        );
+        return response()->json($AssociateArray ,200);
+
+
+    }
+
 }
