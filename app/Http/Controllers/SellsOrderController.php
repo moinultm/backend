@@ -134,4 +134,17 @@ class SellsOrderController extends Controller
     }
 
 
+    public  function details($id): JsonResponse
+    {
+        $query = Order::query();
+        $query->where('id', $id);
+        $query->with(['product']);
+         $query->with(['client']);
+
+        $AssociateArray = array('data' =>$query->get());
+
+        return response()->json($AssociateArray  ,200);
+    }
+
+
 }

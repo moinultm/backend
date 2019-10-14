@@ -54,7 +54,7 @@ Route::group([
 
     //sells order
     Route::resource('sells-order', 'SellsOrderController');
-    Route::get('sells-order/{transaction}/details', 'SellsOrderController@details');
+    Route::get('sell/{transaction}/order-details', 'SellsOrderController@details');
 
     //return sells
     Route::get('sell/return/{transaction}', 'SellController@returnSell');

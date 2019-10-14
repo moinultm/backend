@@ -21,4 +21,11 @@ class Order extends Model
     {
         return $this->belongsTo('App\User');
     }
+
+    public function sells()
+    {
+        return $this->belongsTo('App\Sell');
+    }
+
 }
+
