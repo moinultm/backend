@@ -56,6 +56,11 @@ Route::group([
     Route::resource('sells-order', 'SellsOrderController');
     Route::get('sell/{transaction}/order-details', 'SellsOrderController@details');
     Route::get('sell/{transaction}/order-edit', 'SellsOrderController@getAlter');
+
+    Route::post('sell/{order}/order-post', 'SellController@orderToInvoice');
+
+
+
     //return sells
     Route::get('sell/return/{transaction}', 'SellController@returnSell');
     Route::post('sell/return/{transaction}', 'SellController@returnSellPost');

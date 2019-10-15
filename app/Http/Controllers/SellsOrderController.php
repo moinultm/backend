@@ -191,8 +191,10 @@ class SellsOrderController extends Controller
         $query = Transaction::query();
         $query->where('transaction_type', 'ORDER');
         $query->where('id', $id);
-        $query->with(['order','order.product']);
+        $query->with(['order']);
         $query->with(['client']);
+
+        $AssociateArray = array('order' =>$query->first());
 
 
         return response()->json($query->first()  ,200);

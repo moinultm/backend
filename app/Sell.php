@@ -47,10 +47,8 @@ class Sell extends Model
     }
     public function getMinimumRetailAttribute()
     {
-
             $ret= $this->product()->select('mrp')->where('id', $this->product_id)->pluck('mrp');
             return $ret;
-
 
     }
 

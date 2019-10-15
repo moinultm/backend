@@ -135,6 +135,8 @@ use paginator;
 
         //we have disabled the taxes and settings checkup
         $customer = $request->get('customer');
+        $order_no = $request->get('order_no');
+
         $enableProductTax = 0;
 
         if (!$customer) {
@@ -145,6 +147,7 @@ use paginator;
 
         $row = Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() + 1 : 1;
         $ref_no = $ym.'/SI-'.self::ref($row);
+
         $total = 0;
         $totalProductTax = 0;
         $productTax = 0;
@@ -154,13 +157,23 @@ use paginator;
         $ref_no_rep_sell = $ym.'/RP-'.self::ref($row);
 
 
+        $order_no_new='';
+
+            if ($order_no=='') {
+                $row = Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() + 1 : 1;
+                $order_no_new = $ym.'/SO-'.self::ref($row);
+            }
+
+
+
+
         $paid = floatval($request->get('paid')) ?: 0;
 
         $sells = $request->get('sells');
         $sells = json_decode($sells, TRUE);
        // print_r($sells);
 
-        DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax,$ref_no_rep_sell){
+        DB::transaction(function() use ($request , $sells, $ref_no, &$total, &$total_cost_price, &$totalProductTax, $customer, $paid, $enableProductTax, $productTax,$ref_no_rep_sell,$order_no,$order_no_new){
             foreach ($sells as $sell_item) {
 
                 if (intval($sell_item['quantity']) === 0) {
@@ -171,11 +184,15 @@ use paginator;
                     throw new ValidationException('Product ID is required');
                 }
 
-                $total = $total + $sell_item['item_total'];
-                $total_cost_price = $total_cost_price + ($sell_item['cost_price'] * $sell_item['quantity']);
+                $product_row = Product::findorFail($sell_item['product_id']);
+                $cost_price=$product_row->cost_price;
+
+                $total = $total + $sell_item['sub_total'];
+                $total_cost_price = $total_cost_price + ($cost_price * $sell_item['quantity']);
 
                 $sell = new Sell;
                 $sell->reference_no = $ref_no;
+                $sell->order_no = $order_no_new;
                 $sell->product_id = $sell_item['product_id'];
                 $sell->quantity = $sell_item['quantity'];
                 $sell->product_discount_percentage = $sell_item['product_discount_percentage'];
@@ -194,13 +211,42 @@ use paginator;
                     $totalProductTax = $totalProductTax + $productTax;
                 }
 
-                $sell->unit_cost_price = $sell_item['cost_price'];
-                $sell->sub_total = $sell_item['subtotal']- $productTax;
+
+                $sell->unit_cost_price = $cost_price;
+                $sell->sub_total = $sell_item['sub_total']- $productTax;
                 $sell->client_id = $customer;
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                 $sell->user_id = $request->get('user_id');
 
                 $sell->save();
+
+
+                if (!$order_no==''){
+                    $order = new Order();
+                    $order->reference_no = $order_no_new;
+                    $order->product_id = $sell_item['product_id'];
+                    $order->quantity = $sell_item['quantity'];
+                    $order->invoiced_qty = $sell_item['quantity'];
+                    $order->product_discount_percentage = $sell_item['product_discount_percentage'];
+                    $order->product_discount_amount = $sell_item['product_discount_amount'];
+                    $order->unit_cost_price = $cost_price;
+                    $order->sub_total = $sell_item['sub_total']- $productTax;
+                    $order->client_id = $customer;
+                    $order->date = Carbon::parse($request->get('date'))->format('Y-m-d');
+                    $order->user_id = $request->get('user_id');
+                    $order->save();
+
+                }
+                else{
+
+                    $order=Order::findorFail($order_no);
+                    $order->invoiced_qty = $order->invoiced_qty + intval($sell_item['quantity']);
+                    $order->save();
+                }
+
+
+
+
 
                 //Representative Decrements
                 $stock = new Representative();
@@ -246,6 +292,28 @@ use paginator;
 
             $invoice_tax = 0;
 
+            if ($order_no==''){
+                $transaction = new Transaction;
+                $transaction->reference_no = $order_no_new;
+                $transaction->client_id = $customer;
+                $transaction->transaction_type = 'ORDER';
+                $transaction->total_cost_price = $total_cost_price;
+                $transaction->discount = $discountAmount;
+                //saving total without product tax and shipping cost
+                $transaction->total = $total_payable - $totalProductTax;
+                $transaction->invoice_tax = round($invoice_tax, 2);
+                $transaction->total_tax = round(($totalProductTax + $invoice_tax), 2);
+                $transaction->labor_cost = $request->get('shipping_cost');
+                $transaction->net_total = round(($total_payable + $request->get('shipping_cost') + $invoice_tax), 2);
+                $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+                $transaction->paid = $paid;
+                $transaction->user_id = $request->get('user_id');
+                $transaction->save();
+
+            }
+
+
+
             $transaction = new Transaction;
             $transaction->reference_no = $ref_no;
             $transaction->client_id = $customer;
@@ -282,6 +350,10 @@ use paginator;
         return response()->json( Transaction::where('reference_no', $ref_no), 200);
 
      }
+
+
+
+
 
 
     public  function details($id): JsonResponse
