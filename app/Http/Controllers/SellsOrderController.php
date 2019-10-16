@@ -55,16 +55,16 @@ class SellsOrderController extends Controller
         }
 
 
-
-        $transaction = Transaction::where('transaction_type', 'ORDER')
-            ->select('sells_orders.reference_no',DB::raw('sum(sells_orders.invoiced_qty) as invoiced_qty'))
+/*
+        $transactions = Transaction::where('transaction_type', 'ORDER')
             ->join('sells_orders', 'sells_orders.reference_no', '=', 'transactions.reference_no')
-            ->groupBy('sells_orders.reference_no');
+            ->select('transactions.id','sells_orders.reference_no','transactions.net_total','transactions.date',DB::raw('sum(sells_orders.invoiced_qty) as invoiced_qty'))
+            ->groupBy('transactions.id','sells_orders.reference_no','transactions.net_total','transactions.date');
+
+*/
 
 
-
-
-        return response()->json(self::paginate($transaction, $request), 200);
+        return response()->json(self::paginate($transactions, $request), 200);
     }
 
 
@@ -109,7 +109,7 @@ class SellsOrderController extends Controller
                     throw new ValidationException('Product ID is required');
                 }
 
-                $total = $total + $order_item['item_total'];
+                $total = $total + $order_item['sub_total'];
                 $total_cost_price = $total_cost_price + ($order_item['cost_price'] * $order_item['quantity']);
 
                 $order = new Order();
@@ -119,7 +119,7 @@ class SellsOrderController extends Controller
                 $order->product_discount_percentage = $order_item['product_discount_percentage'];
                 $order->product_discount_amount = $order_item['product_discount_amount'];
                 $order->unit_cost_price = $order_item['cost_price'];
-                $order->sub_total = $order_item['subtotal']- $productTax;
+                $order->sub_total = $order_item['sub_total']- $productTax;
                 $order->client_id = $customer;
                 $order->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                 $order->user_id = $request->get('user_id');
@@ -131,7 +131,7 @@ class SellsOrderController extends Controller
 
             //discount
             $discount = $request->get('discount');
-            $discountType = $request->get('discountType');
+            $discountType ='flat';
             $discountAmount = $discount;
             if($discountType == 'percentage'){
                 $discountAmount = $total * (1 * $discount / 100);

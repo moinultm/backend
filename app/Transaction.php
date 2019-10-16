@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name' );
+    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name','invoiced_qty' );
 
     public static  $preventAttrSet = false;
 
@@ -51,6 +51,11 @@ class Transaction extends Model
     }
 
 
+    public function getInvoicedQtyAttribute()
+    {
+        $ret= $this->order()->select('invoiced_qty')->where('reference_no', $this->reference_no)->pluck('invoiced_qty')[0];
+        return $ret;
+    }
 
     public function getUserNameAttribute()
     {
