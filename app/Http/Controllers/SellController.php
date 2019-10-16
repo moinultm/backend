@@ -221,7 +221,7 @@ use paginator;
                 $sell->save();
 
 
-                if (!$order_no==''){
+                if ($order_no==''){
                     $order = new Order();
                     $order->reference_no = $order_no_new;
                     $order->product_id = $sell_item['product_id'];

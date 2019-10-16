@@ -55,11 +55,18 @@ class SellsOrderController extends Controller
         }
 
 
-        $transactions->with(['user']);
-        $transactions->with(['client']);
 
-        return response()->json(self::paginate($transactions, $request), 200);
+        $transaction = Transaction::where('transaction_type', 'ORDER')
+            ->select('sells_orders.reference_no',DB::raw('sum(sells_orders.invoiced_qty) as invoiced_qty'))
+            ->join('sells_orders', 'sells_orders.reference_no', '=', 'transactions.reference_no')
+            ->groupBy('sells_orders.reference_no');
+
+
+
+
+        return response()->json(self::paginate($transaction, $request), 200);
     }
+
 
     public function show(Request $request)
     {
