@@ -157,14 +157,17 @@ use paginator;
         $ref_no_rep_sell = $ym.'/RP-'.self::ref($row);
 
 
-        $order_no_new='';
 
-            if ($order_no=='') {
+
+            if ($order_no=="0") {
                 $row = Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() + 1 : 1;
                 $order_no_new = $ym.'/SO-'.self::ref($row);
+
             }
-
-
+            else {
+                $order_no_new=$order_no;
+            }
+       // dd($order_no_new);
 
 
         $paid = floatval($request->get('paid')) ?: 0;
@@ -221,7 +224,7 @@ use paginator;
                 $sell->save();
 
 
-                if ($order_no==''){
+                if ($order_no=="0"){
                     $order = new Order();
                     $order->reference_no = $order_no_new;
                     $order->product_id = $sell_item['product_id'];
@@ -239,7 +242,8 @@ use paginator;
                 }
                 else{
 
-                    $order=Order::findorFail($order_no);
+                    //$order=Order::findorFail($order_no);
+                    $order=Order::where('reference_no', $order_no)->firstOrFail();
                     $order->invoiced_qty = $order->invoiced_qty + intval($sell_item['quantity']);
                     $order->save();
                 }
@@ -292,7 +296,7 @@ use paginator;
 
             $invoice_tax = 0;
 
-            if ($order_no==''){
+            if ($order_no=="0"){
                 $transaction = new Transaction;
                 $transaction->reference_no = $order_no_new;
                 $transaction->client_id = $customer;
@@ -316,6 +320,8 @@ use paginator;
 
             $transaction = new Transaction;
             $transaction->reference_no = $ref_no;
+            $transaction->order_no = $order_no_new;
+
             $transaction->client_id = $customer;
             $transaction->transaction_type = 'sell';
             $transaction->total_cost_price = $total_cost_price;

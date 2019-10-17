@@ -27,7 +27,26 @@ class SellsOrderController extends Controller
     public function index(Request $request)
     {
 
-        $transactions = Transaction::where('transaction_type', 'ORDER')->orderBy('date', 'desc');
+  / $transactions = Transaction::where('transaction_type', 'ORDER')
+            ->join('sells_orders', 'sells_orders.reference_no', '=', 'transactions.reference_no')
+            ->leftjoin('clients', 'clients.id', '=', 'sells_orders.client_id')
+            ->select(   'transactions.id',
+                        'sells_orders.reference_no',
+                        'transactions.net_total',
+                        'transactions.date',
+                         'clients.full_name as clients_name',
+             DB::raw('sum(sells_orders.invoiced_qty) as invoiced_qty'))
+            ->groupBy(   'transactions.id',
+                         'sells_orders.reference_no',
+                        'transactions.net_total',
+                        'transactions.date',
+                        'clients.full_name')
+            ->orderBy('sells_orders.reference_no', 'desc');
+
+
+        //$transactions = Transaction::where('transaction_type', 'ORDER') ->orderBy('date', 'desc');
+
+
 
         $from = $request->get('from');
         $to=$request->get('to');
@@ -46,23 +65,13 @@ class SellsOrderController extends Controller
                 if(!is_null($from)){
                     $from = Carbon::createFromFormat('Y-m-d',$from);
                     $from = self::filterFrom($from);
-                    $transactions->whereBetween('date',[$from,$to]);
+                    $transactions->whereBetween('transactions.date',[$from,$to]);
                 }else{
-                    $transactions->where('date','<=',$to);
+                    $transactions->where('transactions.date','<=',$to);
                 }
             }
 
         }
-
-
-/*
-        $transactions = Transaction::where('transaction_type', 'ORDER')
-            ->join('sells_orders', 'sells_orders.reference_no', '=', 'transactions.reference_no')
-            ->select('transactions.id','sells_orders.reference_no','transactions.net_total','transactions.date',DB::raw('sum(sells_orders.invoiced_qty) as invoiced_qty'))
-            ->groupBy('transactions.id','sells_orders.reference_no','transactions.net_total','transactions.date');
-
-*/
-
 
         return response()->json(self::paginate($transactions, $request), 200);
     }
@@ -184,8 +193,15 @@ class SellsOrderController extends Controller
         $query = Transaction::query();
         $query->where('transaction_type', 'ORDER');
         $query->where('id', $id);
-        $query->with(['order','order.product']);
-         $query->with(['client']);
+        $query->with(['order']);
+        $query->with(['order.product']);
+        $query->with(['orderInvoices']);
+        $query->with(['client']);
+
+
+        /*
+         *
+         * {"data":[{"id":41,"reference_no":"2019\/10\/SO-0002","order_no":"0","client_id":1,"transaction_type":"ORDER","warehouse_id":1,"discount":1340,"total":8660,"labor_cost":0,"paid":0,"return":0,"total_cost_price":7800,"invoice_tax":0,"total_tax":0,"net_total":8660,"change_amount":null,"pos":0,"date":"2019-10-15 09:02:08","user_id":1,"created_at":"2019-10-15 09:02:08","updated_at":"2019-10-15 09:02:08","deleted_at":null,"total_paid":0,"total_return":0,"total_pay":0,"client_name":["Ashraf"],"user_name":["Mainul Islam"],"order":[{"id":6,"reference_no":"2019\/10\/SO-0002","client_id":1,"product_id":1,"user_id":1,"warehouse_id":1,"quantity":10,"invoiced_qty":"0","unit_cost_price":80,"product_discount_percentage":15,"product_discount_amount":300,"sub_total":1700,"product_tax":null,"date":"2019-10-15 00:00:00","created_at":"2019-10-15 09:02:08","updated_at":"2019-10-15 09:02:08","deleted_at":null,"product_name":["Sunsilk 500ML Shampoo"],"mrp":[200],"product":{"id":1,"name":"Sunsilk 500ML Shampoo","code":"G554597","category_id":1,"subcategory_id":1,"quantity":-73,"details":"Sunsilk 500ML Shampoo","cost_price":80,"mrp":200,"tax_id":null,"minimum_retail_price":160,"unit":"pcs","status":1,"image":null,"opening_stock":0,"opening_stock_value":0,"created_at":"2019-08-19 00:00:00","updated_at":"2019-10-16 04:24:10","deleted_at":null,"total_quantity_transaction":-73,"sum_opening":0,"total_sells":175,"total_purchases":103}},{"id":7,"reference_no":"2019\/10\/SO-0002","client_id":1,"product_id":4,"user_id":1,"warehouse_id":1,"quantity":10,"invoiced_qty":"0","unit_cost_price":700,"product_discount_percentage":13,"product_discount_amount":1040,"sub_total":6960,"product_tax":null,"date":"2019-10-15 00:00:00","created_at":"2019-10-15 09:02:08","updated_at":"2019-10-15 09:02:08","deleted_at":null,"product_name":["G-Acne-Gel-75gm"],"mrp":[800],"product":{"id":4,"name":"G-Acne-Gel-75gm","code":"G374406","category_id":4,"subcategory_id":4,"quantity":-4,"details":null,"cost_price":700,"mrp":800,"tax_id":null,"minimum_retail_price":750,"unit":"pcs","status":1,"image":null,"opening_stock":0,"opening_stock_value":0,"created_at":"2019-09-29 02:38:43","updated_at":"2019-10-15 11:29:25","deleted_at":null,"total_quantity_transaction":-4,"sum_opening":0,"total_sells":11,"total_purchases":8}}],"client":{"id":1,"full_name":"Ashraf","client_code":"C-M1","contact":"012366650","company_name":"Al Karim Int.","email":"ashraf20@gmail.com","address":"Dhaka 1230","client_type":"customer","previous_due":null,"account_no":"12540","created_at":"2019-08-17 00:00:00","updated_at":"2019-09-30 06:26:00","deleted_at":null,"net_total":84646,"total_return":0}}]}*/
 
         $AssociateArray = array('data' =>$query->get());
 

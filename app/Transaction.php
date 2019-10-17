@@ -5,12 +5,13 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name','invoiced_qty' );
+    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name'  );
 
     public static  $preventAttrSet = false;
 
@@ -28,10 +29,14 @@ class Transaction extends Model
         return $this->hasMany('App\Order', 'reference_no', 'reference_no');
     }
 
+    public function orderInvoices() {
+        return $this->hasMany('App\Transaction', 'order_no', 'reference_no');
+    }
 
     public function sells() {
         return $this->hasMany('App\Sell', 'reference_no', 'reference_no');
     }
+
 
     public function payments() {
         return $this->hasMany('App\Payment', 'reference_no', 'reference_no');
@@ -51,11 +56,7 @@ class Transaction extends Model
     }
 
 
-    public function getInvoicedQtyAttribute()
-    {
-        $ret= $this->order()->select('invoiced_qty')->where('reference_no', $this->reference_no)->pluck('invoiced_qty')[0];
-        return $ret;
-    }
+
 
     public function getUserNameAttribute()
     {
