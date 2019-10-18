@@ -27,7 +27,8 @@ class SellsOrderController extends Controller
     public function index(Request $request)
     {
 
-  / $transactions = Transaction::where('transaction_type', 'ORDER')
+
+ $transactions = Transaction::where('transaction_type', 'ORDER')
             ->join('sells_orders', 'sells_orders.reference_no', '=', 'transactions.reference_no')
             ->leftjoin('clients', 'clients.id', '=', 'sells_orders.client_id')
             ->select(   'transactions.id',
@@ -44,7 +45,7 @@ class SellsOrderController extends Controller
             ->orderBy('sells_orders.reference_no', 'desc');
 
 
-        //$transactions = Transaction::where('transaction_type', 'ORDER') ->orderBy('date', 'desc');
+       //$transactions = Transaction::where('transaction_type', 'ORDER') ->orderBy('date', 'desc');
 
 
 
@@ -70,10 +71,12 @@ class SellsOrderController extends Controller
                     $transactions->where('transactions.date','<=',$to);
                 }
             }
-
         }
 
-        return response()->json(self::paginate($transactions, $request), 200);
+        $size = $request->size;
+        //$transactions->with(['order']);
+
+        return response()->json( $transactions->paginate($size), 200);
     }
 
 
