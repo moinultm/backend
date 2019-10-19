@@ -137,6 +137,8 @@ use paginator;
         $customer = $request->get('customer');
         $order_no = $request->get('order_no');
 
+        $stock=$request->get('order_no');
+
         $enableProductTax = 0;
 
         if (!$customer) {
@@ -189,6 +191,14 @@ use paginator;
 
                 $product_row = Product::findorFail($sell_item['product_id']);
                 $cost_price=$product_row->cost_price;
+
+                $product_stock=$product_row->quantity ;
+
+
+                if ($product_stock <  0) {
+                    throw new ValidationException('Null Stock Item');
+                }
+
 
                 $total = $total + $sell_item['sub_total'];
                 $total_cost_price = $total_cost_price + ($cost_price * $sell_item['quantity']);

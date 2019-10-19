@@ -616,26 +616,28 @@ class ReportingController extends Controller
             $table->integer('INWARD_QUANTITY');
             $table->integer('INWARD_AMOUNT');
             $table->integer('GIFT_QUANTITY');
+            $table->integer('GIFT_COST')->default(0);
             $table->integer('DAMAGE_QUANTITY');
+            $table->integer('DAMAGE_COST')->default(0);
             $table->temporary();
         });
 
 
         $select4= DB::table('TEMP_OPENING')
-            ->selectRaw( 'STOCK_ITEM_ID,STOCK_ITEM_NAME , sum(TRAN_QUANTITY) as TRAN_QUANTITY , sum(TRAN_AMOUNT) as TRAN_AMOUNT,0,0,0,0,0,0')
+            ->selectRaw( 'STOCK_ITEM_ID,STOCK_ITEM_NAME , sum(TRAN_QUANTITY) as TRAN_QUANTITY , sum(TRAN_AMOUNT) as TRAN_AMOUNT,0,0,0,0,0,0,0,0')
             ->groupBy('STOCK_ITEM_ID','STOCK_ITEM_NAME' );
 
 
         $select5 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,products.name,0,0,sum(sells.quantity*-1)as OUTWARD_QUANTITY,sum(sells.sub_total*-1)as AMOUNT,0,0,0,0')
+            ->selectRaw( 'products.id,products.name,0,0,sum(sells.quantity*-1)as OUTWARD_QUANTITY,sum(sells.sub_total*-1)as AMOUNT,0,0,0,0,0,0')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','products.name' );
 
 
         $select6 = Purchase::query()
             ->join('products', 'purchases.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,products.name,0,0,0,0,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as AMOUNT,0,0')
+            ->selectRaw( 'products.id,products.name,0,0,0,0,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as AMOUNT,0,0,0,0')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','products.name' );
 
@@ -643,7 +645,7 @@ class ReportingController extends Controller
 
         $select7 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,sum(gift_products.quantity*-1)as GIFT_QUANTITY,0')
+            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,sum(gift_products.quantity*-1)as GIFT_QUANTITY, sum(gift_products.unit_cost_price*-1) as GIFT_COST,0,0')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','products.name' );
 
@@ -651,19 +653,19 @@ class ReportingController extends Controller
 
         $select8 = DamageProduct::query()
             ->join('products', 'damage_products.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,0,sum(damage_products.quantity*-1)as GIFT_QUANTITY')
+            ->selectRaw( 'products.id,products.name,0,0,0,0,0,0,0,0,sum(damage_products.quantity*-1)as DAMAGE_QUANTITY, sum(damage_products.unit_cost_price*-1) as DAMAGE_COST')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','products.name' );
 
 
 
 
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select4);
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select5);
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select6);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','GIFT_COST','DAMAGE_QUANTITY','DAMAGE_COST'], $select4);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','GIFT_COST','DAMAGE_QUANTITY','DAMAGE_COST'], $select5);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','GIFT_COST','DAMAGE_QUANTITY','DAMAGE_COST'], $select6);
 
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select7);
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select8);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','GIFT_COST','DAMAGE_QUANTITY','DAMAGE_COST'], $select7);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','GIFT_COST','DAMAGE_QUANTITY','DAMAGE_COST'], $select8);
 
 
 ////////////////FINAL SELECTION//////////////////////////////
@@ -679,7 +681,10 @@ class ReportingController extends Controller
             sum(OUTWARD_QUANTITY) as OUTWARD_QUANTITY,
               sum(OUTWARD_AMOUNT) as  OUTWARD_AMOUNT,
               sum(GIFT_QUANTITY) as GIFT_QUANTITY,
-              sum(DAMAGE_QUANTITY) as DAMAGE_QUANTITY'
+               sum(GIFT_COST * GIFT_QUANTITY ) as GIFT_COST,
+              sum(DAMAGE_QUANTITY) as DAMAGE_QUANTITY,
+               sum(DAMAGE_COST*DAMAGE_QUANTITY) as DAMAGE_COST'
+
             )
             ->groupBy('STOCK_ITEM_ID','STOCK_ITEM_NAME' )
             ->get();
@@ -691,6 +696,8 @@ class ReportingController extends Controller
 
         return $dataProduct;
     }
+
+
 
 
 
