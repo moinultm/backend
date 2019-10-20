@@ -1,18 +1,34 @@
 <?php
 
 Route::group([
+    'prefix' => 'auth'
+], function () {
+    Route::post('login', 'Auth\AuthController@login')->name('login');
+    Route::post('register', 'Auth\AuthController@register');
+    Route::group([
+        'middleware' => 'auth:api'
+    ], function() {
+        Route::get('logout', 'Auth\AuthController@logout');
+        Route::get('user', 'Auth\AuthController@user');
+    });
+});
+
+
+
+Route::group([
     'middleware' => 'api',
 ], function ($router) {
 
-    //All Unprotected Roles
+    /*All Unprotected Roles
     Route::post('login', 'AuthController@login');
     Route::post('logout', 'AuthController@logout');
     Route::post('signup', 'AuthController@signup');
     Route::post('refresh', 'AuthController@refresh');
+
     Route::post('me', 'AuthController@me');
     Route::post('sendPasswordResetLink', 'ResetPasswordController@sendEmail');
     Route::post('resetPassword', 'ChangePasswordController@process');
-
+*/
     //security
     Route::resource('roles', 'RoleController');
     Route::resource('profiles', 'ProfileController');

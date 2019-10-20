@@ -2,15 +2,15 @@
 
 namespace App;
 
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
- use App\Traits\UserProfiles;
+use App\Traits\UserProfiles;
  
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
-    use Notifiable,UserProfiles;
+    use HasApiTokens,Notifiable,UserProfiles;
 
 
     protected $fillable = [
@@ -27,21 +27,12 @@ class User extends Authenticatable implements JWTSubject
     ];
 
 
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
 
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = bcrypt($value);
     }
+
 
     public function roles(): array
     {
