@@ -122,6 +122,9 @@ Route::group([
     Route::get('report/product-summary', 'ReportingController@productSummary');
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
+    Route::get('report/{user}/represent-stock-report', 'ReportingController@representStockReport');
+
+
     Route::get('report/product-sells-report', 'ReportingController@productSellReport');
 
     Route::get('report/stock-general-report', 'ReportingController@stockGeneralReport');
@@ -129,6 +132,7 @@ Route::group([
 
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
+
 
 
 });
