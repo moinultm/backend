@@ -1004,6 +1004,51 @@ class ReportingController extends Controller
     }
 
 
+    public  function representPaymentReport(Request $request)
+    {
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+
+
+//Need to make a another query for the date wise report this only returns the summary
+
+
+        $transactions=Transaction::selectRaw('users.id,users.name,sum(transactions.total)as total,sum(transactions.paid) as paid')
+            ->leftJoin('users', 'users.id', '=', 'transactions.user_id')
+            ->where('transactions.transaction_type','=','sell')
+            ->where('users.id','!=','null')
+            ->groupBy('users.name','users.id')
+            ->get();
+
+
+
+
+        if(!is_null($from)) {
+            $transactions->whereBetween('date',[$from,$to]);
+        }
+        else{
+
+            $transactions->whereBetween('date',[$nowDate, $nowDate]);
+
+        }
+
+/*
+
+*/
+
+
+        $AssociateArray = array(
+            'payment' =>  $transactions,
+
+        );
+
+
+
+        return response()->json($AssociateArray ,200);
+    }
+
 
 
 }

@@ -123,6 +123,7 @@ Route::group([
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
     Route::get('report/{user}/represent-stock-report', 'ReportingController@representStockReport');
+    Route::get('report/represent-payment-report', 'ReportingController@representPaymentReport');
 
 
     Route::get('report/product-sells-report', 'ReportingController@productSellReport');
@@ -132,7 +133,6 @@ Route::group([
 
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
-
 
 
 });
