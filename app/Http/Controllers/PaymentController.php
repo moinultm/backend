@@ -13,9 +13,12 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
+        $user_id = $request->get('user_id');
+
         if($request->get('invoice_payment') == 1){
             //direct invoice-wise payment starts
             $ref_no = $request->get('reference_no');
+
             $transaction = Transaction::where('reference_no', $ref_no)->first();
             $previously_paid = $transaction->paid;
             $transaction->paid = round(($previously_paid + $request->get('amount')), 2);
@@ -24,6 +27,7 @@ class PaymentController extends Controller
             //saving paid amount into payment table
             $payment = new Payment;
             $payment->client_id = $request->get('client_id');
+            $payment->user_id = $request->get('user_id');
             $payment->amount = round($request->get('amount'),2);
             $payment->method = $request->get('method');
             $payment->type = $request->get('type');
@@ -52,6 +56,7 @@ class PaymentController extends Controller
                         //payment
                         $payment = new Payment;
                         $payment->client_id = $client_id;
+                        $payment->user_id = $request->get('user_id');
                         $payment->amount = $due;
                         $payment->method = $request->get('method');
                         $payment->type = $request->get('type');
@@ -69,6 +74,7 @@ class PaymentController extends Controller
                         //payment
                         $payment = new Payment;
                         $payment->client_id = $client_id;
+
                         $payment->amount = $amount;
                         $payment->method = $request->get('method');
                         $payment->type = $request->get('type');
