@@ -430,6 +430,7 @@ class ReportingController extends Controller
         $to = Carbon::createFromFormat('Y-m-d',$to);
         $to = self::filterTo($to);
 
+
         $sells = ($warehouse_id == "all") ? Sell::query() : Sell::where('warehouse_id', $warehouse_id);
         $purchases = ($warehouse_id == "all") ? Purchase::query() : Purchase::where('warehouse_id', $warehouse_id);
 
@@ -744,15 +745,17 @@ class ReportingController extends Controller
 
         $warehouse_id = 'all';
         $warehouse_name = ($warehouse_id == 'all') ? 'All Branch' : Warehouse::where('id', $warehouse_id);
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to = self::filterTo($to);
+
 
         $query = Transaction::where('transaction_type', 'sell');
         $query->with(['sells','sells.product']);
         $transactions = ($warehouse_id == 'all') ? $query : $query->where('warehouse_id', $warehouse_id );
 
-        $from = $request->get('from');
-        $to = $request->get('to')?:date('Y-m-d');
-        $to = Carbon::createFromFormat('Y-m-d',$to);
-        $to = self::filterTo($to);
+
 
         if($request->get('from') || $request->get('to')) {
             if(!is_null($from)){
@@ -765,12 +768,21 @@ class ReportingController extends Controller
             }
         }
 
-        $transactions->with(['sells.product']);
 
+       // $transactions->with(['sells.product']);
+
+
+        if(is_null($from)) {
+            $AssociateArray = array(
+                'data' => ''
+            );
+            return response()->json($AssociateArray ,200);
+        }
 
         $AssociateArray = array(
             'data' => $transactions->get()
         );
+
         return response()->json($AssociateArray ,200);
 
 
@@ -1006,21 +1018,14 @@ class ReportingController extends Controller
     {
         $date=Carbon::now();
         $nowDate = date('Y-m-d', strtotime($date));
+
         $from = $request->get('from');
-        $to = $request->get('to')?:date('Y-m-d');
+        $to = $request->get('to');
 
 
 //Need to make a another query for the date wise report this only returns the summary
 
-/*
-        $transactions=Transaction::selectRaw('users.id,users.name,sum(transactions.total)as total,sum(transactions.paid) as paid')
-            ->leftJoin('users', 'users.id', '=', 'transactions.user_id')
-            ->where('transactions.transaction_type','=','sell')
-            ->where('users.id','!=','null')
-            ->groupBy('users.name','users.id')
-            ->get();
 
-*/
         if(!is_null($from)) {
         $temp = $this->REPRESENT_SUM_temp_check($from, $to);
         }
@@ -1028,14 +1033,16 @@ class ReportingController extends Controller
             $temp = $this->REPRESENT_SUM_temp_check($nowDate, $nowDate);
         }
 
+
+
+
         $AssociateArray = array(
-            'payment' =>  $temp,
+            'payment' =>   $temp,
         );
-
-
 
         return response()->json($AssociateArray ,200);
     }
+
 
     public function REPRESENT_SUM_temp_check($from,$to )
     {
@@ -1049,17 +1056,16 @@ class ReportingController extends Controller
             $table->temporary();
         });
 
-        $select1 =User::query()
+        $select1 =Sell::query()
             ->selectRaw('users.id,users.name,sum(sells.sub_total) as total,0')
-            ->leftJoin('sells', 'sells.user_id', '=', 'users.id')
-            ->whereDate('date','<=', $from)
-            ->whereDate('date','>=', $to)
+            ->leftJoin('users', 'users.id', '=', 'sells.user_id')
+            ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
             ->groupBy('users.name','users.id');
 
         $select2 =User::query()
             ->selectRaw('users.id,users.name,0,sum(payments.amount) as payment')
             ->leftJoin('payments', 'payments.user_id', '=', 'users.id')
-            ->whereBetween('date',[$from,$to])
+            ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
             ->groupBy('users.name','users.id');
 
          DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','PAY'], $select1);

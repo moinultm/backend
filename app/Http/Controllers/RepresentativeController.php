@@ -37,7 +37,7 @@ class RepresentativeController extends Controller
 
     public function getUser(): JsonResponse {
 
-        $query = User::query();
+        $query = User::query()->select('id','name','address');
         //$query->where('user_type', '2');
         $AssociateArray = array(
             'data' =>  $query->get()
