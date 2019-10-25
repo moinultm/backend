@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DamageProduct;
+use App\Expense;
 use App\GiftProduct;
 use App\Product;
 use App\Purchase;
@@ -1081,6 +1082,56 @@ class ReportingController extends Controller
         Schema::drop('TEMP_OPENING');
 
         return $dataProduct;
+    }
+
+
+    public function postProfitReport (Request $request){
+
+        $branch_id = 'all';
+        $branch_name = ($branch_id == 'all') ? 'All Branch' : Warehouse::where('id', $branch_id)->first()->name;
+
+        $query = Transaction::where('transaction_type', 'sell');
+        $transactions = ($branch_id == 'all') ? $query : $query->where('warehouse_id', $branch_id );
+
+        $from = Carbon::parse($request->get('from')?:date('Y-m-d'))->startOfDay();
+        $to = Carbon::parse($request->get('to')?:date('Y-m-d'))->endOfDay();
+
+        $transactions = $transactions->whereBetween('date',[$from,$to]);
+
+        $total_selling_price = $transactions->get()->sum('total');
+        $total_cost_price = $transactions->get()->sum('total_cost_price');
+        $gross_profit = $total_selling_price - $total_cost_price;
+
+        $expenses = Expense::whereBetween('created_at',[$from,$to])->get();
+        $cloneExpense = clone $expenses;
+        $total_expense = $cloneExpense->sum('amount');
+
+        $net_profit = $gross_profit - $total_expense;
+
+        $total_tax = $transactions->get()->sum('total_tax');
+
+        $net_profit_after_tax = $net_profit - $total_tax;
+
+
+
+
+            $AssociateArray = array(
+                'total_selling_price' =>  $total_selling_price,
+                'total_cost_price'=>$total_cost_price,
+                'gross_profit'=>$gross_profit,
+                'total_expense'=>$total_expense,
+                'expenses'=>$expenses,
+                'net_profit'=>$net_profit,
+                'total_tax'=>$total_tax,
+                'net_profit_after_tax'=>$net_profit_after_tax,
+
+            );
+
+
+
+        return response()->json($AssociateArray ,200);
+
+
     }
 
 

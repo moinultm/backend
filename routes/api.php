@@ -133,6 +133,7 @@ Route::group([
 
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
+    Route::get('report/profit-loss-report', 'ReportingController@postProfitReport');
 
 
 });
