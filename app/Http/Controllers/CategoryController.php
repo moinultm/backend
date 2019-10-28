@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Rules\CategoryExists;
 use App\Subcategory;
 use Illuminate\Http\Request;
-use App\category;
+use App\Category;
 use App\Traits\Paginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;

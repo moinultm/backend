@@ -26,6 +26,7 @@ class UsersController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+
         $rules = [
             'email' => [
                 'required',
