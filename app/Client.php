@@ -12,7 +12,7 @@ class Client extends Model
 
     protected $fillable = ['id'];
 
-    protected $appends = array('net_total','total_return');
+    protected $appends = array('net_total','total_return','total_dues');
 
 
     public function purchases(){
@@ -42,13 +42,14 @@ class Client extends Model
         return $net_total;
     }
 
-/*
+
     public function getTotalDuesAttribute()
     {
-        $total_return = $this->payments->where('type', 'return')->sum('amount');
-        $total_received =$this->payments->where('type', '!=','return')->sum('amount') - $total_return;
-      return  $total_due = $this->transactions->sum('net_total') - ($total_received);
-    }*/
+
+        $total_return =  $this->payments()->where('type', 'return')->sum('amount');
+        $total_received =$this->payments()->where('type', '!=','return')->sum('amount') - $total_return;
+      return  $total_due = $this->transactions()->sum('net_total') - ($total_received);
+    }
     public function getTotalReturnAttribute()
     {
           $total_return = $this->payments()->where('type', 'return')->sum('amount');

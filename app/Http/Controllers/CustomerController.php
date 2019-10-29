@@ -20,9 +20,21 @@ class CustomerController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $query = Client::where('client_type', 'customer');
+        $rules = [ 'phone' => 'numeric|min:3'];
+        if($request->get('phone')) {
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+            }
+        }
 
-        return response()->json(self::paginate($query, $request), 200);
+        $client = Client::where('client_type', 'customer');
+
+        if($request->get('phone')) {
+            $client->where('contact', 'LIKE', '%' . $request->get('phone') . '%');
+        }
+
+        return response()->json(self::paginate($client, $request), 200);
     }
 
     public  function details(Client $client): JsonResponse
@@ -33,7 +45,7 @@ class CustomerController extends Controller
           $total_received = $client->payments->where('type', '!=','return')->sum('amount') - $total_return;
           $total_due = $client->transactions->sum('net_total') - ($total_received);
           $payment_lists = $client->payments()->orderBy('date','desc')->take(10)->get();
-           $total_invoice = $client->transactions()->where('transaction_type', '!=','opening')->count();
+         $total_invoice = $client->transactions()->where('transaction_type', '!=','opening')->count();
 
 
         $query = compact( 'total_due', 'total_received', 'total_return', 'net_total', 'payment_lists','total_invoice','client');

@@ -1,6 +1,9 @@
 <?php
 
+//
 
+//php artisan passport:client --personal
+//php artisan passport:client --password
 
 Route::group([
     'middleware' => 'auth:api',

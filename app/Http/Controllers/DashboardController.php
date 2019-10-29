@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Expense;
 use App\Payment;
 use App\Product;
 use App\Purchase;
@@ -152,8 +153,11 @@ class DashboardController extends Controller
             $last_six_months_profit[] = $lastSixMonthsSellTransactions->sum('total') - $lastSixMonthsSellTransactions->sum('total_cost_price');
         }
 
-        $today= Carbon::now()->format('d-m-Y');
-//dd($today);
+        //this populates date as per day by database datetime
+
+        $from = Carbon::parse(date('Y-m-d'))->startOfDay();
+        $to = Carbon::parse(date('Y-m-d'))->endOfDay();
+
 
         $todaySellList= Transaction::where('transaction_type', 'sell')
             ->whereDate('date','>', Carbon::now()->subDays(30))
@@ -162,6 +166,10 @@ class DashboardController extends Controller
         $todayPurchaseList= Transaction::where('transaction_type', 'purchase')
             ->whereDate('date', '>', Carbon::now()->subDays(30))
             ->orderBy('date', 'desc')->get();
+
+        $expenses = Expense::whereBetween('created_at',[$from,$to])->get();
+        $cloneExpense = clone $expenses;
+        $todayExpenses = $cloneExpense->sum('amount');
 
         $AssociateArray = array(
             'todays_stats'=>$todays_stats,
@@ -178,8 +186,7 @@ class DashboardController extends Controller
             'lastSevenDayPurchases'=>$lastSevenDayPurchases,
             'lastSevenDayTransactions'=>$lastSevenDayTransactions,
             'daynames'=>$daynames,
-
-
+            'today_expenses'=>$todayExpenses
         );
 
         return response()->json( $AssociateArray, 200);
