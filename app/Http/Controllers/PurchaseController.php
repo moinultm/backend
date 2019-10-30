@@ -29,8 +29,9 @@ class PurchaseController extends Controller
 
         $transactions = Transaction::where('transaction_type', 'purchase')->orderBy('date', 'desc');
 
-        if($request->get('bill_no')) {
-            $transactions->where('reference_no', 'LIKE', '%' . $request->get('bill_no') . '%');
+
+        if($request->get('invoice')) {
+            $transactions->where('reference_no', 'LIKE', '%' . $request->get('invoice') . '%');
         }
 
         if($request->get('supplier')) {

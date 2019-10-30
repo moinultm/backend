@@ -511,13 +511,22 @@ class ReportingController extends Controller
         $to = $request->get('to')?:date('Y-m-d');
 
 
+        try {
 
-        if(!is_null($from)) {
-            $temp = $this->summary_temp_check($from, $to);
+            if(!is_null($from)) {
+                $temp = $this->summary_temp_check($from, $to);
+            }
+            else{
+                $temp = $this->summary_temp_check($nowDate, $nowDate);
+            }
+
+        } catch (\Exception $e) {
+
+            return $e->getMessage();
         }
-        else{
-            $temp = $this->summary_temp_check($nowDate, $nowDate);
-        }
+
+
+
 
 
         $characteristics= Sell::query()

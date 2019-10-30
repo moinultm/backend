@@ -32,10 +32,6 @@ use paginator;
     {
 
 
-        $customers =  Client::orderBy('full_name', 'asc')
-            ->where('client_type', "!=" ,'purchaser')
-            ->pluck('full_name', 'id');
-
         $transactions = Transaction::where('transaction_type', 'sell')->orderBy('date', 'desc') ;
 
         if($request->get('invoice')) {
