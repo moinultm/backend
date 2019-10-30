@@ -548,10 +548,8 @@ class ReportingController extends Controller
         );
 
 
-
         return response()->json($AssociateArray ,200);
     }
-
 
     public function summary_temp_check($from,$to )
     {
