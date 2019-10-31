@@ -359,12 +359,12 @@ class ReportingController extends Controller
         Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
             $table->increments('id');
             $table->string('STOCK_ITEM_NAME');
-            $table->integer('TRAN_QUANTITY');
-            $table->integer('TRAN_AMOUNT');
-            $table->integer('OUTWARD_QUANTITY');
-            $table->integer('OUTWARD_AMOUNT');
-            $table->integer('INWARD_QUANTITY');
-            $table->integer('INWARD_AMOUNT');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
+            $table->integer('OUTWARD_QUANTITY')->default(0);
+            $table->integer('OUTWARD_AMOUNT')->default(0);
+            $table->integer('INWARD_QUANTITY')->default(0);
+            $table->integer('INWARD_AMOUNT')->default(0);
             $table->temporary();
         });
 
@@ -570,8 +570,8 @@ class ReportingController extends Controller
             $table->increments('id');
             $table->integer('STOCK_ITEM_ID');
             $table->string('STOCK_ITEM_NAME');
-            $table->integer('TRAN_QUANTITY');
-            $table->integer('TRAN_AMOUNT');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
             $table->temporary();
         });
 
@@ -619,15 +619,15 @@ class ReportingController extends Controller
             $table->increments('id');
             $table->integer('STOCK_ITEM_ID');
             $table->string('STOCK_ITEM_NAME');
-            $table->integer('TRAN_QUANTITY');
-            $table->integer('TRAN_AMOUNT');
-            $table->integer('OUTWARD_QUANTITY');
-            $table->integer('OUTWARD_AMOUNT');
-            $table->integer('INWARD_QUANTITY');
-            $table->integer('INWARD_AMOUNT');
-            $table->integer('GIFT_QUANTITY');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
+            $table->integer('OUTWARD_QUANTITY')->default(0);
+            $table->integer('OUTWARD_AMOUNT')->default(0);
+            $table->integer('INWARD_QUANTITY')->default(0);
+            $table->integer('INWARD_AMOUNT')->default(0);
+            $table->integer('GIFT_QUANTITY')->default(0);
             $table->integer('GIFT_COST')->default(0);
-            $table->integer('DAMAGE_QUANTITY');
+            $table->integer('DAMAGE_QUANTITY')->default(0);
             $table->integer('DAMAGE_COST')->default(0);
             $table->temporary();
         });
@@ -869,8 +869,8 @@ class ReportingController extends Controller
             $table->increments('id');
             $table->integer('STOCK_ITEM_ID');
             $table->string('STOCK_ITEM_NAME');
-            $table->integer('TRAN_QUANTITY');
-            $table->integer('TRAN_AMOUNT');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
             $table->temporary();
         });
 
@@ -880,7 +880,7 @@ class ReportingController extends Controller
         $select1 = Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id, products.name  , sum(representatives_stock.quantity)as Quantity,0')
-             ->whereDate('date','<=',$from)
+             ->where('date','<',$from)
             ->where('representatives_stock.quantity','>',0)
             ->where('representatives_stock.user_id','=',$id)
             ->groupBy('products.id','products.name' );
@@ -889,7 +889,7 @@ class ReportingController extends Controller
         $select2 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw( 'products.id ,products.name  , sum(sells.quantity*-1)as Quantity,sum(sells.sub_total*-1)as Amount')
-             ->whereDate('date','<=',$from)
+             ->where('date','<',$from)
             ->where('sells.user_id','=',$id)
             ->groupBy('products.id','products.name' );
 
@@ -897,7 +897,7 @@ class ReportingController extends Controller
         $select3 = DamageProduct::query()
             ->join('products', 'damage_products.product_id', '=', 'products.id')
             ->selectRaw( 'products.id, products.name  , sum(damage_products.quantity*-1)as Quantity,sum(damage_products.unit_cost_price)as Amount')
-             ->whereDate('date','<=',$from)
+             ->where('date','<',$from)
             ->where('damage_products.user_id','=',$id)
             ->groupBy('products.id','products.name' );
 
@@ -905,7 +905,7 @@ class ReportingController extends Controller
         $select4 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
             ->selectRaw( 'products.id, products.name  , sum(gift_products.quantity*-1)as Quantity,sum(gift_products.unit_cost_price)as Amount')
-             ->whereDate('date','<=',$from)
+             ->whereDate('date','<',$from)
             ->where('gift_products.user_id','=',$id)
             ->groupBy('products.id','products.name' );
 
@@ -923,15 +923,15 @@ class ReportingController extends Controller
             $table->increments('id');
             $table->integer('STOCK_ITEM_ID');
             $table->string('STOCK_ITEM_NAME');
-            $table->integer('TRAN_QUANTITY');
-            $table->integer('TRAN_AMOUNT');
-            $table->integer('OUTWARD_QUANTITY');
-            $table->integer('OUTWARD_AMOUNT');
-            $table->integer('INWARD_QUANTITY');
-            $table->integer('INWARD_AMOUNT');
-            $table->integer('GIFT_QUANTITY');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
+            $table->integer('OUTWARD_QUANTITY')->default(0);
+            $table->integer('OUTWARD_AMOUNT')->default(0);
+            $table->integer('INWARD_QUANTITY')->default(0);
+            $table->integer('INWARD_AMOUNT')->default(0);
+            $table->integer('GIFT_QUANTITY')->default(0);
             $table->integer('GIFT_COST')->default(0);
-            $table->integer('DAMAGE_QUANTITY');
+            $table->integer('DAMAGE_QUANTITY')->default(0);
             $table->integer('DAMAGE_COST')->default(0);
             $table->temporary();
         });
@@ -960,7 +960,7 @@ class ReportingController extends Controller
         $select6 = Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id, products.name,0,0,0,0,sum(representatives_stock.quantity)  as INWARD_QUANTITY,0,0,0,0,0')
-             ->whereDate('date','<=',$from)
+            ->whereBetween('date',[$from,$to])
             ->where('representatives_stock.quantity','>',0)
             ->where('representatives_stock.user_id','=',$id)
             ->groupBy('products.id','products.name' );

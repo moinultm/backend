@@ -41,7 +41,7 @@ class AuthController extends Controller
             ]);
         }
 
-*/
+
 
     public function register(Request $request)
         {
@@ -62,7 +62,7 @@ class AuthController extends Controller
                 'message' => 'Successfully created user!'
             ], 201);
         }
-
+*/
 
     public function logout(Request $request)
     {

@@ -22,15 +22,7 @@ use League\OAuth2\Server\CryptKey;
 class AccessToken extends PassportAccessToken
 {
 
-    /**
-     * Convert the access token to a JWT based 64 object
-     *
-     * @param CryptKey $privateKey The private key to encrypt/decrypt the access token
-     *
-     * @return Token The JWT access token
-     *
-     * @author EL OUFIR Hatim <eloufirhatim@gmail.com>
-     */
+
 
 
     public function convertToJWT(CryptKey $privateKey): Token

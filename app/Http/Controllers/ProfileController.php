@@ -90,9 +90,11 @@ class ProfileController extends Controller
         $profile->code = $request->get('code');
         $profile->designation = $request->get('designation');
         $profile->save();
-        DB::table('user_profiles')
+
+        DB::table('profile_roles')
             ->where('refProfile', $id)
             ->delete();
+
         if ($request->has('roles')) {
             foreach ($request->get('roles') as $role) {
                 DB::table( 'profile_roles')
