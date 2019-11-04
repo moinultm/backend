@@ -15,17 +15,13 @@ class CreateAttendancesTable extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreign('employee_id')
-                ->references('id')->on('users')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+            $table->unsignedInteger('employee_id');
             $table->date('date');
-            $table->enum('status',array('absent','present','leave'));
             $table->time('clock_in')->nullable();
             $table->time('clock_out')->nullable();
-            $table->string('working_from',255)->default('Office')->nullable();
             $table->text('location')->nullable();
             $table->text('notes')->nullable();
+            $table->enum('status', ['present', 'leave', 'absent']);
             $table->timestamps();
         });
     }

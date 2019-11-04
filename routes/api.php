@@ -107,6 +107,9 @@ Route::group([
     //Dashboard
     Route::get('dashboard', 'DashboardController@index');
 
+    //Attendance
+    Route::resource('attendance', 'AttendanceController@index');
+
 
     //Reporting
     Route::get('report/product-summary', 'ReportingController@productSummary');
