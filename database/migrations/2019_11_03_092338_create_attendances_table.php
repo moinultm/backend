@@ -19,9 +19,9 @@ class CreateAttendancesTable extends Migration
             $table->date('date');
             $table->time('clock_in')->nullable();
             $table->time('clock_out')->nullable();
-            $table->text('location')->nullable();
+            $table->string('location')->default('Office');
             $table->text('notes')->nullable();
-            $table->enum('status', ['present', 'leave', 'absent']);
+            $table->enum('status', ['present', 'leave', 'absent'])->nullable();
             $table->timestamps();
         });
     }
