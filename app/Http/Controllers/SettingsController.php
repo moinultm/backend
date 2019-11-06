@@ -12,7 +12,7 @@ class SettingsController extends Controller
 {
     use Paginator;
 
-    public function index(Request $request )
+    public function getIndex()
     {
         $setting = Setting::whereId(1)->first();
         $taxes = Tax::all();

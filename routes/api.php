@@ -6,6 +6,13 @@
 //php artisan passport:client --password
 
 Route::group([
+    'middleware' => 'api',
+], function ($router) {
+    Route::get('settings', 'settingsController@getIndex');
+});
+
+
+Route::group([
     'middleware' => 'auth:api',
 ], function ($router) {
 
@@ -87,7 +94,7 @@ Route::group([
     Route::resource('vat', 'TaxController');
 
 //settings
-    Route::resource('settings', 'SettingsController');
+    //Route::resource('settings', 'SettingsController');
     Route::post('settings/{settings}', 'SettingsController@update');
 
 
