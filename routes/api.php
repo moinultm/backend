@@ -9,6 +9,8 @@ Route::group([
     'middleware' => 'api',
 ], function ($router) {
     Route::get('settings', 'settingsController@getIndex');
+
+
 });
 
 
@@ -26,6 +28,11 @@ Route::group([
     Route::post('sendPasswordResetLink', 'ResetPasswordController@sendEmail');
     Route::post('resetPassword', 'ChangePasswordController@process');
 */
+    // ATTENDANCE
+    Route::get('attendance/{attendance}/get', 'AttendanceController@isAttendance');
+    Route::get('attendance/{attendance}/in', 'AttendanceController@postClockIn');
+    Route::get('attendance/{attendance}/out', 'AttendanceController@postClockOut');
+
     //security
     Route::resource('roles', 'RoleController');
     Route::resource('profiles', 'ProfileController');

@@ -60,18 +60,82 @@ class AttendanceController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
 
-
-    public function clockIn()
+    public function isAttendance(Request $request)
     {
-        return response()->json( '', 200);
+
+        $getNow = now()->format("Y-m-d");
+        $user=$request->route('attendance');
+
+        $attend = Attendance::query()
+            ->where('employee_id',$user )
+            ->where('date',$getNow )
+            ->first();
+
+        if ($attend !== null) {
+            return response()->json( true, 200);
+        }
+
+        return response()->json( false, 200);
     }
 
-    public function clockOut()
+
+   private function checkAttendance($id,$date){
+       $attend = Attendance::query()
+           ->where('employee_id',$id )
+           ->where('date',$date )
+           ->first();
+       if ($attend !== null) {
+           return true;
+       }
+       return false;
+   }
+
+    public function postClockIn(Request $request)
     {
-        return response()->json( '', 200);
+        $getNow = now()->format("Y-m-d");
+        $getTime = now()->format("H:i:s");
+
+        $user=$request->route('attendance');
+
+      if (self::checkAttendance($user,$getNow))  {
+
+
+          return response()->json( [ 'error' => 'Already Checked in for today'], 403);
+      }
+        $attendance = new Attendance();
+        $attendance->employee_id = $request->get('employee_id');
+        $attendance->date = $getNow;
+        $attendance->clock_in = $getTime;
+        $attendance->clock_out = 0;
+        $attendance->save();
+
+        return response()->json( Attendance::where('employee_id', $attendance->employee_id)->where('date', $getNow)->first(), 200);
+    }
+
+    public function postClockOut(Request $request)
+    {
+        $getNow = now()->format("Y-m-d");
+        $getTime = now()->format("H:i:s");
+
+        $user=$request->route('attendance');
+
+        if (!self::checkAttendance($user,$getNow))  {
+            return response()->json( 'Not Exist Check in First', 403);
+        }
+
+        $attendance = Attendance:: where('employee_id', $user)->where('date', $getNow)
+            ->first();
+
+        $attendance->clock_out = $getTime;
+        $attendance->location = 'User Phone';
+        $attendance->save();
+
+
+        return response()->json( Attendance::where('employee_id', $attendance->employee_id)->where('date', $getNow)->first(), 200);
     }
     /**
      * Store a newly created resource in storage.
