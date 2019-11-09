@@ -6,6 +6,7 @@ use App\Attendance;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 use App\Traits\Helpers;
@@ -67,8 +68,18 @@ class AttendanceController extends Controller
     public function isAttendance(Request $request)
     {
 
+
+        $rules = [ 'id' => [ 'required', 'numeric' ] ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
         $getNow = now()->format("Y-m-d");
-        $user=$request->route('attendance');
+       // $user=$request->route('attendance');
+        $user=$request->get('id');
+
 
         $attend = Attendance::query()
             ->where('employee_id',$user )
@@ -96,18 +107,26 @@ class AttendanceController extends Controller
 
     public function postClockIn(Request $request)
     {
+
+
+        $rules = [ 'id' => [ 'required', 'numeric' ] ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
         $getNow = now()->format("Y-m-d");
         $getTime = now()->format("H:i:s");
 
-        $user=$request->route('attendance');
+        $user = $request->get('id');
 
       if (self::checkAttendance($user,$getNow))  {
-
 
           return response()->json( [ 'error' => 'Already Checked in for today'], 403);
       }
         $attendance = new Attendance();
-        $attendance->employee_id = $request->get('employee_id');
+        $attendance->employee_id = $user;
         $attendance->date = $getNow;
         $attendance->clock_in = $getTime;
         $attendance->clock_out = 0;
@@ -118,13 +137,22 @@ class AttendanceController extends Controller
 
     public function postClockOut(Request $request)
     {
+        $rules = [ 'id' => [ 'required', 'numeric' ] ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+
         $getNow = now()->format("Y-m-d");
         $getTime = now()->format("H:i:s");
 
-        $user=$request->route('attendance');
+        $user = $request->get('id');
+
 
         if (!self::checkAttendance($user,$getNow))  {
-            return response()->json( 'Not Exist Check in First', 403);
+            return response()->json( [ 'error' => 'Not Exist Check-in First'], 403);
         }
 
         $attendance = Attendance:: where('employee_id', $user)->where('date', $getNow)
@@ -145,13 +173,18 @@ class AttendanceController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $rules = [
-            'employee_id' => ['required']
-        ];
+        $getNow = now()->format("Y-m-d");
+
+        $rules = [ 'employee_id' => [ 'required', 'numeric' ] ];
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+
+        if (self::checkAttendance($request->get('employee_id'),$getNow))  {
+            return response()->json( [ 'error' => 'Data Exist cannot Duplicate'], 403);
         }
 
         $attendance = new Attendance();
@@ -201,7 +234,26 @@ class AttendanceController extends Controller
      */
     public function update(Request $request, Attendance $attendance)
     {
-        return response()->json( '', 200);
+        $rules = [
+            'id' => 'required|numeric',
+            'clock_in' => 'required',
+            'clock_out' => 'required',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
+        }
+
+        $tax =Attendance::find($request->get('id'));
+        $tax->clock_in = $request->get('clock_in');
+        $tax->clock_out = $request->get('clock_out');
+        $tax->location = $request->get('location');
+        $tax->notes = $request->get('notes');
+        $tax->status = $request->get('status');
+        $tax->save();
+
+        return response()->json('Updated Success fully', 200);
     }
 
     /**
@@ -210,8 +262,14 @@ class AttendanceController extends Controller
      * @param  \App\Attendance  $attendance
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Attendance $attendance)
+    public function destroy(Request $request,$id)
     {
-        return response()->json( '', 200);
+
+
+        DB::table('attendances')
+            ->where('id', $id)
+            ->delete();
+
+        return response()->json(Attendance::where('id', $id)->delete(), 200);
     }
 }

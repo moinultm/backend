@@ -14,27 +14,14 @@ class SettingsController extends Controller
 
     public function getIndex()
     {
-        $setting = Setting::whereId(1)->first();
-        $taxes = Tax::all();
 
-        if($setting) {
-            $tax_rate = $setting->invoice_tax_rate;
-        }else{
-            $tax_rate = 0;
-        }
+        $setting = Setting::whereId(1)->first();
 
         if(!$setting){
             $setting = new Setting;
         }
 
-        $data=   compact('setting','taxes','tax_rate');
-
-        $AssociateArray = array(
-            'data' =>  $setting
-        );
-
         return response()->json($setting ,200);
-
 
     }
 

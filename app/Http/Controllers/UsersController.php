@@ -27,6 +27,8 @@ class UsersController extends Controller
     public function store(Request $request): JsonResponse
     {
 
+
+
         $rules = [
             'email' => [
                 'required',
@@ -54,6 +56,12 @@ class UsersController extends Controller
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
         }
+
+
+        if( $request->get('user_type')==1){
+            return response()->json('Error', 403);
+        }
+
         $user = new User();
         $user->email = $request->get('email');
         $user->name = $request->get('name');

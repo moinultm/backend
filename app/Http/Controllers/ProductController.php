@@ -183,6 +183,15 @@ class ProductController extends Controller
 
 
 
+    public function updatePrice(Request $request){
+        $id = $request->get('id');
+        $product = Product::find($id);
+        $product->cost_price = $request->get('cost_price');
+        $product->mrp = $request->get('mrp');
+        $product->save();
+
+         return response()->json( [ 'error' => 'updated'], 200);
+    }
 
 
 }

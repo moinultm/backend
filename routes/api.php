@@ -1,14 +1,15 @@
 <?php
 
-//
-
+//php artisan passport:keys
 //php artisan passport:client --personal
 //php artisan passport:client --password
+
 
 Route::group([
     'middleware' => 'api',
 ], function ($router) {
-    Route::get('settings', 'settingsController@getIndex');
+    Route::get('settings', 'SettingsController@getIndex');
+
 
 
 });
@@ -29,9 +30,17 @@ Route::group([
     Route::post('resetPassword', 'ChangePasswordController@process');
 */
     // ATTENDANCE
-    Route::get('attendance/{attendance}/get', 'AttendanceController@isAttendance');
-    Route::get('attendance/{attendance}/in', 'AttendanceController@postClockIn');
-    Route::get('attendance/{attendance}/out', 'AttendanceController@postClockOut');
+
+
+
+    Route::get('attendance/get', 'AttendanceController@isAttendance');
+    Route::get('attendance/in', 'AttendanceController@postClockIn');
+    Route::get('attendance/out', 'AttendanceController@postClockOut');
+
+    Route::post('attendance/{attendance}', 'AttendanceController@update');
+
+
+    Route::resource('attendance', 'AttendanceController');
 
     //security
     Route::resource('roles', 'RoleController');
@@ -67,6 +76,10 @@ Route::group([
     Route::get('parent', 'SubcategoryController@parentReq');
     Route::get('product/{product}/details', 'ProductController@productDetails');
     Route::post('product/{product}', 'ProductController@update');
+
+
+    Route::get('product/{product}/update-price', 'ProductController@updatePrice');
+
 
     //sell
     Route::resource('sell', 'SellController');
@@ -121,8 +134,7 @@ Route::group([
     //Dashboard
     Route::get('dashboard', 'DashboardController@index');
 
-    //Attendance
-    Route::resource('attendance', 'AttendanceController');
+
 
 
     //Reporting

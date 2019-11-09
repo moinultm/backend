@@ -12,18 +12,22 @@ class ProfileRolesSeeder extends Seeder
      */
     public function run()
     {
-        $roleRoles = DB::table('roles')
-        ->where('code', 'ROLE_ROLES')
+        $roleAdmin= DB::table('roles')
+        ->where('code', 'ROLE_ADMIN_PRIVILEGE')
         ->first()
         ->id;
-    $roleProfiles = DB::table('roles')
-        ->where('code', 'ROLE_PROFILES')
+    $roleOwner = DB::table('roles')
+        ->where('code', 'ROLE_OWNER_PRIVILEGE')
         ->first()
         ->id;
-    $roleUsers = DB::table('roles')
-        ->where('code', 'ROLE_USERS')
-        ->first()
-        ->id;
+
+        $roleManager = DB::table('roles')
+            ->where('code', 'ROLE_MANAGER_PRIVILEGE')
+            ->first()
+            ->id;
+
+
+
     $profile = DB::table('profiles')
         ->where('code', 'PROFILE_ADMIN')
         ->first()
@@ -31,13 +35,13 @@ class ProfileRolesSeeder extends Seeder
     DB::table('profile_roles')
         ->insert([
             [
-                'refRole' => $roleRoles,
+                'refRole' => $roleAdmin,
                 'refProfile' => $profile
             ], [
-                'refRole' => $roleProfiles,
+                'refRole' => $roleOwner,
                 'refProfile' => $profile
             ], [
-                'refRole' => $roleUsers,
+                'refRole' => $roleManager,
                 'refProfile' => $profile
             ]
         ]);
