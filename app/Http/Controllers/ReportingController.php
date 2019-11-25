@@ -579,12 +579,12 @@ class ReportingController extends Controller
         $select2 = Sell::query()
             ->selectRaw( 'product_id AS STOCK_ITEM_ID ,sum(quantity*-1)as TRAN_QUANTITY,sum(sub_total*-1)as TRAN_AMOUNT')
              ->where('date','<=',$from)
-            ->groupBy('product_id'  );
+            ->groupBy('STOCK_ITEM_ID');
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
 
 
         $select3 = Purchase::query()
-            ->selectRaw( 'product_id, p sum(quantity)as TRAN_QUANTITY,sum(sub_total)as TRAN_AMOUNT')
+            ->selectRaw( 'product_id, sum(quantity)as TRAN_QUANTITY,sum(sub_total)as TRAN_AMOUNT')
              ->where('date','<=',$from)
             ->groupBy('product_id' );
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
@@ -593,7 +593,7 @@ class ReportingController extends Controller
         $select4 = DamageProduct::query()
              ->selectRaw( 'product_id AS STOCK_ITEM_ID, sum(quantity*-1) as TRAN_QUANTITY,sum(unit_cost_price)as TRAN_AMOUNT')
              ->where('date','<=',$from)
-            ->groupBy('product_id'  );
+            ->groupBy('STOCK_ITEM_ID'  );
 
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
 
@@ -601,7 +601,7 @@ class ReportingController extends Controller
         $select5 = GiftProduct::query()
              ->selectRaw( 'product_id AS STOCK_ITEM_ID , sum(quantity*-1)as TRAN_QUANTITY,sum(unit_cost_price)as TRAN_AMOUNT')
              ->where('date','<=',$from)
-            ->groupBy('products.id');
+            ->groupBy('STOCK_ITEM_ID');
 
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select5);
 
@@ -637,28 +637,28 @@ class ReportingController extends Controller
 
         $select5 = Sell::query()
              ->selectRaw( 'product_id AS STOCK_ITEM_ID,COALESCE(sum(sells.quantity*-1),0)as OUTWARD_QUANTITY,COALESCE(sum(sells.sub_total*-1),0)as OUTWARD_AMOUNT ')
-            ->whereBetween('DATE(date)',[$from,$to])
+            ->whereBetween(DB::raw('DATE(date)'),[$from,$to])
             ->groupBy('product_id' );
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select5);
 
 
         $select6 = Purchase::query()
              ->selectRaw( 'product_id,COALESCE(sum(purchases.quantity),0)as INWARD_QUANTITY,COALESCE(sum(purchases.sub_total),0)as INWARD_AMOUNT')
-            ->whereBetween('DATE(date)',[$from,$to])
+            ->whereBetween(DB::raw('DATE(date)'),[$from,$to])
             ->groupBy('product_id' );
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','INWARD_QUANTITY','INWARD_AMOUNT'], $select6);
 
 
         $select7 = GiftProduct::query()
              ->selectRaw( 'product_id,COALESCE(sum(gift_products.quantity*-1),0) as GIFT_QUANTITY, COALESCE(sum(gift_products.unit_cost_price*-1),0) as GIFT_COST')
-            ->whereBetween('date',[$from,$to])
+            ->whereBetween(DB::raw('DATE(date)'),[$from,$to])
             ->groupBy('product_id' );
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','GIFT_QUANTITY','GIFT_COST'], $select7);
 
 
         $select8 = DamageProduct::query()
-             ->selectRaw( 'products.id,COALESCE(sum(damage_products.quantity*-1),0)as DAMAGE_QUANTITY, COALESCE(sum(damage_products.unit_cost_price*-1),0) as DAMAGE_COST')
-            ->whereBetween('date',[$from,$to])
+             ->selectRaw( 'product_id,COALESCE(sum(damage_products.quantity*-1),0)as DAMAGE_QUANTITY, COALESCE(sum(damage_products.unit_cost_price*-1),0) as DAMAGE_COST')
+            ->whereBetween(DB::raw('DATE(date)'),[$from,$to])
             ->groupBy('product_id' );
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','DAMAGE_QUANTITY','DAMAGE_COST'], $select8);
 
@@ -681,7 +681,7 @@ class ReportingController extends Controller
             COALESCE( sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST')
             ->groupBy('STOCK_ITEM_ID', 'STOCK_ITEM_NAME', 'ITEM_MRP')
             ->get();
-
+/*
         $dataProduct = DB::table('TEMP_TRANSACTION')
             ->selectRaw('STOCK_ITEM_NAME , 
             STOCK_ITEM_ID,
@@ -692,14 +692,14 @@ class ReportingController extends Controller
             COALESCE(sum(OUTWARD_QUANTITY),0) as OUTWARD_QUANTITY,
               COALESCE(sum(OUTWARD_AMOUNT),0) as  OUTWARD_AMOUNT,
               COALESCE(sum(GIFT_QUANTITY),0) as GIFT_QUANTITY,
-               COALESCE(sum(GIFT_COST * GIFT_QUANTITY ),0) as GIFT_COST,
+              COALESCE(sum(GIFT_COST * GIFT_QUANTITY ),0) as GIFT_COST,
               COALESCE(sum(DAMAGE_QUANTITY),0) as DAMAGE_QUANTITY,
-               COALESCE(sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST'
+              COALESCE(sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST'
 
             )
             ->groupBy('STOCK_ITEM_ID','STOCK_ITEM_NAME' )
             ->get();
-
+*/
 
         Schema::drop('TEMP_OPENING');
         Schema::drop('TEMP_TRANSACTION');
