@@ -138,7 +138,7 @@ Route::group([
 
 
     //Reporting
-    Route::get('report/product-summary', 'ReportingController@productSummary');
+    Route::get('report/product-report', 'ReportingController@productReport');
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
     Route::get('report/{user}/represent-stock-report', 'ReportingController@representStockReport');

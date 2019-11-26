@@ -154,17 +154,14 @@ use paginator;
         $row = Representative::where('quantity' , '<','0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
         $ref_no_rep_sell = $ym.'/RP-'.self::ref($row);
 
-
-
-
             if ($order_no=="0") {
                 $row = Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() + 1 : 1;
                 $order_no_new = $ym.'/SO-'.self::ref($row);
-
             }
             else {
                 $order_no_new=$order_no;
             }
+
        // dd($order_no_new);
 
 
