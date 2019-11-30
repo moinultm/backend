@@ -887,6 +887,228 @@ class ReportingController extends Controller
 
 
 
+//*******************************STOCK REPORT- USER BASED**********************************
+    public  function stockReport(Request $request){
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+
+
+        //this for returning blank
+
+
+
+
+        if(!is_null($from)) {
+            $temp = $this->stock_report_temp_check($from, $to);
+        }
+        else{
+            $temp = $this->stock_report_temp_check($nowDate, $nowDate);
+        }
+
+
+        $characteristics= User::query()->select('id','name');
+        /*$characteristics= Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw('sum(sells.quantity) as quantity,
+                            sells.product_discount_percentage,
+                            sum(sells.product_discount_amount)as product_discount_amount')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('sells.product_discount_percentage');*/
+
+
+        $crossData= Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw('products.id,products.name,products.mrp,sum(sells.quantity) as quantity,
+                            sells.product_discount_percentage,
+                            sum(sells.product_discount_amount)as product_discount_amount,
+                            sum(sells.sub_total)as sub_total')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.id','products.name','products.mrp',
+                'sells.product_discount_percentage');
+
+
+
+
+        $AssociateArray = array(
+            'product' =>  $temp,
+            'characteristics'=>$characteristics->get(),
+            'crossData'=>$crossData->get()
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+    public function stock_report_temp_check($from,$to )
+    {
+
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+
+////////////////OPENING-PROCESS///////////////////////////
+
+        Schema::create('TEMP_OPENING', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('STOCK_ITEM_ID');
+            $table->integer('USER_ID')->default(0);
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
+
+            $table->temporary();
+        });
+
+
+
+        $select1 = Representative::query()
+            ->join('products', 'representatives_stock.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,representatives_stock.user_id  , sum(representatives_stock.quantity)as Quantity,0')
+            ->where('date','<',$from)
+            ->where('representatives_stock.quantity','>',0)
+
+            ->groupBy('products.id','representatives_stock.user_id' );
+
+
+        $select2 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id, sells.user_id, sum(sells.quantity*-1)as Quantity,sum(sells.sub_total*-1)as Amount')
+            ->where('date','<',$from)
+            ->groupBy('products.id','sells.user_id' );
+
+
+        $select3 = DamageProduct::query()
+            ->join('products', 'damage_products.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,damage_products.user_id  , sum(damage_products.quantity*-1)as Quantity,sum(damage_products.unit_cost_price)as Amount')
+            ->where('date','<',$from)
+
+            ->groupBy('products.id','damage_products.user_id');
+
+
+        $select4 = GiftProduct::query()
+            ->join('products', 'gift_products.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,gift_products.user_id, sum(gift_products.quantity*-1)as Quantity,sum(gift_products.unit_cost_price)as Amount')
+            ->whereDate('date','<',$from)
+            ->groupBy('products.id','gift_products.user_id');
+
+
+
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
+
+
+//////////////////TRANSACTION-PROCESS//////////////////////////////
+
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('STOCK_ITEM_ID');
+            $table->integer('USER_ID');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->integer('TRAN_AMOUNT')->default(0);
+            $table->integer('OUTWARD_QUANTITY')->default(0);
+            $table->integer('OUTWARD_AMOUNT')->default(0);
+            $table->integer('INWARD_QUANTITY')->default(0);
+            $table->integer('INWARD_AMOUNT')->default(0);
+            $table->integer('GIFT_QUANTITY')->default(0);
+            $table->integer('GIFT_COST')->default(0);
+            $table->integer('DAMAGE_QUANTITY')->default(0);
+            $table->integer('DAMAGE_COST')->default(0);
+            $table->temporary();
+        });
+
+
+        $select0= Product::query()->select(array('id','name','mrp'));
+        //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','ITEM_MRP'], $select0);
+
+        $select4= DB::table('TEMP_OPENING')
+            ->selectRaw( 'STOCK_ITEM_ID,USER_ID,sum(TRAN_QUANTITY) as TRAN_QUANTITY, sum(TRAN_AMOUNT) as TRAN_AMOUNT')
+            ->groupBy('STOCK_ITEM_ID','USER_ID');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
+
+        $select5 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,sells.user_id,sum(sells.quantity*-1)as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT')
+            ->whereBetween('date',[$from,$to])
+
+            ->groupBy('products.id','sells.user_id');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select5);
+
+        /*
+        $select6 = Purchase::query()
+                    ->join('products', 'purchases.product_id', '=', 'products.id')
+                    ->selectRaw( 'products.id,products.name,0,0,0,0,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as AMOUNT,0,0,0,0')
+                    ->whereBetween('date',[$from,$to])
+                    ->groupBy('products.id','products.name' );
+        */
+
+        $select6 = Representative::query()
+            ->join('products', 'representatives_stock.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,representatives_stock.user_id,sum(representatives_stock.quantity)  as INWARD_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->where('representatives_stock.quantity','>',0)
+            ->groupBy('products.id','representatives_stock.user_id');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','INWARD_QUANTITY'], $select6);
+
+
+        $select7 = GiftProduct::query()
+            ->join('products', 'gift_products.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,gift_products.user_id,sum(gift_products.quantity*-1)as GIFT_QUANTITY, sum(gift_products.unit_cost_price*-1) as GIFT_COST')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.id','gift_products.user_id');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','GIFT_QUANTITY','GIFT_COST'], $select7);
+
+
+        $select8 = DamageProduct::query()
+            ->join('products', 'damage_products.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,damage_products.user_id,sum(damage_products.quantity*-1)as DAMAGE_QUANTITY, sum(damage_products.unit_cost_price*-1) as DAMAGE_COST')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.id','damage_products.user_id');
+
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','DAMAGE_QUANTITY','DAMAGE_COST'], $select8);
+
+////////////////FINAL SELECTION//////////////////////////////
+///
+        $select0= Product::query()
+            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
+            ->selectRaw('products.name as STOCK_ITEM_NAME,   USER_ID,   products.mrp as ITEM_MRP,
+            STOCK_ITEM_ID, 
+            COALESCE(SUM(TRAN_QUANTITY),0) as TRAN_QUANTITY,         
+           COALESCE( sum(TRAN_AMOUNT),0) as  TRAN_AMOUNT,
+           COALESCE(  sum(INWARD_QUANTITY),0) as INWARD_QUANTITY,
+            COALESCE( sum(INWARD_AMOUNT),0) as  INWARD_AMOUNT,
+           COALESCE(  sum(OUTWARD_QUANTITY),0) as OUTWARD_QUANTITY,
+            COALESCE( sum(OUTWARD_AMOUNT),0) as  OUTWARD_AMOUNT,
+           COALESCE(  sum(GIFT_QUANTITY),0) as GIFT_QUANTITY,
+            COALESCE( sum(GIFT_COST * GIFT_QUANTITY ),0) as GIFT_COST,
+            COALESCE( sum(DAMAGE_QUANTITY),0) as DAMAGE_QUANTITY,
+            COALESCE( sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST')
+            ->groupBy('STOCK_ITEM_ID','USER_ID', 'STOCK_ITEM_NAME', 'ITEM_MRP')
+            ->get();
+
+
+
+
+
+        Schema::drop('TEMP_OPENING');
+        Schema::drop('TEMP_TRANSACTION');
+
+
+        return $select0;
+
+    }
+
+//*******************************STOCK REPORT- USER BASED**********************************
     // purchase Status Report
     public function postPurchaseReport(Request $request)
     {
