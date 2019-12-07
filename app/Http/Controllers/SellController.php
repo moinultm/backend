@@ -540,4 +540,36 @@ use paginator;
         return redirect()->route('sell.index');
     }
 
+
+    public function deleteSell(Request $request, Transaction $transaction) {
+
+        foreach ($transaction->sells as $sell) {
+            //add deleted product into stock
+            $product = Product::find($sell->product_id);
+            $current_stock = $product->quantity;
+            $product->quantity = $current_stock + $sell->quantity;
+            $product->save();
+
+            //delete the sales entry in sells table
+            $sell->delete();
+        }
+
+        //delete all the payments against this transaction
+        foreach($transaction->payments as $payment){
+            $payment->delete();
+        }
+
+        //delete all the return sells against this transaction
+        foreach($transaction->returnSales as $return){
+            $return->delete();
+        }
+
+        //delete the transaction entry for this sale
+        $transaction->delete();
+
+        $message = trans('core.deleted');
+
+        return redirect()->route('sell.index')->withSuccess($message);
+    }
+
 }

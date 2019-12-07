@@ -84,6 +84,7 @@ Route::group([
     //sell
     Route::resource('sell', 'SellController');
     Route::get('sell/{transaction}/details', 'SellController@details');
+    Route::delete('sell/{transaction}/delete/', 'SellController@deleteSell');
 
     //sells order
     Route::resource('sells-order', 'SellsOrderController');

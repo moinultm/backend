@@ -899,8 +899,6 @@ class ReportingController extends Controller
         //this for returning blank
 
 
-
-
         if(!is_null($from)) {
             $temp = $this->stock_report_temp_check($from, $to);
         }
@@ -909,33 +907,15 @@ class ReportingController extends Controller
         }
 
 
-        $characteristics= User::query()->select('id','name');
-        /*$characteristics= Sell::query()
-            ->join('products', 'sells.product_id', '=', 'products.id')
-            ->selectRaw('sum(sells.quantity) as quantity,
-                            sells.product_discount_percentage,
-                            sum(sells.product_discount_amount)as product_discount_amount')
-            ->whereBetween('date',[$from,$to])
-            ->groupBy('sells.product_discount_percentage');*/
-
-
-        $crossData= Sell::query()
-            ->join('products', 'sells.product_id', '=', 'products.id')
-            ->selectRaw('products.id,products.name,products.mrp,sum(sells.quantity) as quantity,
-                            sells.product_discount_percentage,
-                            sum(sells.product_discount_amount)as product_discount_amount,
-                            sum(sells.sub_total)as sub_total')
-            ->whereBetween('date',[$from,$to])
-            ->groupBy('products.id','products.name','products.mrp',
-                'sells.product_discount_percentage');
-
+        $users= User::query()->select('id','name');
+        $products= Product::query()->select('id','name');
 
 
 
         $AssociateArray = array(
-            'product' =>  $temp,
-            'characteristics'=>$characteristics->get(),
-            'crossData'=>$crossData->get()
+            'products' =>  $products->get(),
+            'users'=>$users->get(),
+            'crossData'=> $temp
         );
 
         return response()->json($AssociateArray ,200);
@@ -1095,8 +1075,6 @@ class ReportingController extends Controller
             COALESCE( sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST')
             ->groupBy('STOCK_ITEM_ID','USER_ID', 'STOCK_ITEM_NAME', 'ITEM_MRP')
             ->get();
-
-
 
 
 
