@@ -69,8 +69,8 @@ class UsersController extends Controller
         $user->user_type = $request->get('user_type');
         $user->password = bcrypt($request->get('password'));
 
-        if ($request->has('picture')) {
-            $user->picture = $this->upload($request->picture, storage_path('uploads/users/avatars'));
+        if ($request->has('image')) {
+            $user->image = $this->upload($request->image, public_path('uploads/users/images'));
         }
         $user->save();
         if ($request->has('profiles')) {
@@ -135,11 +135,11 @@ class UsersController extends Controller
         if ($request->get('password')) {
             $user->password = bcrypt($request->get('password'));
         }
-        if ($request->has('picture')) {
-            if ($user->picture != null) {
-                unlink(storage_path('uploads/users/avatars') . '/' . $user->picture);
+        if ($request->has('image')) {
+            if ($user->image != null) {
+                unlink(public_path('uploads/users/images') . '/' . $user->image);
             }
-            $user->picture = $this->upload($request->picture, storage_path('uploads/users/avatars'));
+            $user->image = $this->upload($request->image, public_path('uploads/users/images'));
         }
         $user->save();
         DB::table('user_profiles')
@@ -177,13 +177,13 @@ class UsersController extends Controller
     }
 
 
-    public function picture(int $id)
+    public function image(int $id)
     {
         $user = User::where('id', $id)->first();
-        if ($user == null || $user->picture == null) {
+        if ($user == null || $user->image == null) {
             return null;
         }
-        return $this->download(storage_path('uploads/users/avatars'), $user->picture);
+        return $this->download(public_path('uploads/users/images'), $user->image);
     }
 
 }
