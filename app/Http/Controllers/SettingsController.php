@@ -7,11 +7,11 @@ use App\Tax;
 use Illuminate\Http\Request;
 use App\Traits\Paginator;
 use Illuminate\Support\Facades\Validator;
-
+use App\Traits\FileHelper;
 class SettingsController extends Controller
 {
-    use Paginator;
 
+    use Paginator,FileHelper;
     public function getIndex()
     {
 
@@ -29,7 +29,6 @@ class SettingsController extends Controller
     public function update(Request $request,$id)
     {
 
-
         $rules = [
             'site_name' => 'required|max:255',
             'email' => 'required|email',
@@ -41,9 +40,6 @@ class SettingsController extends Controller
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
         }
-
-
-
 
 
 
@@ -76,28 +72,35 @@ class SettingsController extends Controller
         $setting->pos_invoice_footer_text = $request->get('pos_invoice_footer_text');
         $setting->dashboard = $request->get('dashboard');
 
-        if($request->hasFile('image')){
-            $file = $request->file('image');
-            $imageSize = getimagesize($file);
-            $width = $imageSize[0];
-            $height = $imageSize[1];
-            if($width > 190 || $height > 34){
-                $warning = "Invalid Image Size";
-                return redirect()->back()->withWarning($warning);
-            }
-            $file_extension = $file->getClientOriginalExtension();
-            $random_string = str_random(12);
-            $file_name = $random_string.'.'.$file_extension;
-            $destination_path = public_path().'/uploads/site/';
-            $request->file('image')->move($destination_path, $file_name);
 
-            $setting->site_logo = $file_name;
+        if ($request->has('site_logo')) {
+            if ($setting->site_logo != null) {
+                unlink(public_path('uploads/site') . '/' . $setting->site_logo);
+            }
+            $setting->site_logo = $this->upload($request->site_logo, public_path('uploads/site'));
+        }
+
+
+        if ($request->has('invoice_header')) {
+            if ($setting->invoice_header != null) {
+                unlink(public_path('uploads/site') . '/' . $setting->invoice_header);
+            }
+            $setting->invoice_header = $this->upload($request->invoice_header, public_path('uploads/site'));
         }
 
         $message = trans('core.changes_saved');
         $setting->save();
 
         return response()->json('Success', 200);
+    }
+
+    public function image(int $id)
+    {
+        $user = Setting::where('id', $id)->first();
+        if ($user == null || $user->image == null) {
+            return null;
+        }
+        return $this->download(public_path('uploads/site/'), $user->image);
     }
 
 

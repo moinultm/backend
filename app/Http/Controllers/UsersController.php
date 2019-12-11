@@ -27,8 +27,6 @@ class UsersController extends Controller
     public function store(Request $request): JsonResponse
     {
 
-
-
         $rules = [
             'email' => [
                 'required',
@@ -141,6 +139,7 @@ class UsersController extends Controller
             }
             $user->image = $this->upload($request->image, public_path('uploads/users/images'));
         }
+
         $user->save();
         DB::table('user_profiles')
             ->where('refUser', $id)
