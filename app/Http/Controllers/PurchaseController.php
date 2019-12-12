@@ -46,7 +46,7 @@ class PurchaseController extends Controller
         if($request->get('from') || $request->get('to')) {
             if(!is_null($from)){
                 $from = Carbon::createFromFormat('Y-m-d',$from);
-                $from = filterFrom($from);
+                $from = self::filterFrom($from);
                 $transactions->whereBetween('date',[$from,$to]);
             }else{
                 $transactions->where('date','<=',$to);
