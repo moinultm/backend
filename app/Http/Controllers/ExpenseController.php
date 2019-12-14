@@ -78,6 +78,7 @@ class ExpenseController extends Controller
         $rules = [
             'purpose' => 'required',
             'amount' => 'required|numeric',
+            'user_id' => 'required|numeric',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -89,7 +90,9 @@ class ExpenseController extends Controller
         $expense = Expense::find($request->get('id'));
             $expense->purpose = $request->get('purpose');
             $expense->amount = $request->get('amount');
+        $expense->user_id = $request->get('user_id');
         $expense->save();
+
 
 
 

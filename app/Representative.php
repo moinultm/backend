@@ -13,7 +13,9 @@ class Representative extends Model
 
     public $fillable = [
         'user_id',
-        'date',  'product_id' , 'quantity'
+        'date',
+        'product_id' ,
+        'quantity'
     ];
 
     public function product(){
