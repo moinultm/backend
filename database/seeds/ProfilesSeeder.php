@@ -21,8 +21,8 @@ class ProfilesSeeder extends Seeder
                 'updated_at' => Carbon::now()
             ],
                 [
-                    'code' => 'ROLE_OWNER',
-                    'designation' => 'Sub Admin privileges',
+                    'code' => 'PROFILE_OWNER',
+                    'designation' => 'Super-Admin privileges',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
@@ -33,17 +33,11 @@ class ProfilesSeeder extends Seeder
                     'updated_at' => Carbon::now()
                 ],
                 [
-                'code' => 'PROFILE_SALES_MAN',
-                'designation' => 'Sales privileges',
+                'code' => 'PROFILE_USER',
+                'designation' => 'User privileges',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ],
-                [
-                    'code' => 'PROFILE_STOCK',
-                    'designation' => 'Stock privileges',
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ]
 
                 ]);
     }

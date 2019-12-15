@@ -27,16 +27,41 @@ class RepresentativeController extends Controller
     public function index(Request $request): JsonResponse
     {
 
-
-        $query = Representative::where('quantity', '>=', '0')
-            ->selectRaw('id,ref_no, sum(quantity)as total_quantity ,date,receiving')
-            ->groupBy('id', 'ref_no', 'date','receiving')
-            ->orderBy('ref_no', 'DESC');
+        $query = Representative::
+            selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
+            ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
+            ->where('representatives_stock.quantity', '>=', '0')
+            ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
+            ->orderBy('representatives_stock.ref_no', 'DESC');
 
 
         return response()->json(self::paginate($query, $request), 200);
     }
 
+
+    public function getChallans(Request $request,$id): JsonResponse
+    {
+        if ($id==0){
+            $query = Representative::
+            selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
+                ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
+                ->where('representatives_stock.quantity', '>=', '0')
+                ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
+                ->orderBy('representatives_stock.ref_no', 'DESC');
+        }
+else{
+        $query = Representative::
+        selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
+            ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
+            ->where('representatives_stock.quantity', '>=', '0')
+            ->where('representatives_stock.user_id','=', $id)
+            ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
+            ->orderBy('representatives_stock.ref_no', 'DESC');
+}
+
+        return response()->json(self::paginate($query, $request), 200);
+
+    }
 
     public function getUser(): JsonResponse
     {
@@ -175,8 +200,6 @@ class RepresentativeController extends Controller
       $user=   Auth::user()->id;
       $receipt = Representative::find($request);
 
-
-
             if ( $receipt->user_id <> $user) {
                 return response()->json( [ 'error' => 'Receiver ID Not Match'], 403);
             }
@@ -184,7 +207,7 @@ class RepresentativeController extends Controller
         $receipt->receiving= '1';
         $receipt->save();
 
-        return response()->json( [ 'success' => 'Receiving Challan Conformed'], 200);
+        return response()->json( [ 'success' => 'Receiving Challan Confirmed'], 200);
 
      }
 

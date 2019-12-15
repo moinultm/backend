@@ -16,28 +16,33 @@ class RolesSeeder extends Seeder
 
         DB::table('roles')
             ->insert([
-
                 [
                     'code' => 'ROLE_OWNER_PRIVILEGE',
-                    'designation' => 'ACL',
+                    'designation' => 'OWNER_PRIVILEGE',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
                     'code' => 'ROLE_MANAGER_PRIVILEGE',
-                    'designation' => 'ACL',
+                    'designation' => 'MANAGER_PRIVILEGE',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
                     'code' => 'ROLE_ADMIN_PRIVILEGE',
-                    'designation' => 'ACL',
+                    'designation' => 'ADMIN_PRIVILEGE',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
+                    'code' => 'ROLE_DASHBOARD_ACCESS',
+                    'designation' => 'Dashboard Access',
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ] ,
+                [
                 'code' => 'ROLE_ACL_ACCESS',
-                'designation' => 'ACL',
+                'designation' => 'ACL_ACCESS',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ], [
@@ -174,13 +179,26 @@ class RolesSeeder extends Seeder
 
                 [
                     'code' => 'ROLE_REPORT_ACCESS',
-                    'designation' => 'Report  access',
+                    'designation' => 'Report access',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],
                 [
                     'code' => 'ROLE_REPORT_MANAGE',
-                    'designation' => 'Report management ',
+                    'designation' => 'Report management',
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ],
+
+                [
+                    'code' => 'ROLE_HRM_ACCESS',
+                    'designation' => 'HR  access',
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ],
+                [
+                    'code' => 'ROLE_HRM_MANAGE',
+                    'designation' => 'HR management',
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ],

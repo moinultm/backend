@@ -122,6 +122,7 @@ Route::group([
     //representetive
     Route::resource('represent', 'RepresentativeController');
     Route::get('users/{user}/representative', 'RepresentativeController@getUser');
+           Route::get('represent/{user}/challans', 'RepresentativeController@getChallans');
     Route::get('represent/{user}/sells', 'RepresentativeController@getSells');
     Route::get('represent/{user}/invoices', 'RepresentativeController@getInvoices');
     Route::get('represent/{user}/details', 'RepresentativeController@getDetails');
