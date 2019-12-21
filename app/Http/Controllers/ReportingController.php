@@ -461,7 +461,6 @@ class ReportingController extends Controller
         $to = $request->get('to')?:date('Y-m-d');
 
 
-
         if(!is_null($from)) {
             $temp = $this->represent_check($from, $to,$id);
         }
@@ -1112,11 +1111,17 @@ class ReportingController extends Controller
         $users= User::query()->select('id','name');
         $products= Product::query()->select('id','name');
 
+        $query = Representative:: query()->select('ref_no','user_id','users.name')
+            ->leftJoin('users' , 'users.id','=','representatives_stock.user_id')
+            ->where('quantity', '>=', '0')
+            ->groupBy('ref_no','user_id','users.name')
+            ->orderBy('ref_no', 'DESC');
+
 
 
         $AssociateArray = array(
             'products' =>  $products->get(),
-            'users'=>$users->get(),
+            'users'=>$query->get(),
             'crossData'=> $temp
         );
 
@@ -1133,32 +1138,6 @@ class ReportingController extends Controller
         $to= self::filterTo($to);
 
 
-////////////////OPENING-PROCESS///////////////////////////
-
-        Schema::create('TEMP_OPENING', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('REF_NO');
-            $table->integer('STOCK_ITEM_ID');
-            $table->integer('USER_ID')->default(0);
-            $table->integer('TRAN_QUANTITY')->default(0);
-            $table->integer('TRAN_AMOUNT')->default(0);
-
-            $table->temporary();
-        });
-
-
-
-        $select1 = Representative::query()
-            ->join('products', 'representatives_stock.product_id', '=', 'products.id')
-            ->selectRaw( 'representatives_stock.ref_no.products.id,representatives_stock.user_id  , representatives_stock.quantity ,0')
-            ->where('date','<',$from)
-            ->where('representatives_stock.quantity','>',0)
-            ->groupBy('products.id','representatives_stock.user_id' );
-
-
-
-
-        DB::table('TEMP_OPENING')->insertUsing(['REF_NO','STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
 
 
 
@@ -1166,68 +1145,32 @@ class ReportingController extends Controller
 
         Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('REF_NO');
             $table->integer('STOCK_ITEM_ID');
             $table->integer('USER_ID');
             $table->integer('TRAN_QUANTITY')->default(0);
-            $table->integer('TRAN_AMOUNT')->default(0);
-            $table->integer('OUTWARD_QUANTITY')->default(0);
-            $table->integer('OUTWARD_AMOUNT')->default(0);
-            $table->integer('INWARD_QUANTITY')->default(0);
-            $table->integer('INWARD_AMOUNT')->default(0);
-            $table->integer('GIFT_QUANTITY')->default(0);
-            $table->integer('GIFT_COST')->default(0);
-            $table->integer('DAMAGE_QUANTITY')->default(0);
-            $table->integer('DAMAGE_COST')->default(0);
             $table->temporary();
         });
 
 
-
-        $select4= DB::table('TEMP_OPENING')
-            ->selectRaw( 'STOCK_ITEM_ID,USER_ID, TRAN_QUANTITY ,  TRAN_AMOUNT ')
-            ->groupBy('STOCK_ITEM_ID','USER_ID');
-
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
-
-
-
         $select6 = Representative::query()
-            ->join('products', 'representatives_stock.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,representatives_stock.user_id, representatives_stock.quantity  as INWARD_QUANTITY')
+            ->select(  'ref_no','product_id as STOCK_ITEM_ID','user_id as USER_ID', 'quantity as TRAN_QUANTITY')
             ->whereBetween('date',[$from,$to])
-            ->where('representatives_stock.quantity','>',0)
-            ->groupBy('products.id','representatives_stock.user_id');
+            ->where('quantity','>',0)
+            ->groupBy( 'ref_no','product_id','user_id','quantity');
 
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','INWARD_QUANTITY'], $select6);
-
-
-
+        DB::table('TEMP_TRANSACTION')->insertUsing(['REF_NO','STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY'], $select6);
 
 
 ////////////////FINAL SELECTION//////////////////////////////
-///
-        $select0= Product::query()
-            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
-            ->selectRaw('products.name as STOCK_ITEM_NAME,   USER_ID,   products.mrp as ITEM_MRP,
-            STOCK_ITEM_ID, 
-            COALESCE(SUM(TRAN_QUANTITY),0) as TRAN_QUANTITY,         
-           COALESCE( sum(TRAN_AMOUNT),0) as  TRAN_AMOUNT,
-           COALESCE(  sum(INWARD_QUANTITY),0) as INWARD_QUANTITY,
-            COALESCE( sum(INWARD_AMOUNT),0) as  INWARD_AMOUNT,
-           COALESCE(  sum(OUTWARD_QUANTITY),0) as OUTWARD_QUANTITY,
-            COALESCE( sum(OUTWARD_AMOUNT),0) as  OUTWARD_AMOUNT,
-           COALESCE(  sum(GIFT_QUANTITY),0) as GIFT_QUANTITY,
-            COALESCE( sum(GIFT_COST * GIFT_QUANTITY ),0) as GIFT_COST,
-            COALESCE( sum(DAMAGE_QUANTITY),0) as DAMAGE_QUANTITY,
-            COALESCE( sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST')
-            ->groupBy('STOCK_ITEM_ID','USER_ID', 'STOCK_ITEM_NAME', 'ITEM_MRP')
+
+        $select0=   DB::table('TEMP_TRANSACTION')
+            ->selectRaw('REF_NO,USER_ID, STOCK_ITEM_ID,TRAN_QUANTITY')
+            ->groupBy('REF_NO','USER_ID','STOCK_ITEM_ID','TRAN_QUANTITY')
             ->get();
 
 
-
-        Schema::drop('TEMP_OPENING');
         Schema::drop('TEMP_TRANSACTION');
-
 
         return $select0;
 

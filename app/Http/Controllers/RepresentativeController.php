@@ -49,7 +49,7 @@ class RepresentativeController extends Controller
                 ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
                 ->orderBy('representatives_stock.ref_no', 'DESC');
         }
-else{
+        else{
         $query = Representative::
         selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
             ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')

@@ -152,6 +152,8 @@ Route::group([
 
     Route::get('report/stock-general-report', 'ReportingController@stockGeneralReport');
     Route::get('report/stock-report', 'ReportingController@stockReport');
+    Route::get('report/challan-report', 'ReportingController@challanReport');
+
 
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
