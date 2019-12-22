@@ -125,9 +125,10 @@ Route::group([
            Route::get('represent/{user}/challans', 'RepresentativeController@getChallans');
     Route::get('represent/{user}/sells', 'RepresentativeController@getSells');
     Route::get('represent/{user}/invoices', 'RepresentativeController@getInvoices');
-    Route::get('represent/{user}/details', 'RepresentativeController@getDetails');
 
-    Route::get('represent/{user}/receiving', 'RepresentativeController@getConformed');
+    Route::get('represent/{id}/details', 'RepresentativeController@getDetails');
+
+    Route::get('represent/{id}/receiving', 'RepresentativeController@getConformed');
 
     //gifts
     Route::resource('gifts', 'GiftProductController');
@@ -152,6 +153,7 @@ Route::group([
 
     Route::get('report/stock-general-report', 'ReportingController@stockGeneralReport');
     Route::get('report/stock-report', 'ReportingController@stockReport');
+
     Route::get('report/{user}/challan-report', 'ReportingController@challanReport');
 
 

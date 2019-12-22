@@ -43,21 +43,20 @@ class RepresentativeController extends Controller
     {
         if ($id==0){
             $query = Representative::
-            selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
-                ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
+            selectRaw('representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
+                ->Join('users', 'users.id', '=', 'representatives_stock.user_id')
                 ->where('representatives_stock.quantity', '>=', '0')
-                ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
+                ->groupBy('representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name','users.id')
                 ->orderBy('representatives_stock.ref_no', 'DESC');
         }
         else{
         $query = Representative::
-        selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
-            ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
+        selectRaw('representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
+            ->Join('users', 'users.id', '=', 'representatives_stock.user_id')
             ->where('representatives_stock.quantity', '>=', '0')
             ->where('representatives_stock.user_id','=', $id)
-            ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
-            ->orderBy('representatives_stock.ref_no', 'DESC');
-}
+            ->groupBy('representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name','users.id')
+            ->orderBy('representatives_stock.ref_no', 'DESC');}
 
         return response()->json(self::paginate($query, $request), 200);
 
@@ -86,10 +85,10 @@ class RepresentativeController extends Controller
             throw new ValidationException('user ID is required.');
         }
 
-        $ym = Carbon::now()->format('Y/m');
+        $ym = Carbon::now()->format('Y-m');
 
         $row = Representative::where('quantity', '>', '0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity', '>', '0')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym . '/RI-' . self::ref($row);
+        $ref_no =   'CH-' . self::ref($row);
 
 
         $items = $request->get('items');
@@ -177,12 +176,13 @@ class RepresentativeController extends Controller
         return response()->json(self::paginate($sells, $request), 200);
     }
 
-    public function getDetails(Request $request, $id): JsonResponse
+    public function getDetails(Request $request): JsonResponse
 
     {
 
+        $id=$request->get('ref');
         $query = Representative::query();
-        $query->where('id', $id);
+        $query->where('ref_no', $id);
         $query->with(['product']);
         $query->with(['user']);
 
@@ -192,13 +192,15 @@ class RepresentativeController extends Controller
 
     }
 
-    public function getConformed( $request): JsonResponse
+    public function getConformed(Request $request): JsonResponse
     {
 
-//dd($request);
+//dd($request->get('ref'));
 
       $user=   Auth::user()->id;
-      $receipt = Representative::find($request);
+
+        $receipt = Representative::where('ref_no', '=', $request->get('ref'))->firstOrFail();;
+        //$receipt = Representative::find($request->get('ref'));
 
             if ( $receipt->user_id <> $user) {
                 return response()->json( [ 'error' => 'Receiver ID Not Match'], 403);

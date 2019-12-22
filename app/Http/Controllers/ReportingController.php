@@ -1089,16 +1089,16 @@ class ReportingController extends Controller
 
 
 //*******************************Challan REPORT- USER BASED**********************************
-    public  function challanReport(Request $request){
+    public  function challanReport(Request $request,$user){
 
         $date=Carbon::now();
         $nowDate = date('Y-m-d', strtotime($date));
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
+        $userId = $user;
 
         //this for returning blank
-
 
         if(!is_null($from)) {
             $temp = $this->challan_report_temp_check($from, $to);
@@ -1108,7 +1108,8 @@ class ReportingController extends Controller
         }
 
 
-        $users= User::query()->select('id','name');
+      //  $users= User::query()->select('id','name');
+
         $products= Product::query()->select('id','name');
 
         $query = Representative:: query()->select('ref_no','user_id','users.name')
@@ -1116,6 +1117,12 @@ class ReportingController extends Controller
             ->where('quantity', '>=', '0')
             ->groupBy('ref_no','user_id','users.name')
             ->orderBy('ref_no', 'DESC');
+
+
+        if ($userId=='0'){ return '';  } else
+        {
+            $query->where('user_id','=', $userId);
+        }
 
 
 
