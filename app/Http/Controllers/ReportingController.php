@@ -1186,6 +1186,205 @@ class ReportingController extends Controller
 //*******************************Challan REPORT- USER BASED**********************************
 
 
+
+
+//*******************************Damage REPORT- USER BASED**********************************
+    public  function damageReport(Request $request,$user){
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+
+        $userId = $user;
+
+        //this for returning blank
+
+        if(!is_null($from)) {
+            $temp = $this->damage_report_temp_check($from, $to);
+        }
+        else{
+            $temp = $this->damage_report_temp_check($nowDate, $nowDate);
+        }
+
+
+        //  $users= User::query()->select('id','name');
+
+        $products= Product::query()->select('id','name');
+
+        $query = DamageProduct::query()->select('reference_no','user_id','users.name')
+            ->leftJoin('users' , 'users.id','=','damage_products.user_id')
+            ->where('quantity', '>=', '0')
+            ->groupBy('reference_no','user_id','users.name')
+            ->orderBy('reference_no', 'DESC');
+
+
+        if ($userId=='0'){ return '';  } else
+        {
+            $query->where('user_id','=', $userId);
+        }
+
+
+
+        $AssociateArray = array(
+            'products' =>  $products->get(),
+            'users'=>$query->get(),
+            'crossData'=> $temp
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+    public function damage_report_temp_check($from,$to )
+    {
+
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+
+
+
+
+//////////////////TRANSACTION-PROCESS//////////////////////////////
+
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('REF_NO');
+            $table->integer('STOCK_ITEM_ID');
+            $table->integer('USER_ID');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->temporary();
+        });
+
+
+        $select6 = DamageProduct::query()
+            ->select(  'reference_no','product_id as STOCK_ITEM_ID','user_id as USER_ID', 'quantity as TRAN_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->where('quantity','>',0)
+            ->groupBy( 'reference_no','product_id','user_id','quantity');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['REF_NO','STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY'], $select6);
+
+
+////////////////FINAL SELECTION//////////////////////////////
+
+        $select0=   DB::table('TEMP_TRANSACTION')
+            ->selectRaw('REF_NO,USER_ID, STOCK_ITEM_ID,TRAN_QUANTITY')
+            ->groupBy('REF_NO','USER_ID','STOCK_ITEM_ID','TRAN_QUANTITY')
+            ->get();
+
+
+        Schema::drop('TEMP_TRANSACTION');
+
+        return $select0;
+
+    }
+
+//*******************************Damage REPORT- USER BASED**********************************
+
+
+
+
+//*******************************Damage REPORT- USER BASED**********************************
+    public  function giftReport(Request $request,$user){
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+
+        $userId = $user;
+
+        //this for returning blank
+
+        if(!is_null($from)) {
+            $temp = $this->gift_report_temp_check($from, $to);
+        }
+        else{
+            $temp = $this->gift_report_temp_check($nowDate, $nowDate);
+        }
+
+
+        //  $users= User::query()->select('id','name');
+
+        $products= Product::query()->select('id','name');
+
+        $query = GiftProduct::query()->select('reference_no','user_id','users.name')
+            ->leftJoin('users' , 'users.id','=','gift_products.user_id')
+            ->where('quantity', '>=', '0')
+            ->groupBy('reference_no','user_id','users.name')
+            ->orderBy('reference_no', 'DESC');
+
+        if ($userId=='0'){ return '';  } else
+        {
+            $query->where('user_id','=', $userId);
+        }
+
+
+        $AssociateArray = array(
+            'products' =>  $products->get(),
+            'users'=>$query->get(),
+            'crossData'=> $temp
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+    public function gift_report_temp_check($from,$to )
+    {
+
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+
+
+
+
+//////////////////TRANSACTION-PROCESS//////////////////////////////
+
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('REF_NO');
+            $table->integer('STOCK_ITEM_ID');
+            $table->integer('USER_ID');
+            $table->integer('TRAN_QUANTITY')->default(0);
+            $table->temporary();
+        });
+
+
+        $select6 = DamageProduct::query()
+            ->select(  'reference_no','product_id as STOCK_ITEM_ID','user_id as USER_ID', 'quantity as TRAN_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->where('quantity','>',0)
+            ->groupBy( 'reference_no','product_id','user_id','quantity');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['REF_NO','STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY'], $select6);
+
+
+////////////////FINAL SELECTION//////////////////////////////
+
+        $select0=   DB::table('TEMP_TRANSACTION')
+            ->selectRaw('REF_NO,USER_ID, STOCK_ITEM_ID,TRAN_QUANTITY')
+            ->groupBy('REF_NO','USER_ID','STOCK_ITEM_ID','TRAN_QUANTITY')
+            ->get();
+
+
+        Schema::drop('TEMP_TRANSACTION');
+
+        return $select0;
+
+    }
+
+//*******************************GiftREPORT- USER BASED**********************************
+
+
+
     // purchase Status Report
     public function postPurchaseReport(Request $request)
     {

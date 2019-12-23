@@ -52,14 +52,14 @@ class GiftProductController extends Controller
         $ym = Carbon::now()->format('Y/m');
 
         $rowT = Transaction::where('transaction_type', 'gift')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'gift')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym.'/GP-'.self::ref($rowT);
+        $ref_no = 'GP-'.self::ref($rowT);
         $total = 0;
         $totalProductTax = 0;
         $productTax = 0;
         $total_cost_price = 0;
 
         $row = GiftProduct::where('quantity' , '>','0')->withTrashed()->get()->count() > 0 ? GiftProduct::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
-        $refno_gift = $ym.'/GP-'.self::ref($row);
+        $refno_gift ='GP-'.self::ref($row);
 
 
 
