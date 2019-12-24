@@ -1323,7 +1323,6 @@ class ReportingController extends Controller
             $query->where('user_id','=', $userId);
         }
 
-
         $AssociateArray = array(
             'products' =>  $products->get(),
             'users'=>$query->get(),
@@ -1341,8 +1340,6 @@ class ReportingController extends Controller
 
         $to = Carbon::createFromFormat('Y-m-d',$to);
         $to= self::filterTo($to);
-
-
 
 
 

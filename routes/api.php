@@ -139,8 +139,6 @@ Route::group([
     Route::get('dashboard', 'DashboardController@index');
 
 
-
-
     //Reporting
     Route::get('report/product-report', 'ReportingController@productReport');
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
