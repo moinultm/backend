@@ -884,6 +884,109 @@ class ReportingController extends Controller
 
 
 
+//*******************************STOCK REPORT- USER BASED**********************************
+    public  function stockInReport(Request $request){
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+
+
+        //this for returning blank
+
+
+        if(!is_null($from)) {
+            $temp = $this->stock_In_report_temp_check($from, $to);
+        }
+        else{
+            $temp = $this->stock_In_report_temp_check($nowDate, $nowDate);
+        }
+
+
+        $users= Purchase::query()->select('id','reference_no','product_id','date');
+        $products= Product::query()->select('id','name');
+
+
+
+        $AssociateArray = array(
+            'products' =>  $products->get(),
+            'users'=>$users->get(),
+            'crossData'=> $temp
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+    public function stock_In_report_temp_check($from,$to )
+    {
+
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+
+////////////////OPENING-PROCESS///////////////////////////
+
+
+
+//////////////////TRANSACTION-PROCESS//////////////////////////////
+
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('STOCK_ITEM_ID');
+            $table->date('TRAN_DATE');
+            $table->string('REF_NO');
+            $table->integer('INWARD_QUANTITY')->default(0);
+            $table->integer('INWARD_AMOUNT')->default(0);
+
+            $table->temporary();
+        });
+
+
+        $select0= Product::query()->select(array('id','name','mrp'));
+        //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','ITEM_MRP'], $select0);
+
+
+
+        $select5 = Purchase::query()
+            ->join('products', 'purchases.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,purchases.date,purchases.reference_no,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as INWARD_AMOUNT')
+            ->whereBetween('date',[$from,$to])
+
+            ->groupBy('products.id','purchases.reference_no','purchases.date');
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','INWARD_QUANTITY','INWARD_AMOUNT'], $select5);
+
+
+
+
+
+////////////////FINAL SELECTION//////////////////////////////
+///
+        $select0= Product::query()
+            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
+            ->selectRaw('STOCK_ITEM_ID, products.name as STOCK_ITEM_NAME,   TRAN_DATE,REF_NO,   products.mrp as ITEM_MRP,
+            TRAN_DATE, 
+            REF_NO,
+            COALESCE(  sum(INWARD_QUANTITY),0) as INWARD_QUANTITY,
+            COALESCE( sum(INWARD_AMOUNT),0) as  INWARD_AMOUNT' )
+            ->groupBy('STOCK_ITEM_ID','TRAN_DATE','REF_NO', 'STOCK_ITEM_NAME', 'ITEM_MRP')
+            ->get();
+
+
+
+         Schema::drop('TEMP_TRANSACTION');
+
+
+        return $select0;
+
+    }
+
+//*******************************STOCK REPORT- USER BASED**********************************
+
 
 
 //*******************************STOCK REPORT- USER BASED**********************************
@@ -1379,6 +1482,10 @@ class ReportingController extends Controller
     }
 
 //*******************************GiftREPORT- USER BASED**********************************
+
+
+
+
 
 
 
