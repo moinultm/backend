@@ -144,7 +144,7 @@ use paginator;
         $ym = Carbon::now()->format('Y/m');
 
         $row = Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'sell')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym.'/SI-'.self::ref($row);
+        $ref_no = 'SI-'.self::ref($row);
 
         $total = 0;
         $totalProductTax = 0;
@@ -152,11 +152,11 @@ use paginator;
         $total_cost_price = 0;
 
         $row = Representative::where('quantity' , '<','0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity' , '>','0')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no_rep_sell = $ym.'/RP-'.self::ref($row);
+        $ref_no_rep_sell = 'RP-'.self::ref($row);
 
             if ($order_no=="0") {
                 $row = Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'ORDER')->withTrashed()->get()->count() + 1 : 1;
-                $order_no_new = $ym.'/SO-'.self::ref($row);
+                $order_no_new = 'SO-'.self::ref($row);
             }
             else {
                 $order_no_new=$order_no;
@@ -223,7 +223,7 @@ use paginator;
                 $sell->client_id = $customer;
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                 $sell->user_id = $request->get('user_id');
-
+                $sell->direct = $request->get('direct');
                 $sell->save();
 
 
@@ -240,6 +240,7 @@ use paginator;
                     $order->client_id = $customer;
                     $order->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                     $order->user_id = $request->get('user_id');
+                    //$order->direct = $request->get('direct');
                     $order->save();
 
                 }
@@ -254,7 +255,7 @@ use paginator;
 
 
 
-
+            if ($request->get('direct')==0) {
                 //Representative Decrements
                 $stock = new Representative();
                 $stock->user_id = $request->get('user_id');
@@ -263,6 +264,7 @@ use paginator;
                 $stock->quantity =  $sell_item['quantity']*-1;
                 $stock->ref_no= $ref_no_rep_sell;
                 $stock->save();
+            }
 
 
 
