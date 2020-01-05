@@ -27,6 +27,9 @@ class RepresentativeController extends Controller
     public function index(Request $request): JsonResponse
     {
 
+        $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('date', 'desc');
+
+
         $query = Representative::
             selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
             ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
@@ -35,12 +38,21 @@ class RepresentativeController extends Controller
             ->orderBy('representatives_stock.ref_no', 'DESC');
 
 
-        return response()->json(self::paginate($query, $request), 200);
+        return response()->json(self::paginate($transactions, $request), 200);
     }
 
 
     public function getChallans(Request $request,$id): JsonResponse
     {
+        if ($id==0){
+            $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('date', 'desc');
+        }
+    else{
+        $transactions = Transaction::where('transaction_type', 'transfer')
+            ->where('user_id','=', $id)
+            ->orderBy('date', 'desc');
+    }
+
         if ($id==0){
             $query = Representative::
             selectRaw('representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
@@ -58,7 +70,7 @@ class RepresentativeController extends Controller
             ->groupBy('representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name','users.id')
             ->orderBy('representatives_stock.ref_no', 'DESC');}
 
-        return response()->json(self::paginate($query, $request), 200);
+        return response()->json(self::paginate($transactions, $request), 200);
 
     }
 
@@ -87,8 +99,8 @@ class RepresentativeController extends Controller
 
         $ym = Carbon::now()->format('Y-m');
 
-        $row = Representative::where('quantity', '>', '0')->withTrashed()->get()->count() > 0 ? Representative::where('quantity', '>', '0')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no =   'CH-' . self::ref($row);
+        $row = Transaction::where('transaction_type', 'transfer')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'transfer')->withTrashed()->get()->count() + 1 : 1;
+        $ref_no = 'CH-' . self::ref($row);
 
 
         $items = $request->get('items');
@@ -107,6 +119,23 @@ class RepresentativeController extends Controller
                 $user = $stock->user_id;
                 $stock->save();
             }
+
+
+            $transaction = new Transaction;
+            $transaction->reference_no = $ref_no;
+            $transaction->client_id = $request->get('user_id');
+            $transaction->transaction_type = 'transfer';
+            $transaction->discount = 0;
+            $transaction->total = 0;
+            $transaction->invoice_tax =0;
+            $transaction->total_tax = 0;
+            $transaction->net_total = 0;
+            $transaction->user_id =  $request->get('user_id');
+            $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+            $transaction->paid =0;
+            $transaction->save();
+
+
         });
 
         return response()->json(Representative::where('user_id', $user)->first(), 200);
@@ -181,10 +210,15 @@ class RepresentativeController extends Controller
     {
 
         $id=$request->get('ref');
-        $query = Representative::query();
-        $query->where('ref_no', $id);
-        $query->with(['product']);
+
+        $query = Transaction::query();
+        $query->where('id', $id);
+        $query->with(['challans','challans.product']);
         $query->with(['user']);
+
+        $AssociateArray = array('data' =>$query->get());
+
+
 
         $AssociateArray = array('data' => $query->get());
 
@@ -199,12 +233,19 @@ class RepresentativeController extends Controller
 
       $user=   Auth::user()->id;
 
-        $receipt = Representative::where('ref_no', '=', $request->get('ref'))->firstOrFail();;
+      $transacttion= Transaction::where('reference_no', '=', $request->get('reference_no'))->firstOrFail();
+
+
+        $receipt = Representative::where('ref_no', '=', $request->get('reference_no'))->firstOrFail();
         //$receipt = Representative::find($request->get('ref'));
 
             if ( $receipt->user_id <> $user) {
                 return response()->json( [ 'error' => 'Receiver ID Not Match'], 403);
             }
+
+
+        $transacttion->pos= '1';
+        $transacttion->save();
 
         $receipt->receiving= '1';
         $receipt->save();
@@ -212,5 +253,23 @@ class RepresentativeController extends Controller
         return response()->json( [ 'success' => 'Receiving Challan Confirmed'], 200);
 
      }
+
+
+    public function deleteChallan(Request $request) {
+        $transaction = Transaction::findorFail($request->get('id'));
+
+        foreach ($transaction->challans as $challan) {
+                        //delete the purchase entry in purchases table
+            $challan->delete();
+
+        }
+        //delete the transaction entry for this sale
+        $transaction->delete();
+
+        return response()->json( 'delete', 200);
+
+
+
+    }
 
 }

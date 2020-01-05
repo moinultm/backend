@@ -720,7 +720,8 @@ class ReportingController extends Controller
             $table->temporary();
         });
 
-
+        $select0=Product::query()->select('id','opening_stock','opening_stock_value');
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select0);
 
         $select1 = Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
@@ -901,7 +902,11 @@ class ReportingController extends Controller
             $temp = $this->stock_In_report_temp_check($nowDate, $nowDate);
         }
 
-        $users= Purchase::query()->select('id','reference_no','product_id','date');
+
+        $users = Transaction::where('transaction_type', 'purchase');
+
+        //$users= Purchase::query()->select('id','reference_no','product_id','date');
+
         $products= Product::query()->select('id','name');
 
         $AssociateArray = array(
@@ -972,10 +977,10 @@ class ReportingController extends Controller
 
     }
 
-//*******************************STOCK REPORT- OUT BASED**********************************
-
-
 //*******************************STOCK REPORT- IN BASED**********************************
+
+
+//*******************************STOCK REPORT- OUT BASED**********************************
     public  function stockOutReport(Request $request){
 
         $date=Carbon::now();
@@ -992,7 +997,8 @@ class ReportingController extends Controller
             $temp = $this->stock_Out_report_temp_check($nowDate, $nowDate);
         }
 
-        $users= Purchase::query()->select('id','reference_no','product_id','date');
+        $users=   Transaction::where('transaction_type', 'sell');
+       // $users= Sell::query()->select('id','reference_no','product_id','date');
         $products= Product::query()->select('id','name');
 
         $AssociateArray = array(
@@ -1022,8 +1028,8 @@ class ReportingController extends Controller
             $table->integer('STOCK_ITEM_ID');
             $table->date('TRAN_DATE');
             $table->string('REF_NO');
-            $table->integer('INWARD_QUANTITY')->default(0);
-            $table->integer('INWARD_AMOUNT')->default(0);
+            $table->integer('OUTWARD_QUANTITY')->default(0);
+            $table->integer('OUTWARD_AMOUNT')->default(0);
 
             $table->temporary();
         });
@@ -1034,14 +1040,14 @@ class ReportingController extends Controller
 
 
 
-        $select5 = Purchase::query()
-            ->join('products', 'purchases.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id,purchases.date,purchases.reference_no,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as INWARD_AMOUNT')
+        $select5 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,sells.date,sells.reference_no,sum(sells.quantity)as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT')
             ->whereBetween('date',[$from,$to])
 
-            ->groupBy('products.id','purchases.reference_no','purchases.date');
+            ->groupBy('products.id','sells.reference_no','sells.date');
 
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','INWARD_QUANTITY','INWARD_AMOUNT'], $select5);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select5);
 
 
 ////////////////FINAL SELECTION//////////////////////////////
@@ -1051,8 +1057,8 @@ class ReportingController extends Controller
             ->selectRaw('STOCK_ITEM_ID, products.name as STOCK_ITEM_NAME,   TRAN_DATE,REF_NO,   products.mrp as ITEM_MRP,
             TRAN_DATE, 
             REF_NO,
-            COALESCE(  sum(INWARD_QUANTITY),0) as INWARD_QUANTITY,
-            COALESCE( sum(INWARD_AMOUNT),0) as  INWARD_AMOUNT' )
+            COALESCE(  sum(OUTWARD_QUANTITY),0) as OUTWARD_QUANTITY,
+            COALESCE( sum(OUTWARD_AMOUNT),0) as  OUTWARD_AMOUNT' )
             ->groupBy('STOCK_ITEM_ID','TRAN_DATE','REF_NO', 'STOCK_ITEM_NAME', 'ITEM_MRP')
             ->get();
 

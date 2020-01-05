@@ -57,7 +57,7 @@ class UsersController extends Controller
 
 
         if( $request->get('user_type')==1){
-            return response()->json('Error', 403);
+            return response()->json('Error User Id 1', 403);
         }
 
         $user = new User();
@@ -156,6 +156,7 @@ class UsersController extends Controller
         }
         return response()->json(User::where('id', $user->id)->with(['profiles'])->first(), 200);
     }
+
 
     public function destroy(Request $request, int $id): JsonResponse
     {

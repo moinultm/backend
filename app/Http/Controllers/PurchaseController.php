@@ -62,7 +62,6 @@ class PurchaseController extends Controller
 
         return response()->json($transaction ,200);
 
-
      }
 
     public function show($id): JsonResponse
@@ -99,7 +98,7 @@ class PurchaseController extends Controller
         $ym = Carbon::now()->format('Y/m');
 
         $row = Transaction::where('transaction_type', 'purchase')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'purchase')->withTrashed()->get()->count() + 1 : 1;
-        $ref_no = $ym.'/PI-'.self::ref($row);
+        $ref_no = 'PI-'.self::ref($row);
         $total = 0;
         $totalProductTax = 0;
         $productTax = 0;
@@ -221,12 +220,42 @@ class PurchaseController extends Controller
 
     public function update(Request $request, $id): JsonResponse
     {
+
     }
+
+    public function deletePurchase(Request $request) {
+
+        $transaction = Transaction::findorFail($request->get('id'));
+        foreach ($transaction->purchases as $purchase) {
+            //subtract deleted product from stock
+            $product = Product::findorFail($purchase->product_id);
+            $current_stock = $product->quantity;
+            $product->quantity = $current_stock - $purchase->quantity;
+            $product->save();
+
+            //delete the purchase entry in purchases table
+            $purchase->delete();
+        }
+
+        //delete all the payments against this transaction
+        foreach($transaction->payments as $payment){
+            $payment->delete();
+        }
+
+        //delete the transaction entry for this sale
+        $transaction->delete();
+
+        $message = trans('core.deleted');
+        return response()->json( 'delete', 200);
+    }
+
 
 
     public function destroy(Request $request, int $id): JsonResponse
     {
 
     }
+
+
 }
 

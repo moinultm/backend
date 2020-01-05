@@ -26,7 +26,7 @@ class AddBillHeaderToSettingsTable extends Migration
     public function down()
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->text('invoice_header')->after('enable_customer');
+            $table->dropColumn('invoice_header');
         });
     }
 }

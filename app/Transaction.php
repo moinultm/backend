@@ -24,6 +24,10 @@ class Transaction extends Model
         return $this->hasMany('App\Purchase', 'reference_no', 'reference_no');
     }
 
+    public function challans() {
+        return $this->hasMany('App\Representative', 'ref_no', 'reference_no');
+    }
+
 
     public function order() {
         return $this->hasMany('App\Order', 'reference_no', 'reference_no');

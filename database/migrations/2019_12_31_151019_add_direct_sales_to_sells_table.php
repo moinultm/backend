@@ -27,7 +27,7 @@ class AddDirectSalesToSellsTable extends Migration
     public function down()
     {
         Schema::table('sells', function (Blueprint $table) {
-            $table->integer('direct')->after('date')->default(0);
+            $table->dropColumn('direct');
 
         });
     }

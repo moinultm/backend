@@ -26,7 +26,7 @@ class AddRecivingToRepresentativesStockTable extends Migration
     public function down()
     {
         Schema::table('representatives_stock', function (Blueprint $table) {
-            $table->text('receiving')->after('date');
+            $table->dropColumn('receiving');
 
         });
     }

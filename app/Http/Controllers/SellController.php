@@ -545,6 +545,8 @@ use paginator;
 
     public function deleteSell(Request $request, Transaction $transaction) {
 
+        $transaction = Transaction::findorFail($request->get('id'));
+
         foreach ($transaction->sells as $sell) {
             //add deleted product into stock
             $product = Product::find($sell->product_id);
@@ -570,8 +572,7 @@ use paginator;
         $transaction->delete();
 
         $message = trans('core.deleted');
-
-        return redirect()->route('sell.index')->withSuccess($message);
+        return response()->json( 'delete', 200);
     }
 
 }

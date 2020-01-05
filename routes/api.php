@@ -10,8 +10,6 @@ Route::group([
 ], function ($router) {
     Route::get('settings', 'SettingsController@getIndex');
 
-
-
 });
 
 
@@ -102,6 +100,8 @@ Route::group([
     //purchase
     Route::resource('purchase', 'PurchaseController');
     Route::get('purchase/{transaction}/details', 'PurchaseController@details');
+
+
     Route::get('purchase/list/pi', 'PurchaseController@getLists');
     Route::get('sell/list/si', 'SellController@getLists');
 
@@ -123,6 +123,7 @@ Route::group([
     Route::resource('represent', 'RepresentativeController');
     Route::get('users/{user}/representative', 'RepresentativeController@getUser');
            Route::get('represent/{user}/challans', 'RepresentativeController@getChallans');
+
     Route::get('represent/{user}/sells', 'RepresentativeController@getSells');
     Route::get('represent/{user}/invoices', 'RepresentativeController@getInvoices');
 
@@ -155,6 +156,7 @@ Route::group([
     Route::get('report/{user}/challan-report', 'ReportingController@challanReport');
 
     Route::get('report/stockin-report', 'ReportingController@stockInReport');
+    Route::get('report/stockout-report', 'ReportingController@stockOutReport');
 
     Route::get('report/{user}/damage-report', 'ReportingController@damageReport');
     Route::get('report/{user}/gift-report', 'ReportingController@giftReport');
@@ -166,3 +168,13 @@ Route::group([
 
 
 });
+
+
+//Delete Sales
+Route::post('sell/{transaction}/delete', 'SellController@deleteSell')->middleware(['auth:api', 'roles:ROLE_SALES_MANAGE']);
+
+//Delete Purchase
+Route::post('purchase/{transaction}/delete', 'PurchaseController@deletePurchase')->middleware(['auth:api', 'roles:ROLE_PURCHASE_MANAGE']);
+
+//Delete Challan
+Route::post('represent/{transaction}/delete', 'RepresentativeController@deleteChallan')->middleware(['auth:api', 'roles:ROLE_SALES_MANAGE']);
