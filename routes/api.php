@@ -117,8 +117,6 @@ Route::group([
 //settings
     //Route::resource('settings', 'SettingsController');
     Route::post('settings/{settings}', 'SettingsController@update');
-
-
     //representetive
     Route::resource('represent', 'RepresentativeController');
     Route::get('users/{user}/representative', 'RepresentativeController@getUser');
