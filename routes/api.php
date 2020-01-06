@@ -137,14 +137,12 @@ Route::group([
     //Dashboard
     Route::get('dashboard', 'DashboardController@index');
 
-
     //Reporting
     Route::get('report/product-report', 'ReportingController@productReport');
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
     Route::get('report/{user}/represent-stock-report', 'ReportingController@representStockReport');
     Route::get('report/represent-payment-report', 'ReportingController@representPaymentReport');
-
 
     Route::get('report/product-sells-report', 'ReportingController@productSellReport');
 
@@ -159,11 +157,9 @@ Route::group([
     Route::get('report/{user}/damage-report', 'ReportingController@damageReport');
     Route::get('report/{user}/gift-report', 'ReportingController@giftReport');
 
-
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
     Route::get('report/profit-loss-report', 'ReportingController@postProfitReport');
-
 
 });
 
@@ -176,3 +172,9 @@ Route::post('purchase/{transaction}/delete', 'PurchaseController@deletePurchase'
 
 //Delete Challan
 Route::post('represent/{transaction}/delete', 'RepresentativeController@deleteChallan')->middleware(['auth:api', 'roles:ROLE_SALES_MANAGE']);
+
+//Delete Gifts
+Route::post('gifts/{transaction}/delete', 'GiftProductController@deleteGift')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);
+
+//Delete Damage
+Route::post('damages/{transaction}/delete', 'GiftProductController@deleteDamage')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);

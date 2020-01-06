@@ -92,29 +92,29 @@ class DamageProductController extends Controller
                 //Transaction Table
                 $invoice_tax = 0;
 
-                $transaction = new Transaction;
-                $transaction->reference_no = $ref_no;
-                $transaction->client_id = 0;
-                $transaction->transaction_type = 'damage';
-                $transaction->total_cost_price = $total_cost_price;
-                $transaction->discount = 0;
-                //saving total without product tax and shipping cost
-                $transaction->total =0;
-                $transaction->invoice_tax = 0;
-                $transaction->total_tax = 0;
-                $transaction->labor_cost = 0;
-                $transaction->net_total = 0;
-                $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
-                $transaction->paid = $paid;
-                $transaction->user_id = $request->get('user_id');
-                $transaction->save();
                 //Product Table
                 $product = $sell->product;
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();
-
-
             }
+
+            $transaction = new Transaction;
+            $transaction->reference_no = $ref_no;
+            $transaction->client_id = 0;
+            $transaction->transaction_type = 'damage';
+            $transaction->total_cost_price = $total_cost_price;
+            $transaction->discount = 0;
+            //saving total without product tax and shipping cost
+            $transaction->total =0;
+            $transaction->invoice_tax = 0;
+            $transaction->total_tax = 0;
+            $transaction->labor_cost = 0;
+            $transaction->net_total = 0;
+            $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+            $transaction->paid = $paid;
+            $transaction->user_id = $request->get('user_id');
+            $transaction->save();
+
 
         }); //end Transaction
         // return response()->json(['message' => 'Successfully saved transaction.'], 200);
@@ -123,9 +123,11 @@ class DamageProductController extends Controller
 
 
 
-    public function delete(Request $request, Transaction $transaction) {
+    public function deleteDamage(Request $request, Transaction $transaction) {
 
-        foreach ($transaction->sells as $sell) {
+        $transaction = Transaction::findorFail($request->get('id'));
+
+        foreach ($transaction->damages as $sell) {
             //add deleted product into stock
             $product = Product::find($sell->product_id);
             $current_stock = $product->quantity;
@@ -136,21 +138,12 @@ class DamageProductController extends Controller
             $sell->delete();
         }
 
-        //delete all the payments against this transaction
-        foreach($transaction->payments as $payment){
-            $payment->delete();
-        }
-
-        //delete all the return sells against this transaction
-        foreach($transaction->returnSales as $return){
-            $return->delete();
-        }
 
         //delete the transaction entry for this sale
         $transaction->delete();
 
         $message = trans('core.deleted');
-        return redirect()->route('sell.index')->withSuccess($message);
+        return response()->json( [ 'success' => 'Deleted'], 200);
     }
 
 }

@@ -28,6 +28,14 @@ class Transaction extends Model
         return $this->hasMany('App\Representative', 'ref_no', 'reference_no');
     }
 
+    public function gifts() {
+        return $this->hasMany('App\GiftProduct', 'reference_no', 'reference_no');
+    }
+
+    public function damages() {
+        return $this->hasMany('App\DamageProduct', 'reference_no', 'reference_no');
+    }
+
 
     public function order() {
         return $this->hasMany('App\Order', 'reference_no', 'reference_no');
