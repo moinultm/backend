@@ -47,7 +47,7 @@ class DamageProductController extends Controller
 
         $ym = Carbon::now()->format('Y/m');
 
-        $rowT = Transaction::where('transaction_type', 'damage')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'gift')->withTrashed()->get()->count() + 1 : 1;
+        $rowT = Transaction::where('transaction_type', 'damage')->withTrashed()->get()->count() > 0 ? Transaction::where('transaction_type', 'damage')->withTrashed()->get()->count() + 1 : 1;
         $ref_no = 'DP-'.self::ref($rowT);
         $total = 0;
         $totalProductTax = 0;
@@ -96,6 +96,11 @@ class DamageProductController extends Controller
                 $product = $sell->product;
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();
+
+                $product = $sell->product;
+                $product->general_quantity = $product->general_quantity - intval($sell_item['quantity']);
+                $product->save();
+
             }
 
             $transaction = new Transaction;
@@ -113,6 +118,7 @@ class DamageProductController extends Controller
             $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
             $transaction->paid = $paid;
             $transaction->user_id = $request->get('user_id');
+            $transaction->notes = $request->get('notes');
             $transaction->save();
 
 
@@ -127,16 +133,28 @@ class DamageProductController extends Controller
 
         $transaction = Transaction::findorFail($request->get('id'));
 
-        foreach ($transaction->damages as $sell) {
+
+
+        foreach ($transaction->damages as $damage) {
             //add deleted product into stock
-            $product = Product::find($sell->product_id);
+            $product = Product::find($damage->product_id);
+
             $current_stock = $product->quantity;
-            $product->quantity = $current_stock + $sell->quantity;
+            $current_general_stock = $product->general_quantity;
+
+            $product->quantity = $current_stock + $damage->quantity;
+            $product->general_quantity =$current_general_stock + $damage->quantity;
+
+
             $product->save();
 
+
+
             //delete the sales entry in sells table
-            $sell->delete();
+            $damage->delete();
         }
+
+
 
 
         //delete the transaction entry for this sale

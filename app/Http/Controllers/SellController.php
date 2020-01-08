@@ -272,6 +272,11 @@ use paginator;
                 $product = $sell->product;
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();
+
+                //this is decrement general field
+                $product = $sell->product;
+                $product->general_quantity = $product->general_quantity - intval($sell_item['add_quantity']);
+                $product->save();
             }
 
             //discount

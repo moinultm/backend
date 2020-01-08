@@ -11,7 +11,7 @@ class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name'  );
+    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name','total_quantity_challan' );
 
     public static  $preventAttrSet = false;
 
@@ -105,10 +105,19 @@ class Transaction extends Model
     }
 
 
+
+    public function getTotalQuantityChallanAttribute()
+    {
+        $sum1= $this->challans()->where('ref_no', $this->reference_no)->sum('quantity');
+        return $sum1;
+    }
+
+
+
+
+
     public function getClientNameAttribute()
     {
-
-
 
         if (self::$preventAttrSet) {return []; }
 

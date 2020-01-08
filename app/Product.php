@@ -38,6 +38,20 @@ class Product extends Model
         return $this->hasMany('App\Sell');
     }
 
+    public function transfers() {
+        return $this->hasMany('App\Representative');
+    }
+
+
+    public function gifts() {
+        return $this->hasMany('App\GiftProduct');
+    }
+
+    public function damages() {
+        return $this->hasMany('App\DamageProduct');
+    }
+
+
 
     //Attributes
     public function getTotalQuantityTransactionAttribute()

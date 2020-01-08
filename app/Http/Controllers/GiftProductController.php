@@ -102,7 +102,9 @@ class GiftProductController extends Controller
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();
 
-
+                $product = $sell->product;
+                $product->general_quantity = $product->general_quantity - intval($sell_item['quantity']);
+                $product->save();
                 }
 
 
@@ -122,6 +124,7 @@ class GiftProductController extends Controller
             $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
             $transaction->paid = $paid;
             $transaction->user_id = $request->get('user_id');
+            $transaction->notes = $request->get('notes');
             $transaction->save();
 
 
@@ -137,15 +140,19 @@ class GiftProductController extends Controller
 
         $transaction = Transaction::findorFail($request->get('id'));
 
-        foreach ($transaction->gifts as $sell) {
+        foreach ($transaction->gifts as $gift) {
             //add deleted product into stock
-            $product = Product::find($sell->product_id);
+            $product = Product::find($gift->product_id);
             $current_stock = $product->quantity;
-            $product->quantity = $current_stock + $sell->quantity;
+            $current_general_stock = $product->general_quantity;
+
+            $product->quantity = $current_stock + $gift->quantity;
+            $product->general_quantity =$current_general_stock + $gift->quantity;
             $product->save();
 
-            //delete the sales entry in sells table
-            $sell->delete();
+
+            //delete the sales entry in $gift table
+            $gift->delete();
         }
 
 

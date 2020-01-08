@@ -11,6 +11,8 @@ class Representative extends Model
 
  protected  $table='representatives_stock';
 
+
+
     public $fillable = [
         'user_id',
         'date',

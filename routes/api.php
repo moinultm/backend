@@ -177,4 +177,4 @@ Route::post('represent/{transaction}/delete', 'RepresentativeController@deleteCh
 Route::post('gifts/{transaction}/delete', 'GiftProductController@deleteGift')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);
 
 //Delete Damage
-Route::post('damages/{transaction}/delete', 'GiftProductController@deleteDamage')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);
+Route::post('damages/{transaction}/delete', 'DamageProductController@deleteDamage')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Product;
 use App\Representative;
 use App\Sell;
 use App\Transaction;
@@ -118,6 +119,14 @@ class RepresentativeController extends Controller
                 $stock->quantity = $sell_item['add_quantity'];
                 $user = $stock->user_id;
                 $stock->save();
+
+
+
+                $product = $stock->product;
+                $product->general_quantity = $product->general_quantity - intval($sell_item['add_quantity']);
+                $product->save();
+
+
             }
 
 
@@ -260,6 +269,12 @@ class RepresentativeController extends Controller
 
         foreach ($transaction->challans as $challan) {
                         //delete the purchase entry in purchases table
+
+            $product = Product::find($challan->product_id);
+            $current_stock = $product->quantity;
+            $product->general_quantity = $current_stock + $challan->general_quantity;
+            $product->save();
+
             $challan->delete();
 
         }
