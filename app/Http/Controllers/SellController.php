@@ -264,8 +264,15 @@ use paginator;
                 $stock->quantity =  $sell_item['quantity']*-1;
                 $stock->ref_no= $ref_no_rep_sell;
                 $stock->save();
+
             }
 
+                if ($request->get('direct')==1) {
+                    //this is decrement general field
+                    $product = $sell->product;
+                    $product->general_quantity = $product->general_quantity - intval($sell_item['quantity']);
+                    $product->save();
+                }
 
 
                 //this is product decrement from stock
@@ -273,10 +280,7 @@ use paginator;
                 $product->quantity = $product->quantity - intval($sell_item['quantity']);
                 $product->save();
 
-                //this is decrement general field
-                $product = $sell->product;
-                $product->general_quantity = $product->general_quantity - intval($sell_item['add_quantity']);
-                $product->save();
+
             }
 
             //discount

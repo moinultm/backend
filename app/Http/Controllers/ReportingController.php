@@ -851,7 +851,7 @@ class ReportingController extends Controller
             COALESCE( sum(DAMAGE_QUANTITY),0) as DAMAGE_QUANTITY,
             COALESCE( sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST')
             ->groupBy('STOCK_ITEM_ID', 'STOCK_ITEM_NAME', 'ITEM_MRP')
-            ->orderBy('STOCK_ITEM_NAME')
+            ->orderBy('STOCK_ITEM_ID')
             ->get();
 /*
         $dataProduct = DB::table('TEMP_TRANSACTION')
@@ -997,7 +997,7 @@ class ReportingController extends Controller
             $temp = $this->stock_Out_report_temp_check($nowDate, $nowDate);
         }
 
-        $users=   Transaction::where('transaction_type', 'sell');
+        $users=   Transaction::where('transaction_type', 'transfer');
        // $users= Sell::query()->select('id','reference_no','product_id','date');
         $products= Product::query()->select('id','name');
 
@@ -1039,16 +1039,22 @@ class ReportingController extends Controller
         //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','ITEM_MRP'], $select0);
 
 
+        $select1 = Representative::query()
+            ->join('products', 'representatives_stock.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,representatives_stock.date,representatives_stock.ref_no , sum(representatives_stock.quantity)as OUTWARD_QUANTITY,0')
+            ->whereBetween('date',[$from,$to])
+            ->where('representatives_stock.quantity','>',0)
+            ->groupBy('products.id','representatives_stock.date','representatives_stock.ref_no');
 
         $select5 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,sells.date,sells.reference_no,sum(sells.quantity)as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT')
+            ->where('direct','=',1)
             ->whereBetween('date',[$from,$to])
-
             ->groupBy('products.id','sells.reference_no','sells.date');
 
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select1);
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select5);
-
 
 ////////////////FINAL SELECTION//////////////////////////////
 
@@ -1070,6 +1076,8 @@ class ReportingController extends Controller
     }
 
 //*******************************STOCK REPORT- OUT BASED**********************************
+
+
 
 
 
@@ -1299,14 +1307,17 @@ class ReportingController extends Controller
 
         $products= Product::query()->select('id','name');
 
-        $query = Representative:: query()->select('ref_no','user_id','users.name')
+        $queryN = Representative:: query()->select('ref_no','user_id','users.name')
             ->leftJoin('users' , 'users.id','=','representatives_stock.user_id')
             ->where('quantity', '>=', '0')
             ->groupBy('ref_no','user_id','users.name')
             ->orderBy('ref_no', 'DESC');
 
+        $query = Transaction::where('transaction_type', 'transfer');
 
-        if ($userId=='0'){ return '';  } else
+        if ($userId=='0'){
+            $query->get();
+        } else
         {
             $query->where('user_id','=', $userId);
         }

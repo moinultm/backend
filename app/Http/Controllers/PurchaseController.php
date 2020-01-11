@@ -29,7 +29,6 @@ class PurchaseController extends Controller
 
         $transactions = Transaction::where('transaction_type', 'purchase')->orderBy('date', 'desc');
 
-
         if($request->get('invoice')) {
             $transactions->where('reference_no', 'LIKE', '%' . $request->get('invoice') . '%');
         }
@@ -141,9 +140,15 @@ class PurchaseController extends Controller
                 $purchase->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
                 $purchase->save();
 
+                //Product Tables Quantity
                 $product = $purchase->product;
+
                 $product->quantity = $product->quantity + intval($purchase_item['quantity']);
+                $product->general_quantity = $product->general_quantity + intval($purchase_item['quantity']);
+
                 $product->save();
+
+
             }
 
             //discount
@@ -229,8 +234,12 @@ class PurchaseController extends Controller
         foreach ($transaction->purchases as $purchase) {
             //subtract deleted product from stock
             $product = Product::findorFail($purchase->product_id);
+
             $current_stock = $product->quantity;
             $product->quantity = $current_stock - $purchase->quantity;
+
+            $current_general_stock = $product->general_quantity;
+            $product->general_quantity =$current_general_stock - $purchase->quantity;
             $product->save();
 
             //delete the purchase entry in purchases table
