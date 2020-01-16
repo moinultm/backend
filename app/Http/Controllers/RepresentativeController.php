@@ -28,7 +28,7 @@ class RepresentativeController extends Controller
     public function index(Request $request): JsonResponse
     {
 
-        $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('date', 'desc');
+        $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('reference_no', 'desc');
 
 
         $query = Representative::
@@ -46,7 +46,7 @@ class RepresentativeController extends Controller
     public function getChallans(Request $request,$id): JsonResponse
     {
         if ($id==0){
-            $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('date', 'desc');
+            $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('reference_no', 'desc');
         }
     else{
         $transactions = Transaction::where('transaction_type', 'transfer')

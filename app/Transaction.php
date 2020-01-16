@@ -38,7 +38,7 @@ class Transaction extends Model
 
 
     public function order() {
-        return $this->hasMany('App\Order', 'reference_no', 'reference_no');
+        return $this->hasMany('App\Transaction', 'reference_no', 'reference_no');
     }
 
     public function orderInvoices() {

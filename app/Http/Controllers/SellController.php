@@ -567,6 +567,11 @@ use paginator;
             $sell->delete();
         }
 
+        foreach ($transaction->order as $sell) {
+
+            $sell->delete();
+        }
+
         //delete all the payments against this transaction
         foreach($transaction->payments as $payment){
             $payment->delete();
@@ -579,6 +584,7 @@ use paginator;
 
         //delete the transaction entry for this sale
         $transaction->delete();
+
 
         $message = trans('core.deleted');
         return response()->json( 'delete', 200);
