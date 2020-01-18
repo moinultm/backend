@@ -1073,9 +1073,7 @@ class ReportingController extends Controller
             ->get();
 
 
-
          Schema::drop('TEMP_TRANSACTION');
-
 
         return $select0;
 
