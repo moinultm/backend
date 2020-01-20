@@ -683,10 +683,9 @@ class ReportingController extends Controller
         } catch (\Exception $e) {
             return $e->getMessage();
         }
-        $AssociateArray = array(
-            'product' =>  $temp,
-        );
-        return response()->json($AssociateArray ,200);
+
+
+        return response()->json($temp ,200);
     }
     public function summary_temp_check($from,$to )
     {
@@ -803,7 +802,12 @@ class ReportingController extends Controller
 
         Schema::drop('TEMP_OPENING');
         Schema::drop('TEMP_TRANSACTION');
-        return $select0;
+
+        $AssociateArray = array(
+            'product' =>  $select0,
+
+        );
+        return $AssociateArray;
     }
 
 
@@ -829,10 +833,11 @@ class ReportingController extends Controller
         } catch (\Exception $e) {
             return $e->getMessage();
         }
-
+      $summary=  $temp->select('TRAN_QUANTITY');
 
         $AssociateArray = array(
             'product' =>  $temp
+
         );
 
 
