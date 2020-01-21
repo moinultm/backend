@@ -31,7 +31,7 @@ class SettingsController extends Controller
 
         $rules = [
             'site_name' => 'required|max:255',
-            'email' => 'required|email',
+            'email' => 'required',
             'address' => 'required|max:255',
             'phone' => 'required',
         ];
