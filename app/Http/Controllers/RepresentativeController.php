@@ -265,14 +265,16 @@ class RepresentativeController extends Controller
 
 
     public function deleteChallan(Request $request) {
+
         $transaction = Transaction::findorFail($request->get('id'));
 
         foreach ($transaction->challans as $challan) {
-                        //delete the purchase entry in purchases table
+            //delete the purchase entry in purchases table
 
-            $product = Product::find($challan->product_id);
-            $current_stock = $product->quantity;
-            $product->general_quantity = $current_stock + $challan->general_quantity;
+            $product = Product::findorFail($challan->product_id);
+
+            $current_general_stock = $product->general_quantity;
+            $product->general_quantity =$current_general_stock + $challan->quantity;
             $product->save();
 
             $challan->delete();
@@ -281,9 +283,8 @@ class RepresentativeController extends Controller
         //delete the transaction entry for this sale
         $transaction->delete();
 
-        return response()->json( 'delete', 200);
 
-
+        return response()->json( $transaction, 200);
 
     }
 

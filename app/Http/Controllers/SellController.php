@@ -568,7 +568,6 @@ use paginator;
         }
 
         foreach ($transaction->order as $sell) {
-
             $sell->delete();
         }
 

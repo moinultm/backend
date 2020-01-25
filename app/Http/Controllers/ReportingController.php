@@ -215,22 +215,19 @@ class ReportingController extends Controller
     public function  productReportActual(Request $request)
     {
 
-//need to fix dates query
+        //need to fix dates query
 
         $date=Carbon::now();
         $nowDate = date('Y-m-d', strtotime($date));
 
-
         $from = $request->get('from') ?:date('Y-m-d H:i:s');
         $to = $request->get('to')?:date('Y-m-d H:i:s');
 
-
-
         if(!is_null($from)) {
-            $temp = $this->temporary_check($from, $to);
+            $temp = $this->temporary_check_actual($from, $to);
         }
         else{
-            $temp = $this->temporary_check($nowDate, $nowDate);
+            $temp = $this->temporary_check_actual($nowDate, $nowDate);
         }
 
         $AssociateArray = array(
@@ -705,7 +702,7 @@ class ReportingController extends Controller
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select0);
         $select1 = Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
-            ->selectRaw( 'products.id , sum(representatives_stock.quantity)as TRAN_QUANTITY,0')
+            ->selectRaw( 'products.id , sum(representatives_stock.quantity*-1)as TRAN_QUANTITY,0')
             ->where('date','<',$from)
             ->where('representatives_stock.quantity','>',0)
             ->groupBy('products.id' );
@@ -1799,7 +1796,8 @@ class ReportingController extends Controller
             ->groupBy('products.id','products.name','products.mrp',
                 'sells.product_discount_percentage');
 
-
+        $query = Transaction::where('transaction_type', 'sell');
+        $query->with(['sells','sells.product']);
 
         if ($userId!='null'){
             $characteristics->where('user_id','=',$userId );
@@ -1811,6 +1809,7 @@ class ReportingController extends Controller
             'product' =>  $temp,
             'characteristics'=>$characteristics->get(),
             'crossData'=>$crossData->get()
+
         );
 
         return response()->json($AssociateArray ,200);

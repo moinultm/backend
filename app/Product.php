@@ -38,7 +38,7 @@ class Product extends Model
         return $this->hasMany('App\Sell');
     }
 
-    public function transfers() {
+    public function challans() {
         return $this->hasMany('App\Representative');
     }
 

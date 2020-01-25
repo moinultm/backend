@@ -239,6 +239,7 @@ class PurchaseController extends Controller
             $product->quantity = $current_stock - $purchase->quantity;
 
             $current_general_stock = $product->general_quantity;
+
             $product->general_quantity =$current_general_stock - $purchase->quantity;
             $product->save();
 

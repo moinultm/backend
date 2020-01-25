@@ -10,8 +10,6 @@ class Purchase extends Model
     use SoftDeletes;
 
 
-
-
     //protected $appends = array('total_purchases');
     protected $dates = ['created_at','updated_at'];
 

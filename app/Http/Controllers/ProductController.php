@@ -188,7 +188,8 @@ class ProductController extends Controller
         $product = Product::find($id);
         $product->cost_price = $request->get('cost_price');
         $product->mrp = $request->get('mrp');
-        $product->save();
+        $product->minimum_retail_price = $request->get('minimum_retail_price');
+       $product->save();
 
          return response()->json( [ 'error' => 'updated'], 200);
     }
