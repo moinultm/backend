@@ -1639,7 +1639,7 @@ class ReportingController extends Controller
         });
 
 
-        $select6 = DamageProduct::query()
+        $select6 = GiftProduct::query()
             ->select(  'reference_no','product_id as STOCK_ITEM_ID','user_id as USER_ID', 'quantity as TRAN_QUANTITY')
             ->whereBetween('date',[$from,$to])
             ->where('quantity','>',0)
