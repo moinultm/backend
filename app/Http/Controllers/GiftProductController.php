@@ -25,8 +25,8 @@ class GiftProductController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-
         $transactions = Transaction::where('transaction_type', 'gift')->orderBy('date', 'desc') ;
+        $transactions->with(['gifts','gifts.product']);
         return response()->json(self::paginate($transactions, $request), 200);
     }
 

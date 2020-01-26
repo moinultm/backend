@@ -23,6 +23,8 @@ class DamageProductController extends Controller
     {
 
         $transactions = Transaction::where('transaction_type', 'damage')->orderBy('date', 'desc') ;
+        $transactions->with(['damages','damages.product']);
+
         return response()->json(self::paginate($transactions, $request), 200);
     }
 

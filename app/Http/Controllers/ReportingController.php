@@ -1780,8 +1780,8 @@ class ReportingController extends Controller
         $characteristics= Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw('sum(sells.quantity) as quantity,
-                            sells.product_discount_percentage,
-                            sum(sells.product_discount_amount)as product_discount_amount')
+                            sells.product_discount_percentage,                           
+                            sum(sells.sub_total)as sub_total')
             ->whereBetween('date',[$from,$to])
             ->groupBy('sells.product_discount_percentage');
 
@@ -1809,7 +1809,6 @@ class ReportingController extends Controller
             'product' =>  $temp,
             'characteristics'=>$characteristics->get(),
             'crossData'=>$crossData->get()
-
         );
 
         return response()->json($AssociateArray ,200);
