@@ -1182,6 +1182,112 @@ class ReportingController extends Controller
 
 
 
+
+
+
+//*******************************STOCK REPORT- USER BASED**********************************
+    public  function stockReport2(Request $request){
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+
+
+        //this for returning blank
+
+
+        if(!is_null($from)) {
+            $temp = $this->stock_report_temp_check2($from, $to);
+        }
+        else{
+            $temp = $this->stock_report_temp_check2($nowDate, $nowDate);
+        }
+
+
+        $users= User::query()->select('id','name');
+        $products= Product::query()->select('id','name');
+//select(DB::raw('DATE(date)as date'))->
+
+
+        $AssociateArray = array(
+            'products' =>  $products->get(),
+            'users'=>$users->get(),
+            'crossData'=> $temp,
+
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+    public function stock_report_temp_check2($from,$to )
+    {
+
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+        //////////////////TRANSACTION-PROCESS//////////////////////////////
+
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('STOCK_ITEM_ID');
+            $table->string('USER_NAME');
+            $table->integer('OUTWARD')->default(0);
+            $table->string('TRAN_TYPE');
+            $table->temporary();
+        });
+
+
+        $select5 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->join('users', 'users.id', '=', 'sells.user_id')
+            ->selectRaw( 'products.id,users.name,sells.quantity as OUTWARD,"Quantity"')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('users.name','products.id','sells.quantity');
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_NAME','OUTWARD','TRAN_TYPE'], $select5);
+
+
+        $select7 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->join('users', 'users.id', '=', 'sells.user_id')
+            ->selectRaw( 'products.id,users.name,sells.sub_total as OUTWARD,"Amount"' )
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('users.name','products.id','sells.sub_total');
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_NAME','OUTWARD','TRAN_TYPE'], $select7);
+
+
+        $select6 = Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->join('users', 'users.id', '=', 'sells.user_id')
+            ->selectRaw( 'products.id,users.name,sum(sells.quantity) as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT, "Quantity"' )
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.id','users.name');
+
+       // DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_NAME','OUTWARD_QUANTITY','OUTWARD_AMOUNT','TRAN_TYPE'], $select6);
+
+
+        ////////////////FINAL SELECTION//////////////////////////////
+
+        $select0= Product::query()
+            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
+            ->selectRaw('products.name as STOCK_ITEM_NAME,USER_NAME,STOCK_ITEM_ID,     
+                       COALESCE( OUTWARD,0) as  OUTWARD,TRAN_TYPE')
+            ->groupBy('STOCK_ITEM_ID','USER_NAME', 'STOCK_ITEM_NAME','OUTWARD','TRAN_TYPE')
+            ->get();
+
+
+        Schema::drop('TEMP_TRANSACTION');
+        return $select0;
+
+    }
+
+//*******************************STOCK REPORT- USER BASED 2 **********************************
+
+
+
 //*******************************STOCK REPORT- USER BASED**********************************
     public  function stockReport(Request $request){
 
@@ -1367,6 +1473,10 @@ class ReportingController extends Controller
     }
 
 //*******************************STOCK REPORT- USER BASED**********************************
+
+
+
+
 
 
 //*******************************Challan REPORT- USER BASED**********************************
