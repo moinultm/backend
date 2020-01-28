@@ -149,7 +149,7 @@ Route::group([
     Route::get('report/stock-general-report', 'ReportingController@stockGeneralReport');
 
     //27-01-2020
-    Route::get('report/stock-report', 'ReportingController@stockReport2');
+    Route::get('report/stock-report', 'ReportingController@stockReport');
 
     Route::get('report/{user}/challan-report', 'ReportingController@challanReport');
 

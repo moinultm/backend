@@ -1295,11 +1295,7 @@ class ReportingController extends Controller
         $nowDate = date('Y-m-d', strtotime($date));
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
-
-
         //this for returning blank
-
-
         if(!is_null($from)) {
             $temp = $this->stock_report_temp_check($from, $to);
         }
@@ -1311,12 +1307,24 @@ class ReportingController extends Controller
         $users= User::query()->select('id','name');
         $products= Product::query()->select('id','name');
 
+        $sells= Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'products.id,  sum(sells.quantity)as Quantity,sum(sells.sub_total)as Amount')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('products.id' );;
 
+        $sells2= Sell::query()
+            ->join('products', 'sells.product_id', '=', 'products.id')
+            ->selectRaw( 'sells.user_id, sum(sells.quantity)as Quantity,sum(sells.sub_total)as Amount')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('sells.user_id' );;
 
         $AssociateArray = array(
             'products' =>  $products->get(),
             'users'=>$users->get(),
-            'crossData'=> $temp
+            'crossData'=> $temp,
+            'char'=>$sells->get(),
+            'charUser'=>$sells2->get()
         );
 
         return response()->json($AssociateArray ,200);

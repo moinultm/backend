@@ -30,13 +30,20 @@ class RepresentativeController extends Controller
 
         $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('reference_no', 'desc');
 
+        $from = $request->get('from');
+        $to = $request->get('to')?:date('Y-m-d');
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to = self:: filterTo($to);
 
-        $query = Representative::
-            selectRaw('representatives_stock.id,representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
-            ->leftJoin('users', 'users.id', '=', 'representatives_stock.user_id')
-            ->where('representatives_stock.quantity', '>=', '0')
-            ->groupBy('representatives_stock.id', 'representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name')
-            ->orderBy('representatives_stock.ref_no', 'DESC');
+        if($request->get('from') || $request->get('to')) {
+            if(!is_null($from)){
+                $from = Carbon::createFromFormat('Y-m-d',$from);
+                $from = self::filterFrom($from);
+                $transactions->whereBetween('date',[$from,$to]);
+            }else{
+                $transactions->where('date','<=',$to);
+            }
+        }
 
 
         return response()->json(self::paginate($transactions, $request), 200);
@@ -45,6 +52,7 @@ class RepresentativeController extends Controller
 
     public function getChallans(Request $request,$id): JsonResponse
     {
+
         if ($id==0){
             $transactions = Transaction::where('transaction_type', 'transfer')->orderBy('reference_no', 'desc');
         }
@@ -54,22 +62,7 @@ class RepresentativeController extends Controller
             ->orderBy('date', 'desc');
     }
 
-        if ($id==0){
-            $query = Representative::
-            selectRaw('representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
-                ->Join('users', 'users.id', '=', 'representatives_stock.user_id')
-                ->where('representatives_stock.quantity', '>=', '0')
-                ->groupBy('representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name','users.id')
-                ->orderBy('representatives_stock.ref_no', 'DESC');
-        }
-        else{
-        $query = Representative::
-        selectRaw('representatives_stock.ref_no,users.name, sum(representatives_stock.quantity)as total_quantity ,representatives_stock.date,representatives_stock.receiving')
-            ->Join('users', 'users.id', '=', 'representatives_stock.user_id')
-            ->where('representatives_stock.quantity', '>=', '0')
-            ->where('representatives_stock.user_id','=', $id)
-            ->groupBy('representatives_stock.ref_no', 'representatives_stock.date','representatives_stock.receiving','users.name','users.id')
-            ->orderBy('representatives_stock.ref_no', 'DESC');}
+
 
         return response()->json(self::paginate($transactions, $request), 200);
 
