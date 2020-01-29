@@ -2150,16 +2150,16 @@ class ReportingController extends Controller
             $table->temporary();
         });
 
-        $select1 =Sell::query()
-            ->selectRaw('users.id,users.name,sum(sells.sub_total) as total,0')
+        $select1 =Sell::selectRaw('users.id,users.name,sum(sells.sub_total) as total,0')
             ->leftJoin('users', 'users.id', '=', 'sells.user_id')
             ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
             ->groupBy('users.name','users.id');
 
-        $select2 =User::query()
-            ->selectRaw('users.id,users.name,0,sum(payments.amount) as payment')
+        //Need to verify this point of soft Deletes 29-1-2020
+        $select2 =User::selectRaw('users.id,users.name,0,sum(payments.amount) as payment')
             ->leftJoin('payments', 'payments.user_id', '=', 'users.id')
             ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
+            ->whereNull('deleted_at')
             ->groupBy('users.name','users.id');
 
          DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','PAY'], $select1);

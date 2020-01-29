@@ -32,7 +32,9 @@ class Product extends Model
         return 'data:image/png;base64,' . DNS1D::getBarcodePNG($this->code, "c128A",1,33,array(1,1,1), true);
     }
 
-
+    public function order() {
+    return $this->hasMany('App\Order');
+    }
 
     public function sells() {
         return $this->hasMany('App\Sell');

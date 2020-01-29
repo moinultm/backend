@@ -11,7 +11,7 @@ class Transaction extends Model
 {
     use SoftDeletes;
 
-    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name','total_quantity_challan' );
+    protected $appends = array( 'total_paid','total_return','total_pay' ,'client_name','user_name','total_quantity_challan','total_quantity_sells','total_quantity_purchases');
 
     public static  $preventAttrSet = false;
 
@@ -37,8 +37,8 @@ class Transaction extends Model
     }
 
 
-    public function order() {
-        return $this->hasMany('App\Transaction', 'reference_no', 'reference_no');
+    public function orders() {
+        return $this->hasMany('App\Order', 'reference_no', 'reference_no');
     }
 
     public function orderInvoices() {
@@ -112,7 +112,17 @@ class Transaction extends Model
         return $sum1;
     }
 
+    public function getTotalQuantitySellsAttribute()
+    {
+        $sum1= $this->sells()->where('reference_no', $this->reference_no)->sum('quantity');
+        return $sum1;
+    }
 
+    public function getTotalQuantityPurchasesAttribute()
+    {
+        $sum1= $this->purchases()->where('reference_no', $this->reference_no)->sum('quantity');
+        return $sum1;
+    }
 
 
 

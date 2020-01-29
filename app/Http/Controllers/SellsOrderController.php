@@ -196,11 +196,9 @@ class SellsOrderController extends Controller
         $query = Transaction::query();
         $query->where('transaction_type', 'ORDER');
         $query->where('id', $id);
-        $query->with(['order']);
-        $query->with(['order.product']);
-        $query->with(['orderInvoices']);
+        $query->with(['orders','orders.product']);
+       $query->with(['orderInvoices']);
         $query->with(['client']);
-
 
 
         $AssociateArray = array('data' =>$query->get());

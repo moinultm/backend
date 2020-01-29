@@ -374,8 +374,6 @@ use paginator;
 
 
 
-
-
     public  function details($id): JsonResponse
     {
         $query = Transaction::query();
@@ -567,7 +565,7 @@ use paginator;
             $sell->delete();
         }
 
-        foreach ($transaction->order as $sell) {
+        foreach ($transaction->orders as $sell) {
             $sell->delete();
         }
 
@@ -584,8 +582,6 @@ use paginator;
         //delete the transaction entry for this sale
         $transaction->delete();
 
-
-        $message = trans('core.deleted');
         return response()->json( 'delete', 200);
     }
 
