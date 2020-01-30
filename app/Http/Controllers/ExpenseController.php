@@ -67,6 +67,8 @@ class ExpenseController extends Controller
         $expense = new Expense;
         $expense->purpose = $request->get('purpose');
         $expense->amount = $request->get('amount');
+        $expense->user_id = $request->get('user_id');
+        $expense->date =Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
         $expense->save();
 
         return response()->json('Saved', 200);

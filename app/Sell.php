@@ -28,6 +28,7 @@ class Sell extends Model
     }
 
 
+
     public function getUserNameAttribute()
     {
         $ret= $this->user()->select('name')->where('id', $this->id)->get();

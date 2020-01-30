@@ -142,10 +142,14 @@ Route::group([
     Route::get('report/{user}/represent-stock', 'ReportingController@representSummary');
 
     Route::get('report/{user}/represent-stock-report', 'ReportingController@representStockReport');
+
+
     Route::get('report/represent-payment-report', 'ReportingController@representPaymentReport');
 
-    Route::get('report/product-sells-report', 'ReportingController@productSellReport');
+    Route::get('report/represent-collection-report', 'ReportingController@representSalesCollectionReport');
 
+
+    Route::get('report/product-sells-report', 'ReportingController@productSellReport');
     Route::get('report/stock-general-report', 'ReportingController@stockGeneralReport');
 
     //27-01-2020

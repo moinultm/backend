@@ -33,6 +33,27 @@ class User extends Authenticatable
         $this->attributes['password'] = bcrypt($value);
     }
 */
+    public function purchases(){
+        return $this->hasMany('App\Purchase');
+    }
+
+    public function sells(){
+        return $this->hasMany('App\Sell');
+    }
+
+    public function transactions(){
+        return $this->hasMany('App\Transaction');
+    }
+
+    public function payments(){
+        return $this->hasMany('App\Payment');
+    }
+
+    public function returns(){
+        return $this->hasMany('App\ReturnTransaction');
+    }
+
+
 
     public function roles(): array
     {

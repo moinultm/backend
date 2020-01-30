@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DamageProduct;
 use App\Expense;
 use App\GiftProduct;
+use App\Payment;
 use App\Product;
 use App\Purchase;
 use App\Representative;
@@ -2101,7 +2102,7 @@ class ReportingController extends Controller
         return $select0;
     }
 
-
+/***********Represent Payment Summary*******************/
     public  function representPaymentReport(Request $request)
     {
         $date=Carbon::now();
@@ -2111,7 +2112,7 @@ class ReportingController extends Controller
         $to = $request->get('to');
 
 
-//Need to make a another query for the date wise report this only returns the summary
+         //Need to make a another query for the date wise report this only returns the summary
 
 
         if(!is_null($from)) {
@@ -2120,9 +2121,6 @@ class ReportingController extends Controller
         else{
             $temp = $this->REPRESENT_SUM_temp_check($nowDate, $nowDate);
         }
-
-
-
 
         $AssociateArray = array(
             'payment' =>   $temp,
@@ -2146,29 +2144,124 @@ class ReportingController extends Controller
             $table->integer('USER_ID');
             $table->string('USER_NAME');
             $table->integer('TOTAL');
+            $table->integer('EXPENSE');
             $table->integer('PAY');
             $table->temporary();
         });
 
-        $select1 =Sell::selectRaw('users.id,users.name,sum(sells.sub_total) as total,0')
+        $select1 =Sell::selectRaw('users.id,users.name,sum(sells.sub_total) as total,0,0')
             ->leftJoin('users', 'users.id', '=', 'sells.user_id')
             ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
             ->groupBy('users.name','users.id');
 
-        //Need to verify this point of soft Deletes 29-1-2020
-        $select2 =User::selectRaw('users.id,users.name,0,sum(payments.amount) as payment')
-            ->leftJoin('payments', 'payments.user_id', '=', 'users.id')
+
+        $select2 =Payment::selectRaw('users.id,users.name,0,0,sum(payments.amount) as payment')
+            ->leftJoin('users', 'users.id', '=', 'payments.user_id')
             ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
-            ->whereNull('deleted_at')
             ->groupBy('users.name','users.id');
 
-         DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','PAY'], $select1);
-         DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','PAY'], $select2);
+        $select3 =Expense::selectRaw('users.id,users.name,0,sum(expenses.amount) as expense,0')
+            ->leftJoin('users', 'users.id', '=', 'expenses.user_id')
+            ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
+            ->groupBy('users.name','users.id');
+
+        DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','EXPENSE','PAY'], $select1);
+        DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','EXPENSE','PAY'], $select2);
+        DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','EXPENSE','PAY'], $select3);
 
         $dataProduct = DB::table('TEMP_OPENING')
             ->selectRaw(
-            'USER_ID, 
-            USER_NAME,sum(TOTAL) as TOTAL,  sum(PAY) as  PAY')
+                'USER_ID, 
+            USER_NAME,sum(TOTAL) as TOTAL,  sum(PAY) as  PAY, sum(EXPENSE) as  EXPENSE')
+            ->groupBy('USER_ID','USER_NAME' )
+            ->get();
+
+        Schema::drop('TEMP_OPENING');
+
+
+        return $dataProduct;
+    }
+
+    /***********Represent Payment Summary*******************/
+
+
+    /***********Represent Sales Collection Summary*******************/
+    public  function representSalesCollectionReport(Request $request)
+    {
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+
+
+
+        $from = Carbon::createFromFormat('Y-m-d', $request->get('from'));
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$request->get('to'));
+        $to= self::filterTo($to);
+
+
+        $user=$request->get('userid');
+
+        //Need to make a another query for the date wise report this only returns the summary
+        $sells = Transaction::where('transaction_type', 'sell')->where('user_id','=',$user)->whereBetween('date',[$from,$to])->get();
+        $expenses = Expense::whereBetween('date',[$from,$to])->where('user_id','=',$user)->get();
+        $payment = Payment::whereBetween('date',[$from,$to])->where('user_id','=',$user)->get();
+
+        //dd($request->get('userid'));
+
+
+        $AssociateArray = array(
+            'sells' =>   $sells,
+            'expenses' => $expenses,
+            'payments'=>$payment
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+
+    public function REPRESENT_COLL_temp_check($from,$to )
+    {
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+        Schema::create('TEMP_OPENING', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('USER_ID');
+            $table->string('USER_NAME');
+            $table->integer('TOTAL');
+            $table->integer('EXPENSE');
+            $table->integer('PAY');
+            $table->temporary();
+        });
+
+        $select1 =Sell::selectRaw('users.id,users.name,sum(sells.sub_total) as total,0,0')
+            ->leftJoin('users', 'users.id', '=', 'sells.user_id')
+            ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
+            ->groupBy('users.name','users.id');
+
+
+        $select2 =Payment::selectRaw('users.id,users.name,0,0,sum(payments.amount) as payment')
+            ->leftJoin('users', 'users.id', '=', 'payments.user_id')
+            ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
+            ->groupBy('users.name','users.id');
+
+        $select3 =Expense::selectRaw('users.id,users.name,0,sum(expenses.amount) as expense,0')
+            ->leftJoin('users', 'users.id', '=', 'expenses.user_id')
+            ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
+            ->groupBy('users.name','users.id');
+
+        DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','EXPENSE','PAY'], $select1);
+        DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','EXPENSE','PAY'], $select2);
+        DB::table('TEMP_OPENING')->insertUsing(['USER_ID','USER_NAME','TOTAL','EXPENSE','PAY'], $select3);
+
+        $dataProduct = DB::table('TEMP_OPENING')
+            ->selectRaw(
+                'USER_ID, 
+            USER_NAME,sum(TOTAL) as TOTAL,  sum(PAY) as  PAY, sum(EXPENSE) as  EXPENSE')
             ->groupBy('USER_ID','USER_NAME' )
             ->get();
 
@@ -2176,6 +2269,10 @@ class ReportingController extends Controller
 
         return $dataProduct;
     }
+
+    /***********Represent Sales Collection  Summary*******************/
+
+
 
 
     public function postProfitReport (Request $request){
