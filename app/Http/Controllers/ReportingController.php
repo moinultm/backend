@@ -705,7 +705,8 @@ class ReportingController extends Controller
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id , sum(representatives_stock.quantity*-1)as TRAN_QUANTITY,0')
             ->where('date','<',$from)
-            ->where('representatives_stock.quantity','>',0)
+            //->where('representatives_stock.quantity','>',0) 4-3-2020
+            ->where('representatives_stock.ref_no','like','%CH-%')
             ->groupBy('products.id' );
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
         // $select1= Product::query()->select(array('id','name','opening_stock','opening_stock_value'));
@@ -755,7 +756,8 @@ class ReportingController extends Controller
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,sum(representatives_stock.quantity*-1)  as OUTWARD_QUANTITY')
             ->whereBetween('date',[$from,$to])
-            ->where('representatives_stock.quantity','>',0)
+             //->where('representatives_stock.quantity','>',0) //4-3-2020
+            ->where('representatives_stock.ref_no','like','%CH-%')
             ->groupBy('products.id');
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','OUTWARD_QUANTITY'], $select9);
         $select5 = Sell::query()
@@ -1961,7 +1963,8 @@ class ReportingController extends Controller
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id  , sum(representatives_stock.quantity)as Quantity,0')
              ->where('date','<',$from)
-            ->where('representatives_stock.quantity','>',0)
+            //->where('representatives_stock.quantity','>',0) 4-3-2020
+            ->where('representatives_stock.ref_no','like','%CH-%')
             ->where('representatives_stock.user_id','=',$id)
             ->groupBy('products.id' );
 
@@ -2046,7 +2049,8 @@ class ReportingController extends Controller
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,sum(representatives_stock.quantity)  as INWARD_QUANTITY')
             ->whereBetween('date',[$from,$to])
-            ->where('representatives_stock.quantity','>',0)
+           // ->where('representatives_stock.quantity','>',0) 4-3-2020
+           ->where('representatives_stock.ref_no','like','%CH-%')
             ->where('representatives_stock.user_id','=',$id)
             ->groupBy('products.id');
 
