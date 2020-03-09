@@ -108,7 +108,6 @@ class GiftProductController extends Controller
                 }
 
 
-
             $transaction = new Transaction;
             $transaction->reference_no = $ref_no;
             $transaction->client_id = $customer;
