@@ -63,6 +63,7 @@ class UsersController extends Controller
         $user = new User();
         $user->email = $request->get('email');
         $user->name = $request->get('name');
+        $user->phone = $request->get('phone');
         $user->address = $request->get('address');
         $user->user_type = $request->get('user_type');
         $user->password = bcrypt($request->get('password'));
@@ -127,6 +128,7 @@ class UsersController extends Controller
         }
         $user = User::where('id', $id)->first();
         $user->name = $request->get('name');
+        $user->phone = $request->get('phone');
         $user->email = $request->get('email');
         $user->address = $request->get('address');
         $user->user_type = $request->get('user_type');
