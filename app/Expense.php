@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Expense extends Model
 {
     use SoftDeletes;
+
+
+    public function expense_category(){
+        return $this->belongsTo('App\ExpenseCategory');
+    }
 }

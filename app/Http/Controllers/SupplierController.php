@@ -68,13 +68,14 @@ class SupplierController extends Controller
 
         $client = new Client();
         $client->full_name = ucwords($request->get('full_name'));
+        $client->client_code = 0;
         $client->company_name = ucwords($request->get('company_name'));
         $client->email = $request->get('email');
         $client->contact = $request->get('contact');
         $client->address = $request->get('address');
         $client->client_type = 'supplier';
         $client->account_no = $request->get('account_no');
-        $client->client_code = $request->get('client_code');
+
 
         if($request->get('previous_due') != null){
             $client->previous_due = $request->get('previous_due');

@@ -53,7 +53,9 @@ class Product extends Model
         return $this->hasMany('App\DamageProduct');
     }
 
-
+    public function consumables() {
+        return $this->hasMany('App\ConsumableProduct');
+    }
 
     //Attributes
     public function getTotalQuantityTransactionAttribute()

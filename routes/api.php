@@ -47,6 +47,10 @@ Route::group([
     Route::post('users/{user}', 'UsersController@update');
 
 
+    //expense category
+    Route::resource('expensecategory', 'ExpenseCategoryController');
+
+
     //category
     Route::resource('category', 'CategoryController');
 
@@ -166,7 +170,6 @@ Route::group([
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
     Route::get('report/profit-loss-report', 'ReportingController@postProfitReport');
-
 });
 
 
