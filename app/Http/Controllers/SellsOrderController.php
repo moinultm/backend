@@ -196,12 +196,27 @@ class SellsOrderController extends Controller
         $query = Transaction::query();
         $query->where('transaction_type', 'ORDER');
         $query->where('id', $id);
+
         $query->with(['orders','orders.product']);
-       $query->with(['orderInvoices']);
+
+        $query->with(['orderInvoices']);
         $query->with(['client']);
 
+        $select2 = Transaction::query()
+            ->join('products', 'representatives_stock.product_id', '=', 'products.id')
+            ->where('transaction_type', 'ORDER')
+            ->where('id', $id);
 
-        $AssociateArray = array('data' =>$query->get());
+
+        $AssociateArray = array(
+            'data' =>$query->get(),
+            'data2' =>$select2->get(),
+
+        );
+
+
+
+
 
         return response()->json($AssociateArray  ,200);
     }

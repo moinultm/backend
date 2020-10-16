@@ -725,13 +725,13 @@ class ReportingController extends Controller
             ->selectRaw( 'product_id AS STOCK_ITEM_ID, sum(quantity*-1) as TRAN_QUANTITY,sum(unit_cost_price)as TRAN_AMOUNT')
             ->where('date','<',$from)
             ->groupBy('STOCK_ITEM_ID'  );
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
+        //DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
         $select5 = GiftProduct::query()
             ->selectRaw( 'product_id AS STOCK_ITEM_ID , sum(quantity*-1)as TRAN_QUANTITY,sum(unit_cost_price)as TRAN_AMOUNT')
             ->where('date','<',$from)
             ->groupBy('STOCK_ITEM_ID');
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select5);
-        //DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
+       // DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select5);
+
 //////////////////TRANSACTION-PROCESS//////////////////////////////
         Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
             $table->increments('id');
@@ -775,12 +775,12 @@ class ReportingController extends Controller
             ->selectRaw( 'product_id,COALESCE(sum(gift_products.quantity*-1),0) as GIFT_QUANTITY, COALESCE(sum(gift_products.unit_cost_price*-1),0) as GIFT_COST')
             ->whereBetween(DB::raw('DATE(date)'),[$from,$to])
             ->groupBy('product_id' );
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','GIFT_QUANTITY','GIFT_COST'], $select7);
+       // DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','GIFT_QUANTITY','GIFT_COST'], $select7);
         $select8 = DamageProduct::query()
             ->selectRaw( 'product_id,COALESCE(sum(damage_products.quantity*-1),0)as DAMAGE_QUANTITY, COALESCE(sum(damage_products.unit_cost_price*-1),0) as DAMAGE_COST')
             ->whereBetween(DB::raw('DATE(date)'),[$from,$to])
             ->groupBy('product_id' );
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','DAMAGE_QUANTITY','DAMAGE_COST'], $select8);
+       // DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','DAMAGE_QUANTITY','DAMAGE_COST'], $select8);
 ////////////////FINAL SELECTION//////////////////////////////
         $select0= Product::query()
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
