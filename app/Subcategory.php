@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Subcategory extends Model
 {
+    protected $table = 'expense_categories';
+
     public $fillable = [
         'subcategory_name',
         'category_id'

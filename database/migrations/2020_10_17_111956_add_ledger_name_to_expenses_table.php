@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddCategoryToExpensesTable extends Migration
+class AddLedgerNameToExpensesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,9 @@ class AddCategoryToExpensesTable extends Migration
     public function up()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->string('expenseitem_id')->after('user_id');
+            $table->string('reference_no')->after('id');
+            $table->string('ledger_name')->after('reference_no');
+
 
         });
     }
@@ -27,8 +29,8 @@ class AddCategoryToExpensesTable extends Migration
     public function down()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('expenseitem_id');
-
+            $table->dropColumn('ledger_name');
+            $table->dropColumn('reference_no');
         });
     }
 }

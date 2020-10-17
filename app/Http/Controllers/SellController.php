@@ -371,6 +371,21 @@ use paginator;
 
      }
 
+//Update sales Invoice
+    public function update(Request $request, $id): JsonResponse
+    {
+        $customer = $request->get('customer');
+        $order_no = $request->get('order_no');
+
+        $enableProductTax = 0;
+
+        if (!$customer) {
+            throw new ValidationException('Customer ID is required.');
+        }
+
+        return  response()->json();
+    }
+
 
 
 
@@ -386,7 +401,6 @@ use paginator;
 
         return response()->json($AssociateArray  ,200);
     }
-
 
 
     //Return Sell

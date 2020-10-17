@@ -31,7 +31,7 @@ class ReportingController extends Controller
     public function  productReport(Request $request)
     {
 
-//need to fix dates query
+        //need to fix dates query
 
         $date=Carbon::now();
         $nowDate = date('Y-m-d', strtotime($date));
@@ -1016,7 +1016,7 @@ class ReportingController extends Controller
 
         //$users= Purchase::query()->select('id','reference_no','product_id','date');
 
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
 
         $AssociateArray = array(
             'products' =>  $products->get(),
@@ -1051,7 +1051,7 @@ class ReportingController extends Controller
         });
 
 
-        $select0= Product::query()->select(array('id','name','mrp'));
+        $select0= Product::query()->where('product_type','=','1')->select(array('id','name','mrp'));
         //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','ITEM_MRP'], $select0);
 
         $select5 = Purchase::query()
@@ -1067,7 +1067,7 @@ class ReportingController extends Controller
 
 ////////////////FINAL SELECTION//////////////////////////////
 
-        $select0= Product::query()
+        $select0= Product::query()->where('product_type','=','1')
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('STOCK_ITEM_ID, products.name as Name,   TRAN_DATE,REF_NO,   products.mrp as ITEM_MRP,
             TRAN_DATE as Date, 
@@ -1108,7 +1108,7 @@ class ReportingController extends Controller
             ->whereBetween('date',[$from,$to])
             ->distinct();
        // $users= Sell::query()->select('id','reference_no','product_id','date');
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
             //skipped due to use of pivot table 16-1-19
         $AssociateArray = array(
            // 'products' =>  $products->get(),
@@ -1162,7 +1162,7 @@ class ReportingController extends Controller
 
 ////////////////FINAL SELECTION//////////////////////////////
 
-        $select0= Product::query()
+        $select0= Product::query()->where('product_type','=','1')
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('STOCK_ITEM_ID, products.name as Name,   TRAN_DATE,  products.mrp as ITEM_MRP,
             TRAN_DATE as Date,          
@@ -1209,7 +1209,7 @@ class ReportingController extends Controller
 
 
         $users= User::query()->select('id','name');
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
 //select(DB::raw('DATE(date)as date'))->
 
 
@@ -1274,7 +1274,7 @@ class ReportingController extends Controller
 
         ////////////////FINAL SELECTION//////////////////////////////
 
-        $select0= Product::query()
+        $select0= Product::query()->where('product_type','=','1')
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('products.name as STOCK_ITEM_NAME,USER_NAME,STOCK_ITEM_ID,     
                        COALESCE( OUTWARD,0) as  OUTWARD,TRAN_TYPE')
@@ -1308,7 +1308,7 @@ class ReportingController extends Controller
 
 
         $users= User::query()->select('id','name');
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
 
         $sells= Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
@@ -1373,7 +1373,7 @@ class ReportingController extends Controller
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
 
 
-        $select3 = DamageProduct::query()
+        $select3 = DamageProduct::query()->where('product_type','=','1')
             ->join('products', 'damage_products.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,damage_products.user_id  , sum(damage_products.quantity*-1)as Quantity,sum(damage_products.unit_cost_price)as Amount')
             ->where('date','<',$from)
@@ -1382,7 +1382,7 @@ class ReportingController extends Controller
        // DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','USER_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
 
 
-        $select4 = GiftProduct::query()
+        $select4 = GiftProduct::query()->where('product_type','=','1')
             ->join('products', 'gift_products.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,gift_products.user_id, sum(gift_products.quantity*-1)as Quantity,sum(gift_products.unit_cost_price)as Amount')
             ->whereDate('date','<',$from)
@@ -1438,7 +1438,7 @@ class ReportingController extends Controller
       //  DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','INWARD_QUANTITY'], $select6);
 
 
-        $select7 = GiftProduct::query()
+        $select7 = GiftProduct::query()->where('product_type','=','1')
             ->join('products', 'gift_products.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,gift_products.user_id,sum(gift_products.quantity*-1)as GIFT_QUANTITY, sum(gift_products.unit_cost_price*-1) as GIFT_COST')
             ->whereBetween('date',[$from,$to])
@@ -1446,7 +1446,7 @@ class ReportingController extends Controller
        // DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_ID','GIFT_QUANTITY','GIFT_COST'], $select7);
 
 
-        $select8 = DamageProduct::query()
+        $select8 = DamageProduct::query()->where('product_type','=','1')
             ->join('products', 'damage_products.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,damage_products.user_id,sum(damage_products.quantity*-1)as DAMAGE_QUANTITY, sum(damage_products.unit_cost_price*-1) as DAMAGE_COST')
             ->whereBetween('date',[$from,$to])
@@ -1456,7 +1456,7 @@ class ReportingController extends Controller
 
 ////////////////FINAL SELECTION//////////////////////////////
 ///
-        $select0= Product::query()
+        $select0= Product::query()->where('product_type','=','1')
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('products.name as STOCK_ITEM_NAME,   USER_ID,   products.mrp as ITEM_MRP,
             STOCK_ITEM_ID, 
@@ -1512,7 +1512,7 @@ class ReportingController extends Controller
 
       //  $users= User::query()->select('id','name');
 
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
 
         $queryN = Representative:: query()->select('ref_no','user_id','users.name')
             ->leftJoin('users' , 'users.id','=','representatives_stock.user_id')
@@ -1615,7 +1615,7 @@ class ReportingController extends Controller
 
         //  $users= User::query()->select('id','name');
 
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
 
         $query = DamageProduct::query()->select('reference_no','user_id','users.name')
             ->leftJoin('users' , 'users.id','=','damage_products.user_id')
@@ -1715,7 +1715,7 @@ class ReportingController extends Controller
 
         //  $users= User::query()->select('id','name');
 
-        $products= Product::query()->select('id','name');
+        $products= Product::query()->where('product_type','=','1')->select('id','name');
 
         $query = GiftProduct::query()->select('reference_no','user_id','users.name')
             ->leftJoin('users' , 'users.id','=','gift_products.user_id')
@@ -2019,7 +2019,7 @@ class ReportingController extends Controller
         });
 
 
-        $select0= Product::query()->select(array('id','name','mrp'));
+        $select0= Product::query()->where('product_type','=','1')->select(array('id','name','mrp'));
         //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','ITEM_MRP'], $select0);
 
         $select4= DB::table('TEMP_OPENING')
@@ -2079,7 +2079,7 @@ class ReportingController extends Controller
 
 ////////////////FINAL SELECTION//////////////////////////////
 ///
-        $select0= Product::query()
+        $select0= Product::query()->where('product_type','=','1')
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('products.name as STOCK_ITEM_NAME,   products.mrp as ITEM_MRP,
             STOCK_ITEM_ID, 

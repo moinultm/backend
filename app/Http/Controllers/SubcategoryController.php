@@ -81,9 +81,9 @@ class SubcategoryController extends Controller
         $subcategory->save();
         return response()->json(Subcategory::where('id', $subcategory->id)->first(), 200);
     }
+    
     public function destroy(Subcategory $subcategory): JsonResponse
     {
-
 
         if(count($subcategory->products) ===  0){
             $subcategory->delete();
@@ -98,10 +98,8 @@ class SubcategoryController extends Controller
 
 
     public function productList(Request $request,$id){
-
         $query=Product::query()->where('subcategory_id', $id);
         return response()->json(self::paginate($query), $query->count() == 0 ? 403 : 200);
-
     }
 
 }

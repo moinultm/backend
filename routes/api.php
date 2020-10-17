@@ -48,8 +48,15 @@ Route::group([
 
 
     //expense category
+    Route::resource('expenseitem', 'ExpenseItemController');
+
+
     Route::resource('expensecategory', 'ExpenseCategoryController');
 
+    Route::resource('expensesubcategory', 'ExpenseSubcategoryController');
+    Route::get('expensesubcategory/{subcategory}/expense', 'ExpenseSubcategoryController@productList');
+
+    Route::get('parentexpense', 'ExpenseSubcategoryController@parentReq');
 
     //category
     Route::resource('category', 'CategoryController');
@@ -62,8 +69,6 @@ Route::group([
     Route::resource('customer', 'CustomerController');
     Route::get('customer/{client}/details', 'CustomerController@details');
     Route::get('customer/{client}/report', 'CustomerController@saleDetails');
-
-
 
     //supplier
     Route::resource('supplier', 'SupplierController');

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateExpensesTable extends Migration
+class AddExpenseItemIdToExpensesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,8 @@ class CreateExpensesTable extends Migration
      */
     public function up()
     {
-        Schema::create('expenses', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('purpose')->nullable();
-            $table->double('amount');
-            $table->softDeletes();
-            $table->timestamps();
+        Schema::table('expenses', function (Blueprint $table) {
+            $table->string('expense_item_id')->after('reference_no');
         });
     }
 
@@ -29,6 +25,8 @@ class CreateExpensesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('expenses');
+        Schema::table('expenses', function (Blueprint $table) {
+            $table->dropColumn('expense_item_id');
+        });
     }
 }

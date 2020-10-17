@@ -18,8 +18,8 @@ class ExpenseCategoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $expenses = ExpenseCategory::orderBy('id', 'desc');
-        if($request->get('name')) {
-            $expenses->where('name', 'LIKE', '%' . $request->get('name') . '%');
+        if($request->get('category_name')) {
+            $expenses->where('category_name', 'LIKE', '%' . $request->get('category_name') . '%');
         }
 
         $from = $request->get('from');
@@ -50,10 +50,10 @@ class ExpenseCategoryController extends Controller
     {
 
         $rules = [
-            'name' => [
+            'category_name' => [
                 'required',
                 'max:255',
-                'unique:expense_categories,name'
+                'unique:expense_categories,category_name'
             ]
         ];
 
@@ -64,7 +64,7 @@ class ExpenseCategoryController extends Controller
 
 
         $expense = new ExpenseCategory;
-        $expense->name = $request->get('name');
+        $expense->category_name = $request->get('category_name');
 
         //$expense->date =Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
         $expense->save();
@@ -76,10 +76,10 @@ class ExpenseCategoryController extends Controller
     {
 
         $rules = [
-            'name' => [
+            'category_name' => [
                 'required',
                 'max:255',
-                'unique:expense_categories,name'
+                'unique:expense_categories,category_name'
             ]
         ];
 
@@ -90,22 +90,24 @@ class ExpenseCategoryController extends Controller
 
 
         $expense = ExpenseCategory::find($request->get('id'));
-        $expense->title = $request->get('name');
+        $expense->category_name = $request->get('category_name');
 
         $expense->save();
 
-
-
-
         return response()->json('Success', 200);
     }
 
-    public function destroy(Request $request,int $id): JsonResponse
+    public function destroy(ExpenseCategory   $category): JsonResponse
     {
-        $expense = ExpenseCategory::where('id', $id)->first();
-        $expense->delete();
+        if(count($category->subcategories) ==  0 && count($category->product) == 0){
+            $category->delete();
+            return response()->json(['message' => 'Successfully Deleted'],200 );
+        }else{
 
-        return response()->json('Success', 200);
+            return response()->json(['error' => 'cannot  delete subcategory exists'], 403);
+
+        }
     }
+
 
 }

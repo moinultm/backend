@@ -87,7 +87,6 @@ class CategoryController extends Controller
         }else{
 
             return response()->json(['error' => 'cannot  delete subcategory exists'], 403);
-
         }
 
     }

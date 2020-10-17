@@ -52,6 +52,10 @@ class ProductController extends Controller
                 'required',
                 'max:255'
             ],
+            'product_type' => [
+                'required'            ],
+
+
             'code' => [
                 'required',
                 'max:255',
@@ -95,6 +99,7 @@ class ProductController extends Controller
         $product->unit = $request->get('unit');
         $product->details = $request->get('details');
         $product->status = $request->get('status') ? $request->get('status') : 0;
+        $product->product_type = $request->get('product_type');
 
         //opening stocks
         $current_stock = ($product->id) ? $product->quantity : 0;
@@ -133,7 +138,9 @@ class ProductController extends Controller
                 'name' => [
                 'required',
                 'max:255'
-            ]
+            ],
+            'product_type' => [
+                'required'            ]
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -156,7 +163,7 @@ class ProductController extends Controller
         $product->unit = $request->get('unit');
         $product->details = $request->get('details');
         $product->status = $request->get('status') ? $request->get('status') : 0;
-
+        $product->product_type = $request->get('product_type');
         //opening stocks
         $current_stock = ($product->id) ? $product->quantity : 0;
         $product->quantity = $current_stock + $request->get('opening_stock');
@@ -181,7 +188,6 @@ class ProductController extends Controller
         //return view('products.form')->withProduct($product)->withSubcategories($subcategories)->withCategories($categories)->withTaxes($taxes)->with('secondary_lang', $secondary_lang);
 
     }
-
 
 
 
