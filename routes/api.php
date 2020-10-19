@@ -103,8 +103,9 @@ Route::group([
 
 
     //return sells
-    Route::get('sell/return/{transaction}', 'SellController@returnSell');
-    Route::post('sell/return/{transaction}', 'SellController@returnSellPost');
+ Route::resource('return', 'SellReturnController');
+Route::get('return/{transaction}/details', 'SellReturnController@returnSell');
+
 
     //purchase
     Route::resource('purchase', 'PurchaseController');
