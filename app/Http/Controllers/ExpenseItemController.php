@@ -52,7 +52,6 @@ class ExpenseItemController extends Controller
         $subcategory->opening_Balance = 0;
         $subcategory->closing_Balance = 0;
 
-
         $subcategory->save();
 
         return response()->json(ExpenseItem::where('id', $subcategory->id)->first(), 200);
@@ -73,7 +72,6 @@ class ExpenseItemController extends Controller
         return response()->json(self::paginate($query, $request), 200);
 
     }
-
 
 
     public function update(Request $request, $id): JsonResponse

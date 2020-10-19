@@ -80,19 +80,19 @@ class ReportingController extends Controller
 
         $select1= Product::query()->select(array('name','opening_stock','opening_stock_value'));
 
-      /*  $select2 = Sell::query()
+         $select2 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
-            ->selectRaw( 'products.name  , COALESCE(sum(sells.quantity*-1),0)as Quantity,COALESCE(sum(sells.sub_total*-1),0)as Amount')
+            ->selectRaw( 'products.name,COALESCE(sum(sells.quantity*-1),0)as Quantity,COALESCE(sum(sells.sub_total*-1),0)as Amount')
             ->where('date','<=',$from)
-            ->groupBy('products.name' );*/
+            ->groupBy('products.name');
 
-        //AS OPENING OUT , Rate not defined - 26-11-2019
-        $select2= Representative::query()
+     //AS OPENING OUT , Rate not defined - 26-11-2019
+     /*  $select2= Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.name  , sum(representatives_stock.quantity*-1)as Quantity')
             ->whereDate('date','<',$from)
             ->groupBy('products.name');
-
+*/
 
         $select3 = Purchase::query()
             ->join('products', 'purchases.product_id', '=', 'products.id')
@@ -112,11 +112,10 @@ class ReportingController extends Controller
              ->where('date','<',$from)
             ->groupBy('products.name' );
 
-
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
-       DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY'], $select2);
+       DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
+       DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
-      DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
+       DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select5);
 
 //////////////////TRANSACTION-PROCESS//////////////////////////////
@@ -140,22 +139,23 @@ class ReportingController extends Controller
             ->selectRaw('STOCK_ITEM_NAME , COALESCE(sum(TRAN_QUANTITY),0) as TRAN_QUANTITY , COALESCE(sum(TRAN_AMOUNT) ,0)as TRAN_AMOUNT,0,0,0,0,0,0')
             ->groupBy('STOCK_ITEM_NAME' );
 
-/*
+
         $select5 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw( 'products.name,0,0,COALESCE(sum(sells.quantity*-1),0)as OUTWARD_QUANTITY,COALESCE(sum(sells.sub_total*-1),0)as AMOUNT,0,0,0,0')
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.name' );
-*/
+
 
         //AS OPENING OUT , Rate not defined - 26-11-2019
-        $select5= Representative::query()
+      /*  $select5= Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.name  , sum(representatives_stock.quantity*-1)as OUTWARD_QUANTITY')
             ->whereBetween('date',[$from,$to])
             ->where('representatives_stock.quantity','>','0')
             ->groupBy('products.name');
 
+*/
 
         $select6 = Purchase::query()
             ->join('products', 'purchases.product_id', '=', 'products.id')
@@ -178,7 +178,7 @@ class ReportingController extends Controller
             ->groupBy('products.name' );
 
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select4);
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME', 'OUTWARD_QUANTITY'], $select5);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME', 'TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select5);
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select6);
 
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT','OUTWARD_QUANTITY','OUTWARD_AMOUNT','INWARD_QUANTITY','INWARD_AMOUNT','GIFT_QUANTITY','DAMAGE_QUANTITY'], $select7);
@@ -448,8 +448,6 @@ class ReportingController extends Controller
     }
 
 
-
-
     public function  representSummary(Request $request,$id)
     {
         $date=Carbon::now();
@@ -531,11 +529,9 @@ class ReportingController extends Controller
             $table->temporary();
         });
 
-
         $select4= DB::table('TEMP_OPENING')
             ->selectRaw('STOCK_ITEM_NAME , sum(TRAN_QUANTITY) as TRAN_QUANTITY , sum(TRAN_AMOUNT) as TRAN_AMOUNT,0,0,0,0')
             ->groupBy('STOCK_ITEM_NAME' );
-
 
         $select5 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
@@ -662,9 +658,6 @@ class ReportingController extends Controller
 
 
 
-
-
-
     ////////////Stock General Report///////////////
     public  function stockGeneralReport(Request $request){
         $date=Carbon::now();
@@ -701,21 +694,24 @@ class ReportingController extends Controller
         });
         $select0=Product::query()->select('id','opening_stock','opening_stock_value');
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select0);
-        $select1 = Representative::query()
+
+
+       /* $select1 = Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id , sum(representatives_stock.quantity*-1)as TRAN_QUANTITY,0')
             ->where('date','<',$from)
             //->where('representatives_stock.quantity','>',0) 4-3-2020
             ->where('representatives_stock.ref_no','like','%CH-%')
-            ->groupBy('products.id' );
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
+            ->groupBy('products.id' );*/
+
+       // DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
         // $select1= Product::query()->select(array('id','name','opening_stock','opening_stock_value'));
         $select2 = Sell::query()
             ->selectRaw( 'product_id AS STOCK_ITEM_ID ,sum(quantity*-1)as TRAN_QUANTITY,sum(sub_total*-1)as TRAN_AMOUNT')
-            ->where('direct','=',1)
             ->where('date','<',$from)
             ->groupBy('STOCK_ITEM_ID');
         DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
+
         $select3 = Purchase::query()
             ->selectRaw( 'product_id, sum(quantity)as TRAN_QUANTITY,sum(sub_total)as TRAN_AMOUNT')
             ->where('date','<',$from)
@@ -1141,23 +1137,20 @@ class ReportingController extends Controller
         });
 
 
-
-
-        $select1 = Representative::query()
+     /*   $select1 = Representative::query()
             ->join('products', 'representatives_stock.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,representatives_stock.date,representatives_stock.ref_no , sum(representatives_stock.quantity)as OUTWARD_QUANTITY,0')
             ->whereBetween('date',[$from,$to])
             ->where('representatives_stock.quantity','>',0)
-            ->groupBy('products.id','representatives_stock.date','representatives_stock.ref_no');
+            ->groupBy('products.id','representatives_stock.date','representatives_stock.ref_no');*/
 
         $select5 = Sell::query()
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,sells.date,sells.reference_no,sum(sells.quantity)as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT')
-            ->where('direct','=',1)
             ->whereBetween('date',[$from,$to])
             ->groupBy('products.id','sells.reference_no','sells.date');
 
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select1);
+        //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select1);
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select5);
 
 ////////////////FINAL SELECTION//////////////////////////////
@@ -1180,9 +1173,6 @@ class ReportingController extends Controller
     }
 
 //*******************************STOCK REPORT- OUT BASED**********************************
-
-
-
 
 
 

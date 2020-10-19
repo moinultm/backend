@@ -106,6 +106,7 @@ class ProductController extends Controller
         $product->quantity = $current_stock + $request->get('opening_stock');
         $product->general_quantity = $current_stock + $request->get('opening_stock');
         $product->opening_stock = $request->get('opening_stock');
+        $product->opening_stock_value = $request->get('opening_stock_value');
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -169,6 +170,8 @@ class ProductController extends Controller
         $product->quantity = $current_stock + $request->get('opening_stock');
        // $product->general_quantity = $current_stock + $request->get('opening_stock');
         $product->opening_stock = $request->get('opening_stock');
+        $product->opening_stock_value = $request->get('opening_stock_value');
+
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
