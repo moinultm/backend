@@ -49,6 +49,7 @@ Route::group([
 
     //expense category
     Route::resource('expenseitem', 'ExpenseItemController');
+    Route::post('expenseitem/{expenseitem}', 'ExpenseItemController@update');
 
 
     Route::resource('expensecategory', 'ExpenseCategoryController');
@@ -87,7 +88,6 @@ Route::group([
 
     Route::get('product/{product}/update-price', 'ProductController@updatePrice');
 
-
     //sell
     Route::resource('sell', 'SellController');
     Route::get('sell/{transaction}/details', 'SellController@details');
@@ -101,10 +101,9 @@ Route::group([
     Route::post('sell/{order}/order-post', 'SellController@orderToInvoice');
 
 
-
     //return sells
- Route::resource('return', 'SellReturnController');
-Route::get('return/{transaction}/details', 'SellReturnController@returnSell');
+    Route::resource('return', 'SellReturnController');
+    Route::get('return/{transaction}/details', 'SellReturnController@returnSell');
 
 
     //purchase
@@ -120,6 +119,7 @@ Route::get('return/{transaction}/details', 'SellReturnController@returnSell');
     Route::resource('warehouse', 'WarehouseController');
 //Expenses
     Route::resource('expense', 'ExpenseController');
+
 
 //vatTax
     Route::resource('vat', 'TaxController');

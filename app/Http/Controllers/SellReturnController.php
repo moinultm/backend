@@ -25,23 +25,9 @@ class SellReturnController extends Controller
         }
 
     public   function show(Transaction $transaction){
-        $quantity = 0;
-        foreach($transaction->sells as $sell){
-            $quantity = $quantity + $sell->quantity;
-        }
-        if($quantity <= 0){
-            $message = "No product in this sell is left to return";
-            return response()->json($message  ,403);
-        }else{
 
+        return response()->json( "" ,200);
 
-            $data=   compact('transaction');
-            $AssociateArray = array(
-                'data' =>array_values($data)
-            );
-
-            return response()->json( $AssociateArray ,200);
-        }
     }
 
     //Return Sell
@@ -73,7 +59,7 @@ class SellReturnController extends Controller
         $transaction = Transaction::find($transactionId);
 
         if (!$transaction) {
-            return response()->json('Transaction was not found.', 403);
+            return  response()->json('Transaction was not found.');
         }
 
         $previousTotal = $transaction->total;
@@ -88,31 +74,40 @@ class SellReturnController extends Controller
         $client = Client::find($transaction->client_id);
         $due = $client->transactions->sum('net_total') - $client->payments->where('type', 'credit')->sum('amount');
 
-        foreach ($transaction->sells as $sell) {
+        $items = $request->get('items');
+        $items = json_decode($items, TRUE);
+//
+     /*  if($transaction){
+           return response()->json($transaction->sells, 200);
+       }
+    */
 
-            $returnQuantity = intval($request->get('quantity_'. $sell->id)) ?: 0;
+        foreach ($items as $sell_item) {
+           // $returnQuantity = intval($request->get('quantity_'. $sell->id)) ?: 0;
+            $returnQuantity = intval($sell_item['quantity_return']) ?: 0;
+
             $total_return_quantity += $returnQuantity;
 
             //new
-            $unitProductTax = $sell->product_tax / $sell->quantity;
+            $unitProductTax =   $sell_item['product_tax'] /  $sell_item['quantity']  ;
 
             if ($returnQuantity === 0) {
-                $total =  $total + $sell->sub_total;
-                $total_product_tax = $total_product_tax + $sell->product_tax;
+                $total =  $total + $sell_item['sub_total']  ;
+                $total_product_tax = $total_product_tax +  $sell_item['product_tax'];
                 continue;
             }
+            $returnUnitPrice = floatval( $sell_item['mrp'] );
+          //  $returnUnitPrice = floatval($request->get('unit_price_'. $sell->id));
 
-            $returnUnitPrice = floatval($request->get('unit_price_'. $sell->id));
+            $sellId =  $sell_item['sell_id'] ;
+            //$sellId = $request->get('sell_'. $sell->id);
 
-            $sellId = $request->get('sell_'. $sell->id);
 
             $sell = Sell::find($sellId);
 
             if($returnQuantity > $sell->quantity){
                 $warning = "Return Quantity (".$returnQuantity.") Can't be greater than the Selling Quantity (".$sell->quantity.")";
-
-                return response()->json($warning, 403);
-
+                throw new ValidationException($warning,403);
             }
 
             $updatedSellQuantity = $sell->quantity - $returnQuantity;
@@ -171,7 +166,8 @@ class SellReturnController extends Controller
 
         if($total_return_quantity <= 0){
             $quantityerror = "You Can't return Zero Quantity";
-            return response()->json($quantityerror, 403);
+            throw new ValidationException($quantityerror,403);
+           // return  response()->json($quantityerror,403);
         }
 
         //update transaction for this return
@@ -197,7 +193,6 @@ class SellReturnController extends Controller
             $payment->date = Carbon::now()->format('Y-m-d H:i:s');
             $payment->save();
         }
-
         return response()->json( 'ok', 200);
     }
 
