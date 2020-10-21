@@ -66,7 +66,6 @@ use paginator;
                     $transactions->where('date','<=',$to);
                 }
             }
-
         }
 
 
@@ -183,9 +182,7 @@ use paginator;
 
                 $product_row = Product::findorFail($sell_item['product_id']);
                 $cost_price=$product_row->cost_price;
-
                 $product_stock=$product_row->quantity ;
-
 
                 if ($product_stock <  0) {
                     throw new ValidationException('Null Stock Item');
@@ -251,9 +248,6 @@ use paginator;
                     $order->save();
                 }
 
-
-
-
             if ($request->get('direct')==0) {
                 //Representative Decrements
                 $stock = new Representative();
@@ -263,7 +257,6 @@ use paginator;
                 $stock->quantity =  $sell_item['quantity']*-1;
                 $stock->ref_no= $ref_no_rep_sell;
                 $stock->save();
-
             }
 
                 if ($request->get('direct')==1) {

@@ -51,7 +51,6 @@ Route::group([
     Route::resource('expenseitem', 'ExpenseItemController');
     Route::post('expenseitem/{expenseitem}', 'ExpenseItemController@update');
 
-
     Route::resource('expensecategory', 'ExpenseCategoryController');
 
     Route::resource('expensesubcategory', 'ExpenseSubcategoryController');
