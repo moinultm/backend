@@ -129,7 +129,7 @@ class ConsumableProductController extends Controller
 
 
 
-    public function deleteGift(Request $request, Transaction $transaction) {
+    public function deleteConsume(Request $request, Transaction $transaction) {
 
         $transaction = Transaction::findorFail($request->get('id'));
 
