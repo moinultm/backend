@@ -24,6 +24,7 @@ class CreateConsumableProductsTable extends Migration
             $table->double('user_id');
             $table->timestamp('date')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

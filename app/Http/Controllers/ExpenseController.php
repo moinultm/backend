@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ValidationException;
 use App\Expense;
+use App\ExpenseTransaction;
 use App\Traits\Paginator;
 
 use Illuminate\Http\JsonResponse;
@@ -56,18 +58,47 @@ class ExpenseController extends Controller
         $rules = [
             'purpose' => 'required',
             'amount' => 'required|numeric',
+
         ];
+
+        $items = $request->get('items');
+        $items = json_decode($items, TRUE);
+
+        if (!$items) {
+            return  response()->json('Itemsiiiiiii8 was not found.');
+        }
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json(collect($validator->getMessageBag())->flatten()->toArray(), 403);
         }
 
+        $row = Expense::where('transaction', 'expense')->withTrashed()->get()->count() > 0 ? Expense::where('transaction', 'expense')->withTrashed()->get()->count() + 1 : 1;
+        $ref_no = 'PV-'.self::ref($row);
+
+        foreach ($items as $sell_item) {
+            if (intval($sell_item['amount']) === 0) {
+                throw new ValidationException('Cannot add Zero value');
+            }
+
+            $expenseTran = new ExpenseTransaction;
+
+            $expenseTran->reference_no = $ref_no;
+            $expenseTran->transaction_no = $ref_no;
+
+            $expenseTran->ledger_name = $request->get('ledger_name');
+            $expenseTran->user_id = $request->get('user_id');
+
+        }
 
         $expense = new Expense;
+        $expense->reference_no = $ref_no;
+
         $expense->purpose = $request->get('purpose');
         $expense->amount = $request->get('amount');
         $expense->user_id = $request->get('user_id');
+        $expense->transaction = $request->get('transaction');
+
         $expense->date =Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
         $expense->save();
 

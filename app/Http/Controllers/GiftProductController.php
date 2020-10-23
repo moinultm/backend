@@ -27,6 +27,34 @@ class GiftProductController extends Controller
     {
         $transactions = Transaction::where('transaction_type', 'gift')->orderBy('date', 'desc') ;
         $transactions->with(['gifts','gifts.product']);
+
+
+        $from = $request->get('from');
+        $to=$request->get('to');
+
+        if( $request->get('from') !='null' &&  $request->get('to')!='null' ) {
+            $from = $request->get('from');
+            $to = $request->get('to')?:date('Y-m-d');
+            $to = Carbon::createFromFormat('Y-m-d',$to);
+            $to = self::filterTo($to);
+        }
+
+        if( $request->get('from') !='null' &&   $request->get('to')!='null' ) {
+            if($request->get('from') || $request->get('to')) {
+                if(!is_null($from)){
+                    $from = Carbon::createFromFormat('Y-m-d',$from);
+                    $from = self::filterFrom($from);
+                    $transactions->whereBetween('transactions.date',[$from,$to]);
+                }else{
+                    $transactions->where('transactions.date','<=',$to);
+                }
+            }
+        }
+
+
+        $size = $request->size;
+
+
         return response()->json(self::paginate($transactions, $request), 200);
     }
 

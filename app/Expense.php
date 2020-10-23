@@ -13,4 +13,9 @@ class Expense extends Model
     public function expense_category(){
         return $this->belongsTo('App\ExpenseCategory');
     }
+
+
+    public function expense_transactions() {
+        return $this->hasMany('App\ExpenseTransaction', 'reference_no', 'reference_no');
+    }
 }

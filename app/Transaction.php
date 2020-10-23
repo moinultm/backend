@@ -36,6 +36,10 @@ class Transaction extends Model
         return $this->hasMany('App\DamageProduct', 'reference_no', 'reference_no');
     }
 
+    public function consumables() {
+        return $this->hasMany('App\ConsumableProduct', 'reference_no', 'reference_no');
+    }
+
 
     public function orders() {
         return $this->hasMany('App\Order', 'reference_no', 'reference_no');

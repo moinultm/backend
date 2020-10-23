@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ConsumableProduct;
 use App\DamageProduct;
 use App\Expense;
 use App\GiftProduct;
@@ -112,11 +113,18 @@ class ReportingController extends Controller
              ->where('date','<',$from)
             ->groupBy('products.name' );
 
+        $select6 = ConsumableProduct::query()
+            ->join('products', 'consumable_products.product_id', '=', 'products.id')
+            ->selectRaw( 'products.name  , COALESCE(sum(consumable_products.quantity*-1),0)as Quantity,COALESCE(sum(consumable_products.unit_cost_price),0)as Amount')
+            ->where('date','<',$from)
+            ->groupBy('products.name' );
+
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select5);
+        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_NAME','TRAN_QUANTITY','TRAN_AMOUNT'], $select6);
 
 //////////////////TRANSACTION-PROCESS//////////////////////////////
 

@@ -141,7 +141,12 @@ Route::group([
     //gifts
     Route::resource('gifts', 'GiftProductController');
 
+    //damages
     Route::resource('damages', 'DamageProductController');
+
+    //consume
+    Route::resource('consume', 'ConsumableProductController');
+
 
     //Dashboard
     Route::get('dashboard', 'DashboardController@index');
@@ -195,3 +200,7 @@ Route::post('damages/{transaction}/delete', 'DamageProductController@deleteDamag
 
 //Delete Order
 Route::post('sells-order/{transaction}/delete', 'SellsOrderController@deleteOrder')->middleware(['auth:api', 'roles:ROLE_SALES_MANAGE']);
+
+//consum
+Route::post('consume/{transaction}/delete', 'ConsumableProductController@deleteConsume')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);
+

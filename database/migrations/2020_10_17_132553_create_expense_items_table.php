@@ -23,6 +23,7 @@ class CreateExpenseItemsTable extends Migration
             $table->string('closing_Balance');
             $table->timestamp('date')->useCurrent();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

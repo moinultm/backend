@@ -14,7 +14,7 @@ class AddCategoryToExpensesTable extends Migration
     public function up()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->string('expenseitem_id')->after('user_id');
+
 
         });
     }
@@ -27,7 +27,6 @@ class AddCategoryToExpensesTable extends Migration
     public function down()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('expenseitem_id');
 
         });
     }
