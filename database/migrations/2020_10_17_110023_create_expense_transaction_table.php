@@ -13,7 +13,7 @@ class CreateExpenseTransactionTable extends Migration
      */
     public function up()
     {
-        Schema::create('expense_transaction', function (Blueprint $table) {
+        Schema::create('expense_transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('reference_no');
             $table->string('transaction_no');
@@ -34,6 +34,6 @@ class CreateExpenseTransactionTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('expense_transaction');
+        Schema::dropIfExists('expense_transactions');
     }
 }

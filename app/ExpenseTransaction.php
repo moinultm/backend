@@ -9,6 +9,8 @@ class ExpenseTransaction extends Model
     use SoftDeletes;
 
 
+    protected  $table='expense_transactions';
+
     public function expenseitem(){
         return $this->belongsTo('App\ExpenseItem');
     }

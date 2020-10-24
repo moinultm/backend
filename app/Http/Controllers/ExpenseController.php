@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\Traits\Helpers;
 use Illuminate\Support\Facades\Validator;
 
+use DB;
 
 class ExpenseController extends Controller
 {
@@ -53,11 +54,13 @@ class ExpenseController extends Controller
     public function store(Request $request): JsonResponse
     {
 
-
-
         $rules = [
             'purpose' => 'required',
-            'amount' => 'required|numeric',
+            'transaction' => 'required',
+            'payment_by' => 'required',
+            'user_id' => 'required',
+
+
 
         ];
 
@@ -65,7 +68,7 @@ class ExpenseController extends Controller
         $items = json_decode($items, TRUE);
 
         if (!$items) {
-            return  response()->json('Itemsiiiiiii8 was not found.');
+            return  response()->json('Items was not found.');
         }
 
         $validator = Validator::make($request->all(), $rules);
@@ -76,31 +79,52 @@ class ExpenseController extends Controller
         $row = Expense::where('transaction', 'expense')->withTrashed()->get()->count() > 0 ? Expense::where('transaction', 'expense')->withTrashed()->get()->count() + 1 : 1;
         $ref_no = 'PV-'.self::ref($row);
 
-        foreach ($items as $sell_item) {
-            if (intval($sell_item['amount']) === 0) {
-                throw new ValidationException('Cannot add Zero value');
+        DB::transaction(function() use ($request , $items, $ref_no, &$total ) {
+
+            foreach ($items as $exp_item) {
+                if (intval($exp_item['quantity']) === 0) {
+                    return response()->json(  'Cannot add Zero value', 403);
+                }
+
+
+                //		amount	transaction	payment_details	payment_by	date	user_id	category
+                $expenseTran = new ExpenseTransaction;
+
+                $expenseTran->reference_no = $ref_no;
+                $expenseTran->transaction_no = $ref_no;
+                // 	 	 	user_id	transaction	total	tran_by 	date	created_at	updated_at
+
+                $total = $total + $exp_item['quantity'];
+
+                $expenseTran->ledger_name = $exp_item['expense_id'];
+                $expenseTran->transaction =   $request->get('transaction');
+                $expenseTran->tran_by =  $request->get('payment_by');
+                $expenseTran->total = $exp_item['quantity'];
+                $expenseTran->details = $exp_item['details']  ;
+                $expenseTran->user_id = $request->get('user_id'); ;
+                $expenseTran->save();
             }
 
-            $expenseTran = new ExpenseTransaction;
+            $expense = new Expense;
+            $expense->reference_no = $ref_no;
 
-            $expenseTran->reference_no = $ref_no;
-            $expenseTran->transaction_no = $ref_no;
+            $expense->expense_item_id = 0;
+            $expense->ledger_name = '';
+            $expense->category = 0;
 
-            $expenseTran->ledger_name = $request->get('ledger_name');
-            $expenseTran->user_id = $request->get('user_id');
+            $expense->transaction = $request->get('transaction');
+            $expense->date =Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
+            $expense->payment_by = $request->get('payment_by');
+            $expense->payment_details = $request->get('payment_details');
+            $expense->purpose = $request->get('purpose');
+            $expense->amount =$total;
+            $expense->user_id = $request->get('user_id');
 
-        }
+            $expense->save();
 
-        $expense = new Expense;
-        $expense->reference_no = $ref_no;
 
-        $expense->purpose = $request->get('purpose');
-        $expense->amount = $request->get('amount');
-        $expense->user_id = $request->get('user_id');
-        $expense->transaction = $request->get('transaction');
+        });
 
-        $expense->date =Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
-        $expense->save();
 
         return response()->json('Saved', 200);
     }
