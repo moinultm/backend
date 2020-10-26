@@ -204,3 +204,4 @@ Route::post('sells-order/{transaction}/delete', 'SellsOrderController@deleteOrde
 //consum
 Route::post('consume/{transaction}/delete', 'ConsumableProductController@deleteConsume')->middleware(['auth:api', 'roles:ROLE_PRODUCT_MANAGE']);
 
+//STOCK CONSUMAL NOT ADDED in Report table

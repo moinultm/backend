@@ -1003,16 +1003,16 @@ class ReportingController extends Controller
         $nowDate = date('Y-m-d', strtotime($date));
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
-
+        $category_id = $request->get('category_id');
 
         //this for returning blank
 
 
         if(!is_null($from)) {
-            $temp = $this->stock_In_report_temp_check($from, $to);
+            $temp = $this->stock_In_report_temp_check($from, $to,$category_id);
         }
         else{
-            $temp = $this->stock_In_report_temp_check($nowDate, $nowDate);
+            $temp = $this->stock_In_report_temp_check($nowDate, $nowDate,$category_id);
         }
 
 
@@ -1020,7 +1020,7 @@ class ReportingController extends Controller
 
         //$users= Purchase::query()->select('id','reference_no','product_id','date');
 
-        $products= Product::query()->where('product_type','=','1')->select('id','name');
+        $products= Product::query()->where('category_id','=',   [ $category_id  ]  )->select('id','name');
 
         $AssociateArray = array(
             'products' =>  $products->get(),
@@ -1031,7 +1031,7 @@ class ReportingController extends Controller
         return response()->json($AssociateArray ,200);
     }
 
-    public function stock_In_report_temp_check($from,$to )
+    public function stock_In_report_temp_check($from,$to,$category_id )
     {
 
         $from = Carbon::createFromFormat('Y-m-d',$from);
@@ -1055,14 +1055,14 @@ class ReportingController extends Controller
         });
 
 
-        $select0= Product::query()->where('product_type','=','1')->select(array('id','name','mrp'));
+        $select0= Product::query()->where('category_id','=',[$category_id])->select(array('id','name','mrp'));
         //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','STOCK_ITEM_NAME','ITEM_MRP'], $select0);
 
         $select5 = Purchase::query()
             ->join('products', 'purchases.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,purchases.date,purchases.reference_no,sum(purchases.quantity)as INWARD_QUANTITY,sum(purchases.sub_total)as INWARD_AMOUNT')
             ->whereBetween('date',[$from,$to])
-
+            ->where('products.category_id','=',[$category_id])
             ->groupBy('products.id','purchases.reference_no','purchases.date');
 
         DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','INWARD_QUANTITY','INWARD_AMOUNT'], $select5);
@@ -1071,7 +1071,7 @@ class ReportingController extends Controller
 
 ////////////////FINAL SELECTION//////////////////////////////
 
-        $select0= Product::query()->where('product_type','=','1')
+        $select0= Product::query()->where('category_id','=',[$category_id])
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('STOCK_ITEM_ID, products.name as Name,   TRAN_DATE,REF_NO,   products.mrp as ITEM_MRP,
             TRAN_DATE as Date, 
@@ -1099,20 +1099,21 @@ class ReportingController extends Controller
         $from = $request->get('from');
         $to = $request->get('to')?:date('Y-m-d');
 
+        $category_id=$request->get('category_id');
 
         //this for returning blank
         if(!is_null($from)) {
-            $temp = $this->stock_Out_report_temp_check($from, $to);
+            $temp = $this->stock_Out_report_temp_check($from, $to,$category_id);
         }
         else{
-            $temp = $this->stock_Out_report_temp_check($nowDate, $nowDate);
+            $temp = $this->stock_Out_report_temp_check($nowDate, $nowDate,$category_id);
         }
 
         $users=   Transaction::select(DB::raw('DATE(date)as date'))->whereIn('transaction_type',['sell','transfer'])
             ->whereBetween('date',[$from,$to])
             ->distinct();
        // $users= Sell::query()->select('id','reference_no','product_id','date');
-        $products= Product::query()->where('product_type','=','1')->select('id','name');
+        $products= Product::query()->where('category_id','=',   [ $category_id  ]  )->select('id','name');
             //skipped due to use of pivot table 16-1-19
         $AssociateArray = array(
            // 'products' =>  $products->get(),
@@ -1123,7 +1124,7 @@ class ReportingController extends Controller
         return response()->json($AssociateArray ,200);
     }
 
-    public function stock_Out_report_temp_check($from,$to )
+    public function stock_Out_report_temp_check($from,$to,$category_id )
     {
 
         $from = Carbon::createFromFormat('Y-m-d',$from);
@@ -1156,6 +1157,7 @@ class ReportingController extends Controller
             ->join('products', 'sells.product_id', '=', 'products.id')
             ->selectRaw( 'products.id,sells.date,sells.reference_no,sum(sells.quantity)as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT')
             ->whereBetween('date',[$from,$to])
+            ->where('products.category_id','=',[$category_id])
             ->groupBy('products.id','sells.reference_no','sells.date');
 
         //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','TRAN_DATE','REF_NO','OUTWARD_QUANTITY','OUTWARD_AMOUNT'], $select1);
@@ -1163,7 +1165,7 @@ class ReportingController extends Controller
 
 ////////////////FINAL SELECTION//////////////////////////////
 
-        $select0= Product::query()->where('product_type','=','1')
+        $select0= Product::query()->where('category_id','=',[$category_id])
             ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
             ->selectRaw('STOCK_ITEM_ID, products.name as Name,   TRAN_DATE,  products.mrp as ITEM_MRP,
             TRAN_DATE as Date,          
