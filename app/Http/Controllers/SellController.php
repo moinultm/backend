@@ -30,9 +30,7 @@ use paginator;
 
     public function index(Request $request)
     {
-
         $transactions = Transaction::where('transaction_type', 'sell')->orderBy('date', 'desc') ;
-
         if($request->get('invoice')) {
             $transactions->where('reference_no', 'LIKE', '%' . $request->get('invoice') . '%');
         }
@@ -53,7 +51,6 @@ use paginator;
             $to = Carbon::createFromFormat('Y-m-d',$to);
             $to = self::filterTo($to);
         }
-
 
         if( $request->get('from') !='null' &&   $request->get('to')!='null' ) {
 
@@ -233,6 +230,13 @@ use paginator;
                     $order->product_discount_amount = $sell_item['product_discount_amount'];
                     $order->unit_cost_price = $cost_price;
                     $order->sub_total = $sell_item['sub_total']- $productTax;
+
+                    $order->sub_total = $sell_item['batch_no'];
+                    $order->sub_total = $sell_item['lot_no'];
+                    $order->sub_total = $sell_item['pack_size'];
+                    $order->sub_total = $sell_item['mfg_date'];
+                    $order->sub_total = $sell_item['exp_date'];
+
                     $order->client_id = $customer;
                     $order->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                     $order->user_id = $request->get('user_id');
@@ -388,13 +392,25 @@ use paginator;
         $query->with(['sells','sells.product']);
         $query->with(['payments']);
         $query->with(['client']);
-
+        $query->with(['returnSales', 'returnSales.sells.product']);
         $AssociateArray = array('data' =>$query->get());
 
         return response()->json($AssociateArray  ,200);
     }
 
 
+    public  function ReturnDetails($id): JsonResponse
+    {
+        $query = Transaction::query();
+        $query->where('id', $id);
+      //  $query->with(['sells','sells.product']);
+      //  $query->with(['payments']);
+        $query->with(['client']);
+        $query->with(['returnSales', 'returnSales.sells.product']);
+        $AssociateArray = array('data' =>$query->get());
+
+        return response()->json($AssociateArray  ,200);
+    }
 
 
     /**
