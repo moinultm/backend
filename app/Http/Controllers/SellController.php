@@ -213,6 +213,13 @@ use paginator;
 
                 $sell->unit_cost_price = $cost_price;
                 $sell->sub_total = $sell_item['sub_total']- $productTax;
+
+                $sell->batch_no = $sell_item['batch_no'];
+                $sell->lot_no = "";
+                $sell->pack_size = $sell_item['pack_size'];
+                $sell->mfg_date = $sell_item['mfg_date'];
+                $sell->exp_date = $sell_item['exp_date'];
+
                 $sell->client_id = $customer;
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d');
                 $sell->user_id = $request->get('user_id');
@@ -231,11 +238,7 @@ use paginator;
                     $order->unit_cost_price = $cost_price;
                     $order->sub_total = $sell_item['sub_total']- $productTax;
 
-                    $order->sub_total = $sell_item['batch_no'];
-                    $order->sub_total = $sell_item['lot_no'];
-                    $order->sub_total = $sell_item['pack_size'];
-                    $order->sub_total = $sell_item['mfg_date'];
-                    $order->sub_total = $sell_item['exp_date'];
+
 
                     $order->client_id = $customer;
                     $order->date = Carbon::parse($request->get('date'))->format('Y-m-d');

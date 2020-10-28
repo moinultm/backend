@@ -24,7 +24,6 @@ class RepresentativeController extends Controller
     use helpers;
 
 
-
     public function index(Request $request): JsonResponse
     {
 
@@ -71,7 +70,7 @@ class RepresentativeController extends Controller
     public function getUser(): JsonResponse
     {
 
-        $query = User::query()->select('id', 'name', 'address');
+        $query = User::query()->where('id','<>','1')->select('id','name','address');
         //$query->where('user_type', '2');
         $AssociateArray = array(
             'data' => $query->get()

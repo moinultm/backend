@@ -1390,16 +1390,14 @@ class ReportingController extends Controller
         }
 
 
-        $users= User::query()->select('id','name');
+        $users= User::query()->where('id','<>','1')->select('id','name');
         $products= Product::query()->where('product_type','=','1')->select('id','name');
 //select(DB::raw('DATE(date)as date'))->
-
 
         $AssociateArray = array(
             'products' =>  $products->get(),
             'users'=>$users->get(),
             'crossData'=> $temp,
-
         );
 
         return response()->json($AssociateArray ,200);
