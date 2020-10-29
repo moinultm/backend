@@ -2019,7 +2019,6 @@ class ReportingController extends Controller
         if ($userId=='null'){ return '';  }
 
 
-
         if(!is_null($from)) {
             $temp = $this->REPRESENT_temp_check($from, $to,$userId);
         }
@@ -2124,10 +2123,10 @@ class ReportingController extends Controller
 
 
 
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
-        DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
+       // DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select1);
+       // DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select2);
+       // DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select3);
+        //DB::table('TEMP_OPENING')->insertUsing(['STOCK_ITEM_ID','TRAN_QUANTITY','TRAN_AMOUNT'], $select4);
 
 
 //////////////////TRANSACTION-PROCESS//////////////////////////////
@@ -2184,8 +2183,7 @@ class ReportingController extends Controller
             ->where('representatives_stock.user_id','=',$id)
             ->groupBy('products.id');
 
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','INWARD_QUANTITY'], $select6);
-
+       //DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','INWARD_QUANTITY'], $select6);
 
         $select7 = GiftProduct::query()
             ->join('products', 'gift_products.product_id', '=', 'products.id')
@@ -2228,10 +2226,8 @@ class ReportingController extends Controller
             ->get();
 
 
-
         Schema::drop('TEMP_OPENING');
         Schema::drop('TEMP_TRANSACTION');
-
 
         return $select0;
     }
