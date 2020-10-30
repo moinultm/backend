@@ -119,7 +119,7 @@ Route::group([
     Route::resource('warehouse', 'WarehouseController');
 //Expenses
     Route::resource('expense', 'ExpenseController');
-
+    Route::get('expense/{transaction}/details', 'ExpenseController@details');
 
 //vatTax
     Route::resource('vat', 'TaxController');

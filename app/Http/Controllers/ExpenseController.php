@@ -51,6 +51,17 @@ class ExpenseController extends Controller
         return response()->json('', 200);
     }
 
+    public  function details($id): JsonResponse
+    {
+        $query = Expense::query();
+        $query->where('id', $id);
+
+        $query->with(['expense_transactions']);
+        $AssociateArray = array('data' =>$query->get());
+
+        return response()->json($AssociateArray  ,200);
+    }
+
     public function store(Request $request): JsonResponse
     {
 
