@@ -170,19 +170,22 @@ use paginator;
             foreach ($sells as $sell_item) {
 
                 if (intval($sell_item['quantity']) === 0) {
-                    throw new ValidationException('Product quantity is required');
+                   throw new ValidationException('Product quantity is required');
+                 //return   response()->json( 'Product quantity is required' ,  200);
                 }
 
                 if (!$sell_item['product_id'] || $sell_item['product_id'] === '') {
                     throw new ValidationException('Product ID is required');
+                    //return   response()->json( 'Product ID is required' ,  200);
                 }
 
                 $product_row = Product::findorFail($sell_item['product_id']);
                 $cost_price=$product_row->cost_price;
                 $product_stock=$product_row->quantity ;
 
-                if ($product_stock <  0) {
-                    throw new ValidationException('Null Stock Item');
+                if ($product_stock  <=0) {
+                   throw new ValidationException('Null Stock Item');
+                    //return   response()->json( 'Null Stock Item' ,  200);
                 }
 
 

@@ -1745,7 +1745,7 @@ class ReportingController extends Controller
 
         //  $users= User::query()->select('id','name');
 
-        $products= Product::query()->where('product_type','=','1')->select('id','name');
+        $products= Product::query()->select('id','name');
 
         $query = DamageProduct::query()->select('reference_no','user_id','users.name')
             ->leftJoin('users' , 'users.id','=','damage_products.user_id')
@@ -1754,10 +1754,10 @@ class ReportingController extends Controller
             ->orderBy('reference_no', 'DESC');
 
 
-        if ($userId=='0'){ return '';  } else
-        {
-            $query->where('user_id','=', $userId);
-        }
+         if ($userId!='null'){
+          $query->where('user_id','=', $userId);
+     }
+
 
 
 
@@ -1853,7 +1853,7 @@ class ReportingController extends Controller
             ->groupBy('reference_no','user_id','users.name')
             ->orderBy('reference_no', 'DESC');
 
-        if ($userId=='0'){ return '';  } else
+        if ($userId!='null')
         {
             $query->where('user_id','=', $userId);
         }
@@ -2288,6 +2288,7 @@ class ReportingController extends Controller
         $select2 =Payment::selectRaw('users.id,users.name,0,0,sum(payments.amount) as payment')
             ->leftJoin('users', 'users.id', '=', 'payments.user_id')
             ->whereBetween(DB::raw('DATE(date)'), array($from, $to))
+            ->where('type','=','credit')
             ->groupBy('users.name','users.id');
 
         $select3 =Expense::selectRaw('users.id,users.name,0,sum(expenses.amount) as expense,0')
@@ -2303,7 +2304,7 @@ class ReportingController extends Controller
             ->selectRaw(
                 'USER_ID, 
             USER_NAME,sum(TOTAL) as TOTAL,  sum(PAY) as  PAY, sum(EXPENSE) as  EXPENSE')
-            ->groupBy('USER_ID','USER_NAME' )
+            ->groupBy('USER_ID','USER_NAME')
             ->get();
 
         Schema::drop('TEMP_OPENING');
@@ -2426,7 +2427,19 @@ class ReportingController extends Controller
         $transactions = $transactions->whereBetween('date',[$from,$to]);
 
         $total_selling_price = $transactions->get()->sum('total');
+
         $total_cost_price = $transactions->get()->sum('total_cost_price');
+
+
+        $collection= Payment::where('type', 'credit');
+        $collection = $collection->whereBetween('date',[$from,$to]);
+        $total_collection=$collection->get()->sum('amount');
+
+
+        $collection->with(['client']);
+        $AssociateArray3 = array('data' =>$collection->get());
+
+
 
         $payments= Payment::where('type', 'debit');
         $payments = $payments->whereBetween('date',[$from,$to]);
@@ -2436,7 +2449,8 @@ class ReportingController extends Controller
         $payments->with(['client']);
         $AssociateArray2 = array('payment' =>$payments->get());
 
-        $gross_profit = $total_selling_price - $total_payments;
+        $gross_profit = $total_collection- $total_payments;
+        // $gross_profit = $total_selling_price - $total_payments;
        // $gross_profit = $total_selling_price - $total_cost_price;
 
         $expenses = Expense::query();;
@@ -2453,19 +2467,21 @@ class ReportingController extends Controller
 
         $total_tax = $transactions->get()->sum('total_tax');
 
-     $net_profit_after_tax = $net_profit - $total_tax;
+        $net_profit_after_tax = $net_profit - $total_tax;
 
 
 
 
             $AssociateArray = array(
                 'total_selling_price' =>  $total_selling_price,
+                'total_collection'=>$total_collection,
                 'total_payments'=>$total_payments,
                 'total_cost_price'=>$total_cost_price,
                 'gross_profit'=>$gross_profit,
                 'total_expense'=>$total_expense,
                 'expenses'=> $AssociateArray,
                 'payments_tran'=>$AssociateArray2,
+                'collection_tran'=>$AssociateArray3,
 
                 'net_profit'=>$net_profit,
                 'total_tax'=>$total_tax,
