@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Client;
@@ -188,7 +187,6 @@ use paginator;
                     //return   response()->json( 'Null Stock Item' ,  200);
                 }
 
-
                 $total = $total + $sell_item['sub_total'];
                 $total_cost_price = $total_cost_price + ($cost_price * $sell_item['quantity']);
 
@@ -240,8 +238,6 @@ use paginator;
                     $order->product_discount_amount = $sell_item['product_discount_amount'];
                     $order->unit_cost_price = $cost_price;
                     $order->sub_total = $sell_item['sub_total']- $productTax;
-
-
 
                     $order->client_id = $customer;
                     $order->date = Carbon::parse($request->get('date'))->format('Y-m-d');

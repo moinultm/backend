@@ -28,7 +28,6 @@ class ReportingController extends Controller
     use helpers;
 
 
-
     public function  productReport(Request $request)
     {
 
