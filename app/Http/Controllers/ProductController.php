@@ -98,6 +98,7 @@ class ProductController extends Controller
         $product->tax_id = $request->get('tax_id');
         $product->unit = $request->get('unit');
         $product->details = $request->get('details');
+        $product->size = $request->get('size');
         $product->status = $request->get('status') ? $request->get('status') : 0;
         $product->product_type = $request->get('product_type');
 
@@ -163,6 +164,7 @@ class ProductController extends Controller
         $product->tax_id = $request->get('tax_id');
         $product->unit = $request->get('unit');
         $product->details = $request->get('details');
+        $product->size = $request->get('size');
         $product->status = $request->get('status') ? $request->get('status') : 0;
         $product->product_type = $request->get('product_type');
         //opening stocks

@@ -218,8 +218,8 @@ use paginator;
                 $sell->batch_no = $sell_item['batch_no'];
                 $sell->lot_no = "";
                 $sell->pack_size = $sell_item['pack_size'];
-                $sell->mfg_date = $sell_item['mfg_date'];
-                $sell->exp_date = $sell_item['exp_date'];
+                $sell->mfg_date =  Carbon::parse($sell_item['mfg_date'] )->format('Y-m-d');
+                $sell->exp_date =    Carbon::parse($sell_item['exp_date'])->format('Y-m-d');
 
                 $sell->client_id = $customer;
                 $sell->date = Carbon::parse($request->get('date'))->format('Y-m-d');

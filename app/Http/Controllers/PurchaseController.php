@@ -122,6 +122,12 @@ class PurchaseController extends Controller
                 $purchase->product_id = $purchase_item['product_id'];
                 $purchase->quantity = $purchase_item['quantity'];
 
+                $purchase->batch_no = $purchase_item['batch_no'];
+                $purchase->lot_no = "";
+                $purchase->pack_size = $purchase_item['pack_size'];
+                $purchase->mfg_date =  Carbon::parse($purchase_item['mfg_date'] )->format('Y-m-d');
+                $purchase->exp_date =    Carbon::parse($purchase_item['exp_date'])->format('Y-m-d');
+
                 if($enableProductTax == 1){
                     //product tax calculation
                     $product_row = Product::findorFail($purchase_item['product_id']);
