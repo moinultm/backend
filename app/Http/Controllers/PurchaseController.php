@@ -153,8 +153,6 @@ class PurchaseController extends Controller
                 $product->general_quantity = $product->general_quantity + intval($purchase_item['quantity']);
 
                 $product->save();
-
-
             }
 
             //discount
