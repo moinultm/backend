@@ -135,6 +135,10 @@ class SellReturnController extends Controller
             $product = $sell->product;
             $currentStock = $product->quantity;
             $product->quantity = $currentStock + $returnQuantity;
+
+            $current_general_stock = $product->general_quantity;
+            $product->general_quantity =$current_general_stock +$returnQuantity;
+
             $product->save();
 
             $total += $subTotal;

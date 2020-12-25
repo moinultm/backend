@@ -10,6 +10,8 @@ class Client extends Model
 {
     use SoftDeletes;
 
+    protected $softDelete = true;
+
     protected $fillable = ['id'];
 
     protected $appends = array('net_total','total_return','total_dues');

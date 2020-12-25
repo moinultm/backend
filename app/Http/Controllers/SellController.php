@@ -309,7 +309,7 @@ use paginator;
             $invoice_tax = 0;
 
             if ($order_no=="0"){
-                $transaction = new Transaction;
+              /*  $transaction = new Transaction;
                 $transaction->reference_no = $order_no_new;
                 $transaction->client_id = $customer;
                 $transaction->transaction_type = 'ORDER';
@@ -324,7 +324,7 @@ use paginator;
                 $transaction->date = Carbon::parse($request->get('date'))->format('Y-m-d H:i:s');
                 $transaction->paid = $paid;
                 $transaction->user_id = $request->get('user_id');
-                $transaction->save();
+                $transaction->save();*/
 
             }
 
@@ -432,6 +432,10 @@ use paginator;
             $product = Product::find($sell->product_id);
             $current_stock = $product->quantity;
             $product->quantity = $current_stock + $sell->quantity;
+
+            $current_general_stock = $product->general_quantity;
+            $product->general_quantity =$current_general_stock + $sell->quantity;
+
             $product->save();
 
             //delete the sales entry in sells table
