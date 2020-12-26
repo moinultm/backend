@@ -1366,110 +1366,6 @@ class ReportingController extends Controller
 //*******************************STOCK REPORT- OUT BASED**********************************
 
 
-
-
-
-//*******************************STOCK REPORT- USER BASED**********************************
-    public  function stockReport2(Request $request){
-
-        $date=Carbon::now();
-        $nowDate = date('Y-m-d', strtotime($date));
-        $from = $request->get('from');
-        $to = $request->get('to')?:date('Y-m-d');
-
-
-        //this for returning blank
-
-
-        if(!is_null($from)) {
-            $temp = $this->stock_report_temp_check2($from, $to);
-        }
-        else{
-            $temp = $this->stock_report_temp_check2($nowDate, $nowDate);
-        }
-
-
-        $users= User::query()->where('id','<>','1')->select('id','name');
-        $products= Product::query()->where('product_type','=','1')->select('id','name');
-//select(DB::raw('DATE(date)as date'))->
-
-        $AssociateArray = array(
-            'products' =>  $products->get(),
-            'users'=>$users->get(),
-            'crossData'=> $temp,
-        );
-
-        return response()->json($AssociateArray ,200);
-    }
-
-    public function stock_report_temp_check2($from,$to )
-    {
-
-        $from = Carbon::createFromFormat('Y-m-d',$from);
-        $from = self::filterFrom($from);
-
-        $to = Carbon::createFromFormat('Y-m-d',$to);
-        $to= self::filterTo($to);
-
-        //////////////////TRANSACTION-PROCESS//////////////////////////////
-
-        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('STOCK_ITEM_ID');
-            $table->string('USER_NAME');
-            $table->integer('OUTWARD')->default(0);
-            $table->string('TRAN_TYPE');
-            $table->temporary();
-        });
-
-
-        $select5 = Sell::query()
-            ->join('products', 'sells.product_id', '=', 'products.id')
-            ->join('users', 'users.id', '=', 'sells.user_id')
-            ->selectRaw( 'products.id,users.name,sells.quantity as OUTWARD,"Quantity"')
-            ->whereBetween('date',[$from,$to])
-            ->groupBy('users.name','products.id','sells.quantity');
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_NAME','OUTWARD','TRAN_TYPE'], $select5);
-
-
-        $select7 = Sell::query()
-            ->join('products', 'sells.product_id', '=', 'products.id')
-            ->join('users', 'users.id', '=', 'sells.user_id')
-            ->selectRaw( 'products.id,users.name,sells.sub_total as OUTWARD,"Amount"' )
-            ->whereBetween('date',[$from,$to])
-            ->groupBy('users.name','products.id','sells.sub_total');
-        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_NAME','OUTWARD','TRAN_TYPE'], $select7);
-
-
-        $select6 = Sell::query()
-            ->join('products', 'sells.product_id', '=', 'products.id')
-            ->join('users', 'users.id', '=', 'sells.user_id')
-            ->selectRaw( 'products.id,users.name,sum(sells.quantity) as OUTWARD_QUANTITY,sum(sells.sub_total)as OUTWARD_AMOUNT, "Quantity"' )
-            ->whereBetween('date',[$from,$to])
-            ->groupBy('products.id','users.name');
-
-       // DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','USER_NAME','OUTWARD_QUANTITY','OUTWARD_AMOUNT','TRAN_TYPE'], $select6);
-
-
-        ////////////////FINAL SELECTION//////////////////////////////
-
-        $select0= Product::query()->where('product_type','=','1')
-            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
-            ->selectRaw('products.name as STOCK_ITEM_NAME,USER_NAME,STOCK_ITEM_ID,     
-                       COALESCE( OUTWARD,0) as  OUTWARD,TRAN_TYPE')
-            ->groupBy('STOCK_ITEM_ID','USER_NAME', 'STOCK_ITEM_NAME','OUTWARD','TRAN_TYPE')
-            ->get();
-
-
-        Schema::drop('TEMP_TRANSACTION');
-        return $select0;
-
-    }
-
-//*******************************STOCK REPORT- USER BASED 2 **********************************
-
-
-
 //*******************************STOCK REPORT- USER BASED**********************************
     public  function stockReport(Request $request){
 
@@ -2496,6 +2392,149 @@ class ReportingController extends Controller
 
     }
 
+
+
+
+
+    public  function ProductBatchView(Request $request)
+    {
+
+        $date=Carbon::now();
+        $nowDate = date('Y-m-d', strtotime($date));
+
+        $from = $request->get('from');
+        $to = $request->get('to');
+
+        $productID=$request->get('pid');
+
+        //Need to make a another query for the date wise report this only returns the summary
+
+        if(!is_null($from)) {
+            $temp = $this->TEMP_BatchView($from, $to,$productID);
+        }
+        else{
+            $temp = $this->TEMP_BatchView($nowDate, $nowDate,$productID);
+        }
+
+        $AssociateArray = array(
+            'data' =>   $temp,
+        );
+
+        return response()->json($AssociateArray ,200);
+    }
+
+
+
+    public function TEMP_BatchView ($from,$to,$productID){
+
+
+        $from = Carbon::createFromFormat('Y-m-d',$from);
+        $from = self::filterFrom($from);
+
+        $to = Carbon::createFromFormat('Y-m-d',$to);
+        $to= self::filterTo($to);
+
+
+
+        Schema::create('TEMP_TRANSACTION', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->integer('STOCK_ITEM_ID');
+            $table->text('STOCK_ITEM_NAME')->nullable();
+            $table->text('BATCH_NO')->default(0);
+            $table->text('MFG_DATE')->default(0);
+            $table->text('EXP_DATE')->default(0);
+            $table->integer('OUTWARD_QUANTITY')->default(0);
+
+            $table->temporary();
+        });
+
+
+        $select5 = Sell::query()
+            ->selectRaw( 'product_id,batch_no,mfg_date,exp_date,COALESCE(sum(sells.quantity*-1),0)as OUTWARD_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('product_id','batch_no','mfg_date','exp_date');
+
+
+        $select6 = Purchase::query()
+            ->selectRaw( 'product_id,batch_no,mfg_date,exp_date,COALESCE(sum(purchases.quantity),0)as OUTWARD_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('product_id','batch_no','mfg_date','exp_date');
+
+
+        $select7 = GiftProduct::query()
+            ->selectRaw( 'product_id,batch_no,mfg_date,exp_date,COALESCE(sum(gift_products.quantity*-1),0)as OUTWARD_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('product_id','batch_no','mfg_date','exp_date');
+
+
+        $select9 = DamageProduct::query()
+            ->selectRaw( 'product_id,batch_no,mfg_date,exp_date,COALESCE(sum(damage_products.quantity*-1),0)as OUTWARD_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('product_id','batch_no','mfg_date','exp_date');
+
+        $select8 = ConsumableProduct::query()
+
+            ->selectRaw( 'product_id,batch_no,mfg_date,exp_date,COALESCE(sum(consumable_products.quantity*-1),0)as OUTWARD_QUANTITY')
+            ->whereBetween('date',[$from,$to])
+            ->groupBy('product_id','batch_no','mfg_date','exp_date');
+
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','BATCH_NO','MFG_DATE','EXP_DATE','OUTWARD_QUANTITY'], $select5);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','BATCH_NO','MFG_DATE','EXP_DATE','OUTWARD_QUANTITY'], $select6);
+
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','BATCH_NO','MFG_DATE','EXP_DATE','OUTWARD_QUANTITY'], $select7);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','BATCH_NO','MFG_DATE','EXP_DATE','OUTWARD_QUANTITY'], $select8);
+        DB::table('TEMP_TRANSACTION')->insertUsing(['STOCK_ITEM_ID','BATCH_NO','MFG_DATE','EXP_DATE','OUTWARD_QUANTITY'], $select9);
+
+
+       ////////////////FINAL SELECTION//////////////////////////////
+        $dataProduct= Product::query()->where('product_type','=','1')
+            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
+            ->selectRaw('products.name as STOCK_ITEM_NAME,
+            STOCK_ITEM_ID, 
+            BATCH_NO,
+            MFG_DATE,
+            EXP_DATE,          
+             sum(OUTWARD_QUANTITY) as OUTWARD_QUANTITY')
+            ->where('BATCH_NO','<>','null')
+            ->groupBy('products.name','STOCK_ITEM_ID','BATCH_NO','MFG_DATE','EXP_DATE')
+            ->orderBy('EXP_DATE')
+            ->get();
+
+
+
+        Schema::drop('TEMP_TRANSACTION');
+
+        return $dataProduct;
+
+
+/*
+ *  $select0= Product::query()->where('product_type','=','1')
+            ->leftJoin('TEMP_TRANSACTION','products.id','=','TEMP_TRANSACTION.STOCK_ITEM_ID')
+            ->selectRaw('products.name as STOCK_ITEM_NAME,   products.mrp as ITEM_MRP,
+            STOCK_ITEM_ID,
+            COALESCE(SUM(TRAN_QUANTITY),0) as TRAN_QUANTITY,
+           COALESCE( sum(TRAN_AMOUNT),0) as  TRAN_AMOUNT,
+           COALESCE(  sum(INWARD_QUANTITY),0) as INWARD_QUANTITY,
+            COALESCE( sum(INWARD_AMOUNT),0) as  INWARD_AMOUNT,
+           COALESCE(  sum(OUTWARD_QUANTITY),0) as OUTWARD_QUANTITY,
+            COALESCE( sum(OUTWARD_AMOUNT),0) as  OUTWARD_AMOUNT,
+           COALESCE(  sum(GIFT_QUANTITY),0) as GIFT_QUANTITY,
+            COALESCE( sum(GIFT_COST * GIFT_QUANTITY ),0) as GIFT_COST,
+            COALESCE( sum(DAMAGE_QUANTITY),0) as DAMAGE_QUANTITY,
+            COALESCE( sum(DAMAGE_COST*DAMAGE_QUANTITY),0) as DAMAGE_COST')
+            ->groupBy('STOCK_ITEM_ID', 'STOCK_ITEM_NAME', 'ITEM_MRP')
+            ->orderBy('STOCK_ITEM_ID','ASC')
+            ->get();
+
+
+        Schema::drop('TEMP_OPENING');
+        Schema::drop('TEMP_TRANSACTION');
+
+        return $select0;
+ * */
+    }
 
 
 }

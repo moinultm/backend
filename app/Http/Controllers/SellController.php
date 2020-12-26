@@ -5,6 +5,7 @@ use App\Client;
 use App\Order;
 use App\Payment;
 use App\Product;
+use App\Purchase;
 use App\Representative;
 use DB;
 use App\Sell;
@@ -383,6 +384,17 @@ use paginator;
 
         return  response()->json();
     }
+
+    public  function batchDetails($id): JsonResponse{
+        $query = Purchase::query();
+        $query->where('product_id', $id) ->select('batch_no','mfg_date', 'exp_date')
+            ->groupBy('batch_no','mfg_date', 'exp_date');
+
+        $AssociateArray = array('data' =>$query->get());
+
+        return response()->json($AssociateArray  ,200);
+    }
+
 
 
 

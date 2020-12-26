@@ -93,6 +93,10 @@ Route::group([
     Route::get('sell/{transaction}/return-details', 'SellController@returnDetails');
     Route::delete('sell/{transaction}/delete/', 'SellController@deleteSell');
 
+    Route::get('sell/{number}/batch', 'SellController@batchDetails');
+
+
+
     //sells order
     Route::resource('sells-order', 'SellsOrderController');
     Route::get('sell/{transaction}/order-details', 'SellsOrderController@details');
@@ -181,6 +185,8 @@ Route::group([
     Route::get('report/purchase-report', 'ReportingController@postPurchaseReport');
     Route::get('report/sells-report', 'ReportingController@postSellsReport');
     Route::get('report/profit-loss-report', 'ReportingController@postProfitReport');
+
+    Route::get('report/{id}/product-batch-view', 'ReportingController@ProductBatchView');
 });
 
 
